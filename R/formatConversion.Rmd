@@ -1,0 +1,122 @@
+---
+title: "converExcelTo"
+author: "Jian"
+date: "5 September 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(readxl)
+library(tidyverse)
+
+sheets <- excel_sheets("../QTMB Tool - V 2.1.xlsx")
+sh <- grep("parameters| graphing|AMN input", sheets, value = T,ignore.case = T)
+# l <- lapply(sh, function(x) read_excel("../QTMB Tool - V 2.1.xlsx", sheet = x))
+path <- "../QTMB Tool - V 2.1.xlsx"
+```
+_Note_
+
+
+crop relative sheets need to be read individually
+
+# Soil
+
+_Note_
+
+1. what is the col after grey the col for? 
+```{r soil}
+soil <- read_excel(path, sheet =  sh[1]) %>% 
+  select(-...9, -...11, -...12)
+head(soil)
+cols <- colnames(soil)
+units <- regmatches(cols, gregexpr("\\(.+\\D", cols))
+names(units) <- cols
+units_df <- units %>% 
+  enframe(name = "origin", value = "unit") %>% 
+  unnest()
+
+
+cols_new <- gsub("\\s", ".", gsub("\\s$","",gsub("\\(.+\\)", "", cols)))
+names(cols_new) <- cols
+cols_new_df <- cols_new %>% 
+  enframe(name = "origin", value = "new") %>% 
+  unnest()
+
+meta_soil <- tibble(origin = cols) %>% 
+  left_join(cols_new_df) %>% 
+  left_join(units_df) 
+
+colnames(soil) <- cols_new
+soil %>% 
+  ggplot(aes(Texture, Moisture.value)) +
+  geom_point() + 
+  coord_flip() +
+  facet_wrap( ~ Sampling.Depth, ncol = 1) +
+  theme_light() + 
+  theme(panel.grid.minor = element_blank(),
+        text = element_text(family = "sans"))
+
+```
+
+
+# Crop
+
+
+```{r crop}
+crop <- read_excel(path, sheet = sh[2],skip = 1) 
+crop_info <- crop %>% 
+  select(Crop = Crop...1, `Yield value`, Helper, `Harvested value`, `Helper 2`, `Seasonal N uptake (kg/ha)`, B, M, C, A)
+
+
+cols <- colnames(crop_info)
+
+
+units <-  regmatches(cols, gregexpr("\\(.+\\D", cols))
+
+names(units) <- cols
+units_df <- units %>% 
+  enframe(name = "origin", value = "unit") %>% 
+  unnest()
+
+
+cols_new <- gsub("\\s", ".", gsub("\\s$","",gsub("\\(.+\\)", "", cols)))
+names(cols_new) <- cols
+cols_new_df <- cols_new %>% 
+  enframe(name = "origin", value = "new") %>% 
+  unnest()
+
+meta_crop <- tibble(origin = cols) %>% 
+  left_join(cols_new_df) %>% 
+  left_join(units_df) 
+colnames(crop_info) <- cols_new
+
+crop_cleaned <- crop_info %>% 
+  mutate(Yield.value = as.integer(Yield.value),
+         Harvested.value = as.integer(Harvested.value),
+         Seasonal.N.uptake = as.numeric(Seasonal.N.uptake),
+         B = as.numeric(B),
+         M = as.numeric(M),
+         C = as.numeric(C),
+         A = as.numeric(A))
+crop_para <- crop %>% 
+  select(Crop = Crop...12, `Yield paramater`,`Harvested parameter`,Cultivar) %>% 
+  filter(!is.na(Crop))
+cols <- colnames(crop_para)
+names(crop_para) <- cols
+cols_new <- gsub("\\s", ".", gsub("\\s$","",gsub("\\(.+\\)", "", cols)))
+names(cols_new) <- cols
+meta_crop_para <- cols_new %>% 
+  enframe(name = "origin", value = "new") %>% 
+  unnest()
+names(crop_para) <- cols_new
+
+
+```
+
+# Crop N
+
+
+# MinN
+
+# AMN
