@@ -9,6 +9,8 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 library(readxl)
 library(tidyverse)
+library(DBI)
+library(RSQLite)
 
 sheets <- excel_sheets("../QTMB Tool - V 2.1.xlsx")
 sh <- grep("parameters| graphing|AMN input", sheets, value = T,ignore.case = T)
@@ -120,3 +122,37 @@ names(crop_para) <- cols_new
 # MinN
 
 # AMN
+
+```{r amn}
+
+notes <- read_excel(path, sh[5], range = "A2:A4", col_names = "Notes")
+notes_AMN <- notes %>% 
+  mutate(Notes = gsub("^.....", "", Notes),
+         source = "AMN")
+tab_AMN <- read_excel(path, sh[5], skip = 5) 
+
+tab_AMN <- tab_AMN %>% 
+  mutate(`AMN availability > 100` = `AMN (kg/ha)`*`AMN availability > 100`,
+         `AMN availability  40-100` = `AMN (kg/ha)` * `AMN availability  40-100`,
+         `AMN availability < 40` = `AMN (kg/ha)` * `AMN availability < 40`) %>% 
+  select(-`AMN (kg/ha)`) %>% 
+  gather(key = "DAP",value = "value", -System) %>% 
+  mutate(DAP = gsub("AMN availability|>|<|\\s", "", DAP))
+
+```
+
+# write tables into sqlite3
+
+
+```{r sql connection and write out}
+con <- dbConnect(RSQLite::SQLite(),'../QTMB/qtmb_data.sqlite3')
+dbListTables(con)
+dbWriteTable(con, "tab_AMN", tab_AMN, overwrite = TRUE)
+# dbExecute(con," CREATE TABLE `tab_AMN` (
+#   `System` TEXT NOT NULL,
+#   `variable` int NOT NULL,
+#   `value` int NOT NULL
+# );
+# ")
+dbDisconnect(con)
+```
