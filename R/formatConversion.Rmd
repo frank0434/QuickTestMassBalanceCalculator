@@ -148,6 +148,7 @@ tab_AMN <- tab_AMN %>%
 con <- dbConnect(RSQLite::SQLite(),'../QTMB/qtmb_data.sqlite3')
 dbListTables(con)
 dbWriteTable(con, "tab_AMN", tab_AMN, overwrite = TRUE)
+dbWriteTable(con, "tab_crop.para", crop_para, overwrite = TRUE)
 # dbExecute(con," CREATE TABLE `tab_AMN` (
 #   `System` TEXT NOT NULL,
 #   `variable` int NOT NULL,
