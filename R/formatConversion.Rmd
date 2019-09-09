@@ -96,11 +96,11 @@ colnames(crop_info) <- cols_new
 crop_cleaned <- crop_info %>% 
   mutate(Yield.value = as.integer(Yield.value),
          Harvested.value = as.integer(Harvested.value),
-         Seasonal.N.uptake = as.numeric(Seasonal.N.uptake),
+         Seasonal.N.uptake = round(as.numeric(Seasonal.N.uptake),digits = 0),
          B = as.numeric(B),
          M = as.numeric(M),
          C = as.numeric(C),
-         A = as.numeric(A))
+         A = as.numeric(A)) 
 crop_para <- crop %>% 
   select(Crop = Crop...12, `Yield paramater`,`Harvested parameter`,Cultivar) %>% 
   filter(!is.na(Crop))
@@ -149,6 +149,7 @@ con <- dbConnect(RSQLite::SQLite(),'../QTMB/qtmb_data.sqlite3')
 dbListTables(con)
 dbWriteTable(con, "tab_AMN", tab_AMN, overwrite = TRUE)
 dbWriteTable(con, "tab_crop.para", crop_para, overwrite = TRUE)
+dbWriteTable(con, "tab_crop", crop_cleaned, overwrite = TRUE)
 # dbExecute(con," CREATE TABLE `tab_AMN` (
 #   `System` TEXT NOT NULL,
 #   `variable` int NOT NULL,
