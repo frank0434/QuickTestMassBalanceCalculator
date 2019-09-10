@@ -132,12 +132,12 @@ notes_AMN <- notes %>%
 tab_AMN <- read_excel(path, sh[5], skip = 5) 
 
 tab_AMN <- tab_AMN %>% 
-  mutate(`AMN availability > 100` = `AMN (kg/ha)`*`AMN availability > 100`,
-         `AMN availability  40-100` = `AMN (kg/ha)` * `AMN availability  40-100`,
-         `AMN availability < 40` = `AMN (kg/ha)` * `AMN availability < 40`) %>% 
-  select(-`AMN (kg/ha)`) %>% 
-  gather(key = "DAP",value = "value", -System) %>% 
-  mutate(DAP = gsub("AMN availability|>|<|\\s", "", DAP))
+  rename(AMN_default = `AMN (kg/ha)`,
+         AMN_long = `AMN availability > 100`,
+         AMN_intermedia = `AMN availability  40-100`,
+         AMN_short = `AMN availability < 40`) %>% 
+  gather(key = "DAP",value = "value", -System, -AMN_default) %>% 
+  mutate(N_supply = AMN_default * value)
 
 ```
 
