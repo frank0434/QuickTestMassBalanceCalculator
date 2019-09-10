@@ -9,6 +9,7 @@ library(ggplot2)
 library(data.table)
 library(dplyr)
 library(DBI)
+library(tidyr)
 
 
 # selectInput -------------------------------------------------------------
@@ -25,4 +26,5 @@ crops <- unique(crop.para$Crop)
 
 crop.yield <- dbReadTable(conn, "tab_crop")
 
+soil <- dbReadTable(conn, "tab_soil")
 
