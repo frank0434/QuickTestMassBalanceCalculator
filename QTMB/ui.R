@@ -4,6 +4,7 @@
 
 
 # Define UI for application that draws a histogram
+source("global.R")
 
 shinyUI(fluidPage(
   theme = "style.css",
@@ -16,42 +17,46 @@ shinyUI(fluidPage(
              p(strong(h4("Crop"))),
              hr(),
              column(6,
-                    selectInput(inputId = "1",
+                    selectInput(inputId = "input_system",
                                 label = "System",
-                                choices = c("Intensive vegetable production","2","3"))),
+                                choices = input_systems)),
              column(4,
-                    selectInput(inputId = "2", label = "Crop", choices = c("Wheat_Autumn","2","3"))),
+                    selectInput(inputId = "input_crop", label = "Crop", choices = crops)),
              column(6,
-                    dateInput("date1", label = "Planting Date")),
+                    dateInput("input_PlantingDate", label = "Planting Date")),
              column(4,
-                    selectInput("date1", label = "Target yield (t FW/ha)", choices = c(1:100))),
-             column(12,
-                    numericInput("date1", label = "Estimated seasonal N uptake (kg/ha)", value = 0))
+                    selectInput("input_targetYield", label = "Target yield (t FW/ha)", choices =  c(""))),
+             column(6,
+                    htmlOutput("Harvested_value")),
+             column(6,
+                    htmlOutput("N_uptake_estimated"))
            ),
 
            hr(),
            fixedRow(
              p(strong(h4("Seasonal N Balance"))),
              hr(),
-             column(6,
-                    numericInput(inputId = "1", label = "Soil N supply",value = 0)),
-             column(4,
-                    numericInput(inputId = "2", label = "Remaining Crop N requirement",value = 0)),
-             column(6,
-                    textInput("3", label = "Net", value = paste0(000,"surplus") ))
+             DT::dataTableOutput("N_inCrop")
+             # column(6,
+             #        numericInput(inputId = "1", label = "Soil N supply",value = 0)),
+             # column(4,
+             #        numericInput(inputId = "2", label = "Remaining Crop N requirement",value = 0)),
+             # column(6,
+             #        textInput("3", label = "Net", value = paste0(000,"surplus") ))
            ),
            hr(),
            fixedRow(
              p(strong(h4("Next sampling date (SD)"))),
              hr(),
-             column(12,
-                    dateInput(inputId = "1",
+             column(10,
+                    dateInput(inputId = "input_nextsamplingDate",
                               label = "Next SD")),
-             column(6,
-                    numericInput(inputId = "2",
-                                 label = "Crop N Requirement Until next SD (kg/ha)", value = 0)),
-             column(6,
-                    numericInput("date1", label = "Net (kg/ha)",value = 0 ))
+             DT::dataTableOutput("N_require")
+             # column(6,
+             #        numericInput(inputId = "2",
+             #                     label = "Crop N Requirement Until next SD (kg/ha)", value = 0)),
+             # column(6,
+             #        numericInput("date1", label = "Net (kg/ha)",value = 0 ))
 
 
            )
@@ -62,7 +67,8 @@ shinyUI(fluidPage(
            hr(),
            p(em("Nitrate Quick Test")),
 
-           dateInput("date1", label = "Sampling Date"),
+           dateInput("Sampling.Date", label = "Sampling Date"),
+
            br(),
            fixedRow(
              column(4,
@@ -150,10 +156,10 @@ shinyUI(fluidPage(
   hr(),
   fixedRow(
     column(width = 5,
-           plotOutput('plot')
+           plotOutput('distPlot')
     ),
     column(width = 5, offset = 1,
-           plotOutput('plot2')
+           plotOutput('distPlot2')
     )
   )
 
