@@ -74,89 +74,53 @@ shinyUI(fluidPage(
              column(4,
                     p(strong(h5("Sampling Depth"))),
                     verticalLayout(
-                      sliderInput(inputId = "Sampling depth 1", label = "depth1", min = 0, max = 30, value = 15,step = 5),
-                      sliderInput(inputId = "Sampling depth 2", label = "depth2", min = 30, max = 60, value = 45,step = 5),
-                      sliderInput(inputId = "Sampling depth 2", label = "depth3", min = 60, max = 90, value = 75,step = 5)
+                      sliderInput(inputId = "depth.1", label = "Depth 1", min = 0, max = 30, value = 15,step = 5),
+                      sliderInput(inputId = "depth.2", label = "Depth 2", min = 30, max = 60, value = 45,step = 5),
+                      sliderInput(inputId = "depth.3", label = "Depth 3", min = 60, max = 90, value = 75,step = 5)
                     )
              ),
              column(2,
                     p(strong(h5("Soil Texture"))),
                     verticalLayout(
-                      selectInput(inputId = "1", label = "depth1", choices = c("1","2","3")),
-                      selectInput(inputId = "2", label = "depth2", choices = c("1","2","3")),
-                      selectInput(inputId = "3", label = "depth3", choices = c("1","2","3"))
+                      selectInput(inputId = "Texture.1", label = "Depth 1", choices = ""),
+                      selectInput(inputId = "Texture.2", label = "Depth 2", choices = ""),
+                      selectInput(inputId = "Texture.3", label = "Depth 3", choices = "")
                     )
              ),
              column(2,
                     p(strong(h5("Soil Moisture"))),
                     verticalLayout(
-                      selectInput(inputId = "1", label = "depth1", choices = c("1","2","3")),
-                      selectInput(inputId = "2", label = "depth2", choices = c("1","2","3")),
-                      selectInput(inputId = "3", label = "depth3", choices = c("1","2","3"))
+                      selectInput(inputId = "Moisture.1", label = "Depth 1", choices = ""),
+                      selectInput(inputId = "Moisture.2", label = "Depth 2", choices = ""),
+                      selectInput(inputId = "Moisture.3", label = "Depth 3", choices = "")
                     )
              ),
              column(2,
                     p(strong(h5("QtestNitrate"))),
                     verticalLayout(
-                      numericInput(inputId = "1", label = "depth1",value = 0),
-                      numericInput(inputId = "2", label = "depth2", value = 0),
-                      numericInput(inputId = "3", label = "depth3",value = 0)
+                      numericInput(inputId = "Qtest1", label = "Depth 1",value = 0),
+                      numericInput(inputId = "Qtest2", label = "Depth 2", value = 0),
+                      numericInput(inputId = "Qtest3", label = "Depth 3",value = 0)
                     )
              ),
              column(2,
                     p(strong(h5("AMN"))),
                     verticalLayout(
-                      numericInput(inputId = "1", label = "depth1",value = 0),
-                      numericInput(inputId = "2", label = "depth2", value = 0),
-                      numericInput(inputId = "3", label = "depth3",value = 0)
+                      numericInput(inputId = "AMN1", label = "Depth 1",value = 0),
+                      numericInput(inputId = "AMN2", label = "Depth 2", value = 0),
+                      numericInput(inputId = "AMN3", label = "Depth 3",value = 0)
                     )
              ),
-             column(10,
+             column(12,
 
-                    splitLayout(
-                      numericInput(inputId = "1", label = "depth1",value = 0),
-                      numericInput(inputId = "2", label = "depth2", value = 0),
-                      numericInput(inputId = "3", label = "depth3",value = 0)
+                    DT::dataTableOutput("N.calculated")
                     )
-             ),
-             column(2,
-
-                    splitLayout(
-
-                      numericInput(inputId = "3", label = "Total",value = 0)
-                    )
-             ),
-             column(10,
-
-                    splitLayout(
-                      numericInput(inputId = "1", label = NULL,value = 0),
-                      numericInput(inputId = "2", label = NULL, value = 0),
-                      numericInput(inputId = "3", label = NULL,value = 0)
-                    )
-             ),
-             column(10,
-
-                    splitLayout(
-                      numericInput(inputId = "1", label = NULL,value = 0),
-                      numericInput(inputId = "2", label = NULL, value = 0),
-                      numericInput(inputId = "3", label = NULL,value = 0)
-                    )
-             ),
-
-             column(2,
-
-                    splitLayout(
-
-                      numericInput(inputId = "3", label = NULL,value = 0)
-                    )
-             )
-
            )
     )),
   hr(),
   fixedRow(
     column(width = 5,
-           plotOutput('distPlot')
+           plotOutput('P_N.uptake')
     ),
     column(width = 5, offset = 1,
            plotOutput('distPlot2')

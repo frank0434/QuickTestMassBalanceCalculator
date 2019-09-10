@@ -50,14 +50,14 @@ meta_soil <- tibble(origin = cols) %>%
   left_join(units_df) 
 
 colnames(soil) <- cols_new
-soil %>% 
-  ggplot(aes(Texture, Moisture.value)) +
-  geom_point() + 
-  coord_flip() +
-  facet_wrap( ~ Sampling.Depth, ncol = 1) +
-  theme_light() + 
-  theme(panel.grid.minor = element_blank(),
-        text = element_text(family = "sans"))
+# soil %>% 
+#   ggplot(aes(Texture, Moisture.value)) +
+#   geom_point() + 
+#   coord_flip() +
+#   facet_wrap( ~ Sampling.Depth, ncol = 1) +
+#   theme_light() + 
+#   theme(panel.grid.minor = element_blank(),
+#         text = element_text(family = "sans"))
 
 ```
 
@@ -150,6 +150,7 @@ dbListTables(con)
 dbWriteTable(con, "tab_AMN", tab_AMN, overwrite = TRUE)
 dbWriteTable(con, "tab_crop.para", crop_para, overwrite = TRUE)
 dbWriteTable(con, "tab_crop", crop_cleaned, overwrite = TRUE)
+dbWriteTable(con, "tab_soil", soil, overwrite = TRUE)
 # dbExecute(con," CREATE TABLE `tab_AMN` (
 #   `System` TEXT NOT NULL,
 #   `variable` int NOT NULL,
