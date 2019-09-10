@@ -58,7 +58,13 @@ colnames(soil) <- cols_new
 #   theme_light() + 
 #   theme(panel.grid.minor = element_blank(),
 #         text = element_text(family = "sans"))
-
+soil <- soil %>% 
+  separate(Sampling.Depth, c("upper","lower"), remove = FALSE) %>% 
+  # mutate(Sampling.Depth = gsub("\\d{1,2}-","", Sampling.Depth)) %>% 
+  select(-Soil.Texture.INPUT,
+         -Helper) %>% 
+  mutate(upper = as.integer(upper),
+         lower = as.integer(lower))
 ```
 
 
