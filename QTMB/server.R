@@ -152,15 +152,8 @@ shinyServer(function(input, output,session) {
       labs(title = "Estimated whole crop N uptake",
            x = "Days after planting",
            y  = "Whole crop N uptake (kg/ha)")+
-      theme_classic() +
-      theme(strip.background = element_blank(),
-            plot.background = element_rect(inherit.blank = T),
-            panel.background = element_rect(fill = "white", colour = "black"),
-            panel.grid.major.x = element_blank(),
-            panel.grid.major.y = element_line(color = "grey"),
-            text = element_text(family = "sans", size = 16),
-            plot.title = element_text(hjust = 0.5)
-            )
+      theme_qtmb()
+
 
     P
 
@@ -268,7 +261,26 @@ shinyServer(function(input, output,session) {
 
 
   output$distPlot2 <- renderPlot({
-    plot(rnorm(100))
+    depths <- soil_filter() %>%
+      select(MineralN) %>%
+      mutate(Depth = as.character(c(paste0(0, "-",input$depth.1, " cm"),
+                                    paste0(input$depth.1,"-",input$depth.2, " cm"),
+                                    paste0(input$depth.2, "-", input$depth.3, " cm"))))
+    total <- soil_filter() %>%
+      select(MineralN) %>%
+      dplyr::summarise(MineralN = sum(MineralN, na.rm = TRUE)) %>%
+      mutate(Depth = "Total")
+    p <- bind_rows(depths, total) %>%
+      ggplot(aes(Depth, MineralN, fill = Depth)) +
+      geom_col(width = 0.5) +
+      labs(title = "Estimated  soil mineral N supply (from nitrate QT)",
+           x = "",
+           y  = "Soil mineral N supply (kg/ha)")+
+      theme_qtmb() +
+      scale_y_continuous(expand = c(0,0), limits = c(0, max(total$MineralN) + 5 ),breaks = pretty(total$MineralN))
+
+    p
+
 
   })
 
