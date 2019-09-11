@@ -107,10 +107,13 @@ shinyUI(fluidPage(
                     p(strong(h5("AMN"))),
                     verticalLayout(
                       numericInput(inputId = "AMN1", label = "Depth 1",value = 0),
-                      numericInput(inputId = "AMN2", label = "Depth 2", value = 0),
-                      numericInput(inputId = "AMN3", label = "Depth 3",value = 0)
+                      textInput(inputId = "AMN2", label = "Depth 2", placeholder = "Place holder"),
+                      textInput(inputId = "AMN3", label = "Depth 3", placeholder = "Place holder")
                     )
              ),
+             column(12,
+                    htmlOutput("period")),
+             br(),
              column(12,
 
                     DT::dataTableOutput("N.calculated")
@@ -124,6 +127,7 @@ shinyUI(fluidPage(
     ),
     column(width = 5, offset = 1,
            plotOutput('distPlot2')
+           # DT::dataTableOutput("N_graphing")
     )
   )
 
