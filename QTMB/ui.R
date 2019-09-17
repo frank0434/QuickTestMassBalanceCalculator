@@ -10,125 +10,99 @@ shinyUI(fluidPage(
   theme = "style.css",
   headerPanel('Quick Test Mass Calculator'),
   hr(),
+  sidebarLayout(
+    sidebarPanel(
+      fixedRow(
+        p(strong(h4("Input"))),
+        hr(),
+        column(6,
+               selectInput(inputId = "input_system",
+                           label = "System",
+                           choices = input_systems)),
+        column(6,
+               selectInput(inputId = "input_crop", label = "Crop", choices = crops)),
+        column(4,
+               dateInput("input_PlantingDate", label = "Planting Date")),
+        column(4,
+               dateInput("Sampling.Date", label = "Sampling Date")),
+        column(4,
+               dateInput(inputId = "input_nextsamplingDate",
+                         label = "Next Sampling Date")),
+        column(6,
+               selectInput("input_targetYield", label = "Target yield (t FW/ha)", choices =  c(""))),
+        column(10,
+               p(strong(h5("Sampling Depth"))),
+               verticalLayout(
+                 sliderInput(inputId = "depth.1", label = "Depth 1", min = 0, max = 30, value = 15,step = 5),
+                 sliderInput(inputId = "depth.2", label = "Depth 2", min = 30, max = 60, value = 45,step = 5),
+                 sliderInput(inputId = "depth.3", label = "Depth 3", min = 60, max = 90, value = 75,step = 5)
+               )),
+        column(6,
+               p(strong(h5("Soil Texture"))),
+               verticalLayout(
+                 selectInput(inputId = "Texture.1", label = "Depth 1", choices = ""),
+                 selectInput(inputId = "Texture.2", label = "Depth 2", choices = ""),
+                 selectInput(inputId = "Texture.3", label = "Depth 3", choices = "")
+               )),
+        column(6,
+               p(strong(h5("Soil Moisture"))),
+               verticalLayout(
+                 selectInput(inputId = "Moisture.1", label = "Depth 1", choices = ""),
+                 selectInput(inputId = "Moisture.2", label = "Depth 2", choices = ""),
+                 selectInput(inputId = "Moisture.3", label = "Depth 3", choices = "")
+               )),
 
-  fluidRow(
-    column(5,
-           fixedRow(
-             p(strong(h4("Crop"))),
-             hr(),
-             column(6,
-                    selectInput(inputId = "input_system",
-                                label = "System",
-                                choices = input_systems)),
-             column(4,
-                    selectInput(inputId = "input_crop", label = "Crop", choices = crops)),
-             column(6,
-                    dateInput("input_PlantingDate", label = "Planting Date")),
-             column(4,
-                    selectInput("input_targetYield", label = "Target yield (t FW/ha)", choices =  c(""))),
-             column(6,
-                    htmlOutput("Harvested_value")),
-             column(6,
-                    htmlOutput("N_uptake_estimated"))
-           ),
+        column(6,
+               p(strong(h5("QtestNitrate"))),
+               verticalLayout(
+                 numericInput(inputId = "Qtest1", label = "Depth 1",value = 0),
+                 numericInput(inputId = "Qtest2", label = "Depth 2", value = 0),
+                 numericInput(inputId = "Qtest3", label = "Depth 3",value = 0)
+               )),
+        column(6,
+               p(strong(h5("AMN"))),
+               verticalLayout(
+                 numericInput(inputId = "AMN1", label = "Depth 1",value = 0),
+                 textInput(inputId = "AMN2", label = "Depth 2", placeholder = "Place holder"),
+                 textInput(inputId = "AMN3", label = "Depth 3", placeholder = "Place holder")
+               ))
+      )
+    ) ,
 
-           hr(),
-           fixedRow(
-             p(strong(h4("Seasonal N Balance"))),
-             hr(),
-             DT::dataTableOutput("N_inCrop")
-             # column(6,
-             #        numericInput(inputId = "1", label = "Soil N supply",value = 0)),
-             # column(4,
-             #        numericInput(inputId = "2", label = "Remaining Crop N requirement",value = 0)),
-             # column(6,
-             #        textInput("3", label = "Net", value = paste0(000,"surplus") ))
-           ),
-           hr(),
-           fixedRow(
-             p(strong(h4("Next sampling date (SD)"))),
-             hr(),
-             column(10,
-                    dateInput(inputId = "input_nextsamplingDate",
-                              label = "Next SD")),
-             DT::dataTableOutput("N_require")
-             # column(6,
-             #        numericInput(inputId = "2",
-             #                     label = "Crop N Requirement Until next SD (kg/ha)", value = 0)),
-             # column(6,
-             #        numericInput("date1", label = "Net (kg/ha)",value = 0 ))
+  mainPanel(
 
+    column(6,
+           htmlOutput("Harvested_value")),
+    column(6,
+           htmlOutput("N_uptake_estimated")),
+    DT::dataTableOutput("N_inCrop"),
+    DT::dataTableOutput("N_require"),
 
-           )
+    column(8,
+           htmlOutput("period")),
+    br(),
+    column(8,
 
-    ),
-    column(7,
-           p(strong(h4("Soil Nitrogen"))),
-           hr(),
-           p(em("Nitrate Quick Test")),
+           DT::dataTableOutput("N.calculated")),
+    hr(),
 
-           dateInput("Sampling.Date", label = "Sampling Date"),
-
-           br(),
-           fixedRow(
-             column(4,
-                    p(strong(h5("Sampling Depth"))),
-                    verticalLayout(
-                      sliderInput(inputId = "depth.1", label = "Depth 1", min = 0, max = 30, value = 15,step = 5),
-                      sliderInput(inputId = "depth.2", label = "Depth 2", min = 30, max = 60, value = 45,step = 5),
-                      sliderInput(inputId = "depth.3", label = "Depth 3", min = 60, max = 90, value = 75,step = 5)
-                    )
-             ),
-             column(2,
-                    p(strong(h5("Soil Texture"))),
-                    verticalLayout(
-                      selectInput(inputId = "Texture.1", label = "Depth 1", choices = ""),
-                      selectInput(inputId = "Texture.2", label = "Depth 2", choices = ""),
-                      selectInput(inputId = "Texture.3", label = "Depth 3", choices = "")
-                    )
-             ),
-             column(2,
-                    p(strong(h5("Soil Moisture"))),
-                    verticalLayout(
-                      selectInput(inputId = "Moisture.1", label = "Depth 1", choices = ""),
-                      selectInput(inputId = "Moisture.2", label = "Depth 2", choices = ""),
-                      selectInput(inputId = "Moisture.3", label = "Depth 3", choices = "")
-                    )
-             ),
-             column(2,
-                    p(strong(h5("QtestNitrate"))),
-                    verticalLayout(
-                      numericInput(inputId = "Qtest1", label = "Depth 1",value = 0),
-                      numericInput(inputId = "Qtest2", label = "Depth 2", value = 0),
-                      numericInput(inputId = "Qtest3", label = "Depth 3",value = 0)
-                    )
-             ),
-             column(2,
-                    p(strong(h5("AMN"))),
-                    verticalLayout(
-                      numericInput(inputId = "AMN1", label = "Depth 1",value = 0),
-                      textInput(inputId = "AMN2", label = "Depth 2", placeholder = "Place holder"),
-                      textInput(inputId = "AMN3", label = "Depth 3", placeholder = "Place holder")
-                    )
-             ),
-             column(12,
-                    htmlOutput("period")),
-             br(),
-             column(12,
-
-                    DT::dataTableOutput("N.calculated")
-                    )
-           )
-    )),
-  hr(),
-  fixedRow(
-    column(width = 5,
-           plotOutput('P_N.uptake')
-    ),
-    column(width = 5, offset = 1,
-           plotOutput('distPlot2')
-           # DT::dataTableOutput("N_graphing")
+    fixedRow(
+      column(width = 8,
+             plotOutput('P_N.uptake')
+      ),
+      column(width = 8,
+             plotOutput('distPlot2')
+             # DT::dataTableOutput("N_graphing")
+      )
     )
+
+  )
+  )
+  )
   )
 
-))
+  # column(7,
+  #          p(strong(h4("Soil Nitrogen"))),
+  #          hr(),
+  #          p(em("Nitrate Quick Test")),
+  #
