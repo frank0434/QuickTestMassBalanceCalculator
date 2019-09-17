@@ -101,7 +101,7 @@ colnames(crop_info) <- cols_new
 
 crop_cleaned <- crop_info %>% 
   mutate(Yield.value = as.integer(Yield.value),
-         Harvested.value = as.integer(Harvested.value),
+         Harvested.value = ifelse(is.na(Harvested.value), Yield.value, as.integer(Harvested.value)),
          Seasonal.N.uptake = round(as.numeric(Seasonal.N.uptake),digits = 0),
          B = as.numeric(B),
          M = as.numeric(M),
@@ -119,6 +119,13 @@ meta_crop_para <- cols_new %>%
   unnest()
 names(crop_para) <- cols_new
 
+
+```
+
+##### Revise the crop parameter values
+```{r recode the harvested parameter}
+crop_para <- crop_para %>% 
+  mutate(Harvested.parameter = ifelse(is.na(Harvested.parameter), Yield.paramater, Harvested.parameter))
 
 ```
 
