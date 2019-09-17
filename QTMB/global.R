@@ -29,3 +29,4 @@ crop.yield <- dbReadTable(conn, "tab_crop")
 soil <- dbReadTable(conn, "tab_soil")
 
 amn <- dbReadTable(conn, "tab_AMN")
+dbDisconnect(conn)
