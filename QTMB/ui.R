@@ -14,6 +14,8 @@ shinyUI(fluidPage(
     sidebarPanel(
       fixedRow(
         p(strong(h4("Input"))),
+
+
         hr(),
         column(6,
                selectInput(inputId = "input_system",
@@ -30,61 +32,83 @@ shinyUI(fluidPage(
                          label = "Next Sampling Date")),
         column(6,
                selectInput("input_targetYield", label = "Target yield (t FW/ha)", choices =  c(""))),
+        column(6,
+               selectInput("input_componentYield", label = "Harvested component (t FW/ha)", choices =  c(""))
+               # htmlOutput("Harvested_value")
+               ),
         column(10,
                p(strong(h5("Sampling Depth"))),
-               verticalLayout(
+
+               tags$form(
+                 class="form-horizontal",
+
+                 tags$div(
+                   class="form-group",
+                   tags$label(class = "col-sm-4 control-label", `for` = "depth.1"),
+
                  sliderInput(inputId = "depth.1", label = "Depth 1", min = 0, max = 30, value = 15,step = 5),
                  sliderInput(inputId = "depth.2", label = "Depth 2", min = 30, max = 60, value = 45,step = 5),
                  sliderInput(inputId = "depth.3", label = "Depth 3", min = 60, max = 90, value = 75,step = 5)
-               )),
-        column(6,
-               p(strong(h5("Soil Texture"))),
-               verticalLayout(
-                 selectInput(inputId = "Texture.1", label = "Depth 1", choices = ""),
-                 selectInput(inputId = "Texture.2", label = "Depth 2", choices = ""),
-                 selectInput(inputId = "Texture.3", label = "Depth 3", choices = "")
-               )),
-        column(6,
-               p(strong(h5("Soil Moisture"))),
-               verticalLayout(
-                 selectInput(inputId = "Moisture.1", label = "Depth 1", choices = ""),
-                 selectInput(inputId = "Moisture.2", label = "Depth 2", choices = ""),
-                 selectInput(inputId = "Moisture.3", label = "Depth 3", choices = "")
-               )),
-
-        column(6,
-               p(strong(h5("QtestNitrate"))),
-               verticalLayout(
-                 numericInput(inputId = "Qtest1", label = "Depth 1",value = 0),
-                 numericInput(inputId = "Qtest2", label = "Depth 2", value = 0),
-                 numericInput(inputId = "Qtest3", label = "Depth 3",value = 0)
-               )),
-        column(6,
-               p(strong(h5("AMN"))),
-               verticalLayout(
-                 numericInput(inputId = "AMN1", label = "Depth 1",value = 0),
-                 textInput(inputId = "AMN2", label = "Depth 2", placeholder = "Place holder"),
-                 textInput(inputId = "AMN3", label = "Depth 3", placeholder = "Place holder")
-               ))
-      )
-    ) ,
+               )))
+        )
+      ) ,
 
   mainPanel(
+    sidebarLayout(
+      sidebarPanel(width = 6,
+                   p(strong(h4("Input"))),
 
-    column(6,
-           htmlOutput("Harvested_value")),
-    column(6,
-           htmlOutput("N_uptake_estimated")),
-    DT::dataTableOutput("N_inCrop"),
-    DT::dataTableOutput("N_require"),
 
-    column(8,
-           htmlOutput("period")),
-    br(),
-    column(8,
+                   hr(),
+                   fixedRow(
+                     column(6,
+                            p(strong(h5("Soil Texture"))),
+                            verticalLayout(
+                              selectInput(inputId = "Texture.1", label = "Depth 1", choices = ""),
+                              selectInput(inputId = "Texture.2", label = "Depth 2", choices = ""),
+                              selectInput(inputId = "Texture.3", label = "Depth 3", choices = "")
+                            )),
+                     column(6,
+                            p(strong(h5("Soil Moisture"))),
+                            verticalLayout(
+                              selectInput(inputId = "Moisture.1", label = "Depth 1", choices = ""),
+                              selectInput(inputId = "Moisture.2", label = "Depth 2", choices = ""),
+                              selectInput(inputId = "Moisture.3", label = "Depth 3", choices = "")
+                            )),
 
-           DT::dataTableOutput("N.calculated")),
-    hr(),
+                     column(6,
+                            p(strong(h5("QtestNitrate"))),
+                            verticalLayout(
+                              numericInput(inputId = "Qtest1", label = "Depth 1",value = 0),
+                              numericInput(inputId = "Qtest2", label = "Depth 2", value = 0),
+                              numericInput(inputId = "Qtest3", label = "Depth 3",value = 0)
+                            )),
+                     column(6,
+                            p(strong(h5("AMN"))),
+                            verticalLayout(
+                              numericInput(inputId = "AMN1", label = "Depth 1",value = 0),
+                              textInput(inputId = "AMN2", label = "Depth 2", placeholder = "Place holder"),
+                              textInput(inputId = "AMN3", label = "Depth 3", placeholder = "Place holder")
+                            ))
+
+                   )),
+      mainPanel(
+        p(strong(h4("output"))),
+
+
+        hr(),
+        width = 6,
+        # column(12,
+               # htmlOutput("N_uptake_estimated")),
+        DT::dataTableOutput("N_inCrop"),
+        DT::dataTableOutput("N_require"),
+
+        # column(12,
+        #        htmlOutput("period")),
+        br(),
+
+        DT::dataTableOutput("N.calculated"),
+        hr(),
 
     fixedRow(
       column(width = 8,
@@ -94,7 +118,11 @@ shinyUI(fluidPage(
              plotOutput('distPlot2')
              # DT::dataTableOutput("N_graphing")
       )
+    ))
     )
+
+
+
 
   )
   )

@@ -25,6 +25,7 @@ shinyServer(function(input, output,session) {
 
   observe({
     updateSelectInput(session, "input_targetYield", choices = crop_filtered()$Yield.value)
+
     updateSelectInput(session, "Texture.1", choices = soil.Texture())
     updateSelectInput(session, "Texture.2", choices = soil.Texture())
     updateSelectInput(session, "Texture.3", choices = soil.Texture())
@@ -34,6 +35,15 @@ shinyServer(function(input, output,session) {
 
   })
 
+  crop.para_filtered <- reactive({
+    df <- crop.para %>%
+      filter(Crop == input$input_crop)
+    df
+  })
+
+  observe({
+    updateSelectInput(session, "input_componentYield", label = crop.para_filtered()$Harvested.parameter,choices = crop_filtered_1row()$Harvested.value)
+  })
   # report back to the Estimated seasonal N uptake (kg/ha)
   crop_filtered_1row <- reactive({
     df <- crop.yield %>%
@@ -41,20 +51,11 @@ shinyServer(function(input, output,session) {
     df
   })
 
-  output$N_uptake_estimated <- renderText({
-    paste("<b>Estimated seasonal N uptake (kg/ha): ", crop_filtered_1row()$Seasonal.N.uptake, "</b>")
+  N_uptake_estimated <- reactive({
+    N_uptake <- crop_filtered_1row()$Seasonal.N.uptake
+    N_uptake
   })
 
-  veges <- reactive({
-    if(input$input_crop %in% crop.para$Crop){
-      df <- crop.yield %>%
-        filter(Crop == input$input_crop, Yield.value == input$input_targetYield)
-      df
-    }
-    })
-
-  output$Harvested_value <- renderText({
-    paste("<b>Harvested component (t FW/ha): ", veges()$Harvested.value, "</b>")})
 
 
 
@@ -87,10 +88,11 @@ shinyServer(function(input, output,session) {
 
     net = Soil_N_supply() - N_remain()
     net = ifelse(net > 0, paste0(net, "(surplus)"), paste0(net, "(deficit)"))
-    tab <- tibble(`Seasonal N Balance`= c("Soil N supply",
+    tab <- tibble(`Seasonal N Balance`= c("Estimated seasonal N uptake (kg/ha)",
+                                          "Soil N supply",
                                           "Remaining crop N requirement",
                                           "Net"),
-                  `kg N/ha` = c(Soil_N_supply(), N_remain(), net))
+                  `kg N/ha` = c(N_uptake_estimated(), Soil_N_supply(), N_remain(), net))
     tab <- DT::datatable(tab,
                          rownames = FALSE,
                          options = list(dom = 't',
