@@ -8,7 +8,7 @@ source("global.R")
 
 shinyUI(fluidPage(
   theme = "style.css",
-  headerPanel('Quick Test Mass Calculator'),
+  headerPanel('The Nitrate Quick Test Mass Balance Tool'),
   hr(),
 
   fluidRow(
