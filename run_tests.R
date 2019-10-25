@@ -2,10 +2,10 @@ library(testthat)
 library(shinytest)
 
 #Test if app runs----
-test_that("Application works", {
-  expect_pass(testApp("shinyapp", compareImages = FALSE))
-})
-
+# test_that("Application works", {
+#   expect_pass(testApp("shinyapp", compareImages = FALSE))
+# })
+#
 
 #Test Crop Section input and output value----
 test_that("Output matches Input", {
