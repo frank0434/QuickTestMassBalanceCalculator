@@ -25,21 +25,14 @@ shinyServer(function(input, output,session) {
 
   observe({
     updateSelectInput(session, "input_targetYield", choices = crop_filtered()$Yield.value)
-    updateSelectInput(session, "Texture.1", choices = soil.Texture())
-    updateSelectInput(session, "Texture.2", choices = soil.Texture())
-    updateSelectInput(session, "Texture.3", choices = soil.Texture())
-    updateSelectInput(session, "Moisture.1", choices = soil.Moisture())
-    updateSelectInput(session, "Moisture.2", choices = soil.Moisture())
-    updateSelectInput(session, "Moisture.3", choices = soil.Moisture())
 
-  })
-
-  # report back to the Estimated seasonal N uptake (kg/ha)
+    # report back to the Estimated seasonal N uptake (kg/ha)
   crop_filtered_1row <- reactive({
     df <- crop.yield %>%
       filter(Crop == input$input_crop, Yield.value == input$input_targetYield)
     df
   })
+
 
   output$N_uptake_estimated <- renderText({
     paste("<b>Estimated seasonal N uptake (kg/ha): ", crop_filtered_1row()$Seasonal.N.uptake, "</b>")
@@ -56,10 +49,7 @@ shinyServer(function(input, output,session) {
   output$Harvested_value <- renderText({
     paste("<b>Harvested component (t FW/ha): ", veges()$Harvested.value, "</b>")})
 
-
-
-
-# Seasonal N balance PANEL ------------------------------------------------
+   # Seasonal N balance PANEL ------------------------------------------------
 
 
 
@@ -87,10 +77,12 @@ shinyServer(function(input, output,session) {
 
     net = Soil_N_supply() - N_remain()
     net = ifelse(net > 0, paste0(net, "(surplus)"), paste0(net, "(deficit)"))
+
     tab <- tibble(`Seasonal N Balance`= c("Soil N supply",
                                           "Remaining crop N requirement",
                                           "Net"),
                   `kg N/ha` = c(Soil_N_supply(), N_remain(), net))
+
     tab <- DT::datatable(tab,
                          rownames = FALSE,
                          options = list(dom = 't',

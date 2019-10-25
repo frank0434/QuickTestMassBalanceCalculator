@@ -7,7 +7,8 @@ test_that("Application works", {
 })
 
 
-n#Test Crop Section input and output value----
+#Test Crop Section input and output value----
+
 test_that("Output matches Input", {
 
   #connect the app
