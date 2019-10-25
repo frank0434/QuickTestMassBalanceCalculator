@@ -3,7 +3,7 @@ library(shinytest)
 
 #Test if app runs----
 test_that("Application works", {
-  expect_pass(testApp("./QTMB/", compareImages = FALSE))
+  expect_pass(testApp("shinyapp", compareImages = FALSE))
 })
 
 
@@ -11,7 +11,7 @@ test_that("Application works", {
 test_that("Output matches Input", {
 
   #connect the app
-  app <- ShinyDriver$new("./QTMB/")
+  app <- ShinyDriver$new("shinyapp")
 
   #set up input selections randomly
   app$setInputs(input_system = "Intensive vegetable production")
