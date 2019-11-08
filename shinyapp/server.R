@@ -13,57 +13,60 @@ source("functions.R")
 shinyServer(function(input, output,session) {
 
 
-# CROP PANEL----
+# Crop tab ----
+
+  ## crop type filter from the display name
+  input_crop <- reactive({
+    ### only need the vector value
+      subset(crop.para, Crop_name_display == input$input_crop)$Crop
+  })
 
   ## crop selction and the yield options
   crop_filtered <- reactive({
+    ### filter by the crop type
     df <- crop.yield %>%
-      filter(Crop == input$input_crop)
+      filter(Crop == input_crop())
     df
   })
 
-
-  observe({
-    updateSelectInput(session, "input_targetYield", choices = crop_filtered()$Yield.value)
-
-    updateSelectInput(session, "Texture.1", choices = soil.Texture())
-    updateSelectInput(session, "Texture.2", choices = soil.Texture())
-    updateSelectInput(session, "Texture.3", choices = soil.Texture())
-    updateSelectInput(session, "Moisture.1", choices = soil.Moisture())
-    updateSelectInput(session, "Moisture.2", choices = soil.Moisture())
-    updateSelectInput(session, "Moisture.3", choices = soil.Moisture())
-
-  })
-
+  ## crop harvest componet unit and name filtered
   crop.para_filtered <- reactive({
+    ### filter by the crop type
     df <- crop.para %>%
-      filter(Crop == input$input_crop)
+      filter(Crop == input_crop())
     df
   })
 
-  observe({
-    updateSelectInput(session, "input_componentYield", label = crop.para_filtered()$Harvested.parameter,choices = crop_filtered_1row()$Harvested.value)
-  })
-  # report back to the Estimated seasonal N uptake (kg/ha)
+  ## crop parameters: N.uptake, B M C A
   crop_filtered_1row <- reactive({
+    ### filter by the crop type and the user seleted marketable yield
     df <- crop.yield %>%
-      filter(Crop == input$input_crop, Yield.value == input$input_targetYield)
+      filter(Crop == input_crop(), Harvested.value == input$input_componentYield)
     df
   })
 
-  N_uptake_estimated <- reactive({
-    N_uptake <- crop_filtered_1row()$Seasonal.N.uptake
-    N_uptake
+  crop_info_reactive <- reactive({
+    tab <- tibble(" " = c("Crop Selected",
+                          "Farm System",
+                          "Target Harvested Fresh Yield",
+                          "Planting Date",
+                          "Sampling Date",
+                          "Next Sampling/Side dressing Date"),
+                  "  " = c(input$input_crop,
+                           input$input_system,
+                           input$input_componentYield,
+                           as.character(input$input_PlantingDate),
+                           as.character(input$Sampling.Date),
+                           as.character(input$input_nextsamplingDate)))
+  })
+  crop_period <- reactive({
+    max(Crop_N_graphing()$DAP_annual)
   })
 
+  # report back to the Estimated seasonal N uptake (kg/ha)
+  Seasonal.N.uptake <- reactive({crop_filtered_1row()$Seasonal.N.uptake})
 
-
-
-
-# Seasonal N balance PANEL ------------------------------------------------
-
-
-
+  # days after planting information ----
   DAP_SD <- reactive({
     DAP <- as.Date(input$Sampling.Date) - as.Date(input$input_PlantingDate)
     DAP <- ifelse(DAP < 0, 0, DAP)
@@ -73,52 +76,333 @@ shinyServer(function(input, output,session) {
     DAP <- ifelse(DAP < 0, 0, DAP)
   })
 
-  output$DAP <- renderText({
-    paste("<b>Days after planting (t FW/ha): ", DAP_SD(), "</b>")
-    })
 
-  N_remain <- reactive({
-    N_remain <- setDT(crop_filtered_1row())[, N_remain := round(Seasonal.N.uptake - (C + A)/(1 + exp(-B*(DAP_SD() - M))), digits = 0)]$N_remain
+# Soil tab ----
+
+  # process sampling depth ----
+
+  # soil_info_v <- reactive({
+  #   # make all the input avaiable to the entire app
+  #   v <- c(input$Texture.1,
+  #          input$Texture.1.1,
+  #          input$Texture.1.2,
+  #          input$Texture.2 ,
+  #          input$Texture.3,
+  #          input$Moisture.1,
+  #          input$Moisture.1.1,
+  #          input$Moisture.1.2,
+  #          input$Moisture.2,
+  #          input$Moisture.3)
+  #   names(v) <- v
+  # })
+
+  depth.15.1 <- reactive({
+    # if texture and moisture have been selected, assign depth to 15
+    if(input$Texture.1.1 %in% soil.texture & input$Moisture.1.1 %in% soil.moisture){
+      as.integer(15)
+    } else if (input$Texture.1 %in% soil.moisture){
+      cat("Sampling depth crashed. Can't have both 0-15 and 0-30 for one session.\r\nPlease check 0-30.\r\n")
+    } else {
+      print("Please make sure both texture and moisture have been selected.")
+    }
+  })
+
+
+  depth.15.2 <- reactive({
+    # if texture and moisture have been selected, assign depth to 15
+    if(input$Texture.1.2 %in% soil.texture & input$Moisture.1.2  %in% soil.moisture){
+      as.integer(15)
+    } else if (input$Moisture.1 %in% soil.moisture){
+      cat("Sampling depth crashed. Can't have both 15-30 and 0-30 for one session.\r\nPlease check 0-30.\r\n")
+    } else {
+      print("Please make sure both texture and moisture have been selected.")
+    }
+  })
+
+  depth.30.1 <- reactive({
+    # if texture and moisture have been selected, assign depth to 15
+    if(input$Texture.1 %in% soil.texture & input$Moisture.1 %in% soil.moisture){
+      as.integer(30)
+    } else if (input$Moisture.1.1 %in% soil.moisture | soil_info_v()["Moisture.1.2"] %in% soil.moisture){
+      cat("Sampling depth crashed. Can't have both 0-15/15-30 and 0-30 for one session.\r\nPlease check 0-15/15-30.\r\n")
+    } else {
+      print("Please make sure both texture and moisture have been selected.")
+    }
+  })
+
+  depth.30.2 <- reactive({
+    # if texture and moisture have been selected, assign depth to 15
+    if(input$Texture.2 %in% soil.texture & input$Moisture.2 %in% soil.moisture){
+      as.integer(30)
+    } else {
+      print("Please make sure both texture and moisture have been selected.")
+    }
+  })
+
+  ## 60-90 is diabled
+  # depth.30.3
+  # Texture.3
+  # Moisture.3
+
+  # quick test results ----
+
+  Qtest.15.1 <- reactive({
+    # if Qtest1.1 has input, check type and if crash with 0-30
+    val0_15 <- as.integer(input$Qtest1.1)
+    val0_30 <- as.integer(input$Qtest1)
+    if(val0_15 < 0){
+      print("Quick test resutls must be 0 or positive numbers.")
+      val0_15 = 0
+    } else if (is.na(val0_15)){
+      val0_15 = 0
+    } else if(val0_30 > 0 ){
+      print("Quick test resutls can't have both 0-15 and 0-30 presnet in one session")
+      print("Please check if values have been filled in 0-30 accidently.")
+    } else{
+      val0_15
+    }
+  })
+  Qtest.15.2 <-  reactive({
+    # if Qtest1.1 has input, check type and if crash with 0-30
+    val15_30 <- as.integer(input$Qtest1.2)
+    val0_30 <- as.integer(input$Qtest1)
+    if(val15_30 < 0){
+      print("Quick test resutls must be 0 or positive numbers.")
+    } else if (is.na(val15_30)){
+      val15_30 = 0
+    } else if(val0_30 > 0 ){
+      print("Quick test resutls can't have both 0-15 and 0-30 presnet in one session")
+      print("Please check if values have been filled in 0-30 accidently.")
+    } else{
+      val15_30
+    }
+  })
+  Qtest.30.1 <- reactive({
+    # if Qtest1.1 has input, check type and if crash with 0-30
+    val0_15 <- as.integer(input$Qtest1.1)
+    val15_30 <- as.integer(input$Qtest1.2)
+    val0_30 <- as.integer(input$Qtest1)
+    if(val0_30 < 0){
+      print("Quick test resutls must be 0 or positive numbers.")
+    } else if (is.na(val0_30)){
+      val0_30 = 0
+    } else if(val0_15 > 0 |  val15_30 > 0){
+      print("Quick test resutls can have both 0-15 and 0-30 presnet in one session.")
+      print("Please check if values have been filled in 0-15/15-30 accidently.")
+    } else{
+      val0_30
+    }
+  })
+  Qtest.30.2 <- reactive({
+    # if Qtest1.1 has input, check type and if crash with 0-30
+    val30_60 <- as.integer(input$Qtest2)
+
+    if(val30_60 < 0){
+      print("Quick test resutls must be 0 or positive numbers.")
+    } else if (is.na(val30_60)){
+      val30_60 = 0
+    } else{
+      val30_60
+    }
+  })
+  # Qtest.30.3 # currently disabled
+
+
+  # quick test nitrate-N (mg/kg DM) calculation----
+  ## Quick test nitrate-N (mg/kg DM) = Quick test nitrate (mg/L) (user input)/CF
+  # Mineral N supply (kg/ha) = Quick test nitrate (mg/L) * CF2/ Ammonium_N_factor(0.95)
+  # CF , CF = filter(Texture, Moisture, depth1)
+
+  # BD same rules as for CF, filtering by textture and mositure and depth
+
+  # CF2  = 1/(CF/(BD * (depth/10)))
+  soil_filter <- reactive({
+
+
+    if(Qtest.15.1() >= 0 & Qtest.15.2() >= 0){
+      df.1.1 <- soil %>%
+        filter(Texture == input$Texture.1.1,
+               Moisture == input$Moisture.1.1,
+               Sampling.Depth == "0-30") %>%
+        mutate(qtest_user.input = Qtest.15.1(),
+               Sample.length = as.integer(15))
+      df.1.2 <- soil %>%
+        filter(Texture == input$Texture.1.2,
+               Moisture == input$Moisture.1.2,
+               Sampling.Depth == "0-30") %>%
+        mutate(qtest_user.input = Qtest.15.2(),
+               Sample.length = as.integer(15))
+      # depth 0-15 & 15-30
+      df.1 <- bind_rows(df.1.1, df.1.2)
+    } else if (Qtest.30.1() >= 0){
+      # depth 0-30
+      df.1 <- soil %>%
+        filter(Texture == input$Texture.1,
+               Moisture == input$Moisture.1,
+               Sampling.Depth == "0-30") %>%
+        mutate(qtest_user.input = Qtest.30.2(),
+               Sample.length = as.integer(30))
+    }
+
+
+    # depth 30-60
+    if(Qtest.30.2() >= 0 & Qtest.30.2() >= 0){
+      df.2 <- soil %>%
+        filter(
+          Texture == input$Texture.2,
+          Moisture == input$Moisture.2,
+          Sampling.Depth == "30-60") %>%
+        mutate(qtest_user.input = Qtest.30.2(),
+               Sample.length = as.integer(30))
+    }
+
+
+    #depth 60-90 disabled.
+    # df.3 <- cf_filter(soil, input$Texture.3, input$Moisture.3, 60, zz = input$depth.3, a = input$Qtest3)
+
+    if(exists("df.1") & exists("df.2")){
+        df <- bind_rows(df.1,df.2) %>%
+          mutate(qTestN.mg.kg = round(qtest_user.input/CF, digits = 0),
+                 CF2 = round(1/(CF/(Bulk.density*(Sample.length/10))), digits = 2),
+                 MineralN = round(qtest_user.input*CF2/0.95, digits = 0))
+      } else if (exists("df.1") & !exists("df.2")){
+          df <- df.1 %>%
+            mutate(qTestN.mg.kg = round(qtest_user.input/CF, digits = 0),
+                   CF2 = round(1/(CF/(Bulk.density*(Sample.length/10))), digits = 2),
+                   MineralN = round(qtest_user.input*CF2/0.95, digits = 0))
+      } else if (!exists("df.1") & exists("df.2")){
+        df <-  df.2 %>%
+          mutate(qTestN.mg.kg = round(qtest_user.input/CF, digits = 0),
+                 CF2 = round(1/(CF/(Bulk.density*(Sample.length/10))), digits = 2),
+                 MineralN = round(qtest_user.input*CF2/0.95, digits = 0))
+      } else {
+        df <-  tibble(Texture = " ",
+                      Mositure = " ",
+                      Sampling.Depth = " ",
+                      Description = "Please check the soil tab.")
+        }
+
+
+    df
+  })
+
+
+  # AMN N supply calculation -----
+  # if(!is.na(test result))
+  # Remaining ON supply (kg/ha) = (crop period - DAP_SD)*data supply rate
+  # if(is.na(test result))
+
+  #  Remaining ON supply (kg/ha) = (crop period - DAP_SD )* Default Supply Rate (kg N/day)
+
+
+  # Data supply rate (kg N/day) = test result * converison coefficient/crop period
+
+  AMN_supply <- reactive({
+
+    AMN_default <- switch (input$input_system,
+                           "Mixed cropping/arable" = as.integer(90),
+                           "Intensive vegetable production" = as.integer(50),
+                           "Pasture conversion" = as.integer(180)
+                           )
+    if(input$AMN1.1!=0){
+      converisonF <- ifelse(crop_period() >= 100, 0.9,
+                            ifelse(crop_period() < 40, 0.3, 0.5))
+      AMN_supply1 = (crop_period() - DAP_SD()) * (input$AMN1.1 * converisonF/crop_period())
+      AMN_supply = round(AMN_supply1, digits = 0)
+    } else if(input$AMN1 != 0){
+      converisonF <- ifelse(crop_period() >= 100, 0.9,
+                            ifelse(crop_period() < 40, 0.3, 0.5))
+      AMN_supply1 = (crop_period() - DAP_SD()) * (input$AMN1 * converisonF/crop_period())
+      AMN_supply = round(AMN_supply1, digits = 0)
+    } else {
+      converisonF <- ifelse(crop_period() >= 100, 0.9,
+                            ifelse(crop_period() < 40, 0.3, 0.5))
+      AMN_supply1 = (crop_period() - DAP_SD()) * (AMN_default * converisonF/crop_period())
+      AMN_supply = round(AMN_supply1, digits = 0)
+    }
 
   })
-  output$N_inCrop <- DT::renderDataTable({
-    # critical calculation ----
+
+
+  # total N supply from soil - minN + AMN
+  Soil_N_supply <- reactive({
+    sn <- sum(soil_filter()$MineralN, na.rm = TRUE) + AMN_supply() # AMN_supply has 3 element.
+    sn
+  })
+
+
+
+
+# updating user selection -----
+
+  observe({
+    # Marketable Yield dropdown list - key component
+    updateSelectInput(session,
+                      "input_componentYield",
+                      label = crop.para_filtered()$Harvested.parameter,
+                      choices = crop_filtered()$Harvested.value)
+  })
+
+
+
+  # currently disable in the UI, total FW biomass seems redundant information for farmers
+  observe({
+    updateSelectInput(session,
+                      "input_targetYield",
+                      label = crop.para_filtered()$Yield.parameter,
+                      choices = crop_filtered_1row()$Yield.value)
+
+  })
+
+
+# Seasonal N balance PANEL -------
+
+  # Crop alone remaining N required (critical calculation) ----
+  remaining.crop.N.requirement <- reactive({
     # Remaining.CropN.requirement = estimated.seasonal.Nuptake - (C+A)/(1 + exp(-B*(DAP - M)))
+    N_remain <- crop_filtered_1row() %>%
+      mutate(N_remain = round(Seasonal.N.uptake - (C + A)/(1 + exp(-B*(DAP_SD() - M))), digits = 0))
+  })
 
-
-    net = Soil_N_supply() - N_remain()
+  # seasonal N net
+  net.whole.season <- reactive({
+    net = Soil_N_supply() - remaining.crop.N.requirement()
     net = ifelse(net > 0, paste0(net, "(surplus)"), paste0(net, "(deficit)"))
-    tab <- tibble(`Seasonal N Balance`= c("Estimated seasonal N uptake (kg/ha)",
-                                          "Soil N supply",
+  })
+
+  # crop n requirement unitl next sampling date, a value -----
+  crop.N.req.until.next.SD <- reactive({
+    if(input$Sampling.Date >= input$input_nextsamplingDate){
+      val <- "NA.sampling date is greater than the next sampling date."
+    } else {
+      N_require <- crop_filtered_1row() %>%
+        mutate(N_require = round(Seasonal.N.uptake - (C + A)/(1 + exp(-B*(DAP_nextSD() - M))), digits = 0)) %>%
+        .$N_require
+      remaining.crop.N.requirement()$N_remain - N_require
+    }
+  })
+
+  net.to.next.SD <- reactive({
+    if(input$input_nextsamplingDate > input$Sampling.Date){
+      Soil_N_supply() - crop.N.req.until.next.SD()
+    }
+  })
+
+  # Crop N requirement table ----
+  N_crop <- reactive({
+    tab <- tibble(`Seasonal N Balance`= c("Crop N requirement until next sampling/side dressing date",
                                           "Remaining crop N requirement",
-                                          "Net"),
-                  `kg N/ha` = c(N_uptake_estimated(), Soil_N_supply(), N_remain(), net))
-    tab <- DT::datatable(tab,
-                         rownames = FALSE,
-                         options = list(dom = 't',
-                                        columnDefs = list(list(className = 'dt-right', targets = '_all'))),
-                         colnames = c("", colnames(tab)[ncol(tab)]))
-    })
-
-  output$N_require <- DT::renderDataTable({
-
-    # critical calculation ----
-    # Crop.N.requirement.NextSD = Remaining.CropN.requirement - (Seasonal.N.uptake - (C + A)/(1 + exp(-B*(DAP.of.NextSD-M))))
-
-    N_require <- N_remain() -
-      (setDT(crop_filtered_1row())[, N_require :=
-                                     round(Seasonal.N.uptake - (C + A)/(1 + exp(-B*(DAP_nextSD() - M))),
-                                           digits = 0)]$N_require)
-    net <- ifelse(is.na(input$input_nextsamplingDate), NA, Soil_N_supply() - N_require)
-    tab <- tibble(i1 = c("Crop N Requirement until next SD", "Net"),
-                  `kg N/ha` = c( N_require, net))
-    tab <- DT::datatable(tab,
-                         rownames = FALSE,
-                         options = list(dom = 't',
-                                        columnDefs = list(list(className = 'dt-right', targets = '_all'))),
-                         colnames = c("", colnames(tab)[ncol(tab)]))
+                                          "Estimated total N uptake",
+                                          "Soil Plant Avilable N to Plants"),
+                  `kg N/ha` = c(crop.N.req.until.next.SD(),
+                                remaining.crop.N.requirement()$N_remain,
+                                Seasonal.N.uptake(),
+                                Soil_N_supply()))
 
   })
+
+
+
 
   Crop_N_graphing <- reactive({
     # whole crop n uptake plot ----
@@ -128,27 +412,22 @@ shinyServer(function(input, output,session) {
     df <- unnest(df) %>%
       mutate(Predicted.N.Uptake = (A+C)/(1+exp(-B*(DAP_annual - M))),
              Predicted.N.Uptake = ifelse(Predicted.N.Uptake <0, 0, Predicted.N.Uptake),
-             Remaining.N.Requirement = N_remain() - Predicted.N.Uptake) %>%
+             Remaining.N.Requirement = remaining.crop.N.requirement()$N_remain - Predicted.N.Uptake) %>%
       filter(Remaining.N.Requirement > 0 ) %>%
       mutate(N_SD = ifelse(DAP_annual == DAP_SD(), Predicted.N.Uptake, NA),
              N_nextSD = ifelse(DAP_annual == DAP_nextSD(), Predicted.N.Uptake, NA))
   })
 
-  output$N_graphing <- DT::renderDataTable({
-    DT::datatable(Crop_N_graphing())
-  })
-
-  output$P_N.uptake <- renderPlot({
-
-
-     #plotting
+  # 1st graph, line plot for N estimation ----
+  N_uptake_reactive <- reactive({
+    #plotting
     size = 5
     P <- Crop_N_graphing() %>%
       ggplot(aes(x = DAP_annual)) +
       # geom_point(aes(y = Predicted.N.Uptake)) +
       geom_line(aes(y = Predicted.N.Uptake, color = "Predicted.N.Uptake"))+
-      geom_point(aes(y = N_SD, shape = "Sampling date"), size = size)+
-      geom_point(aes(y = N_nextSD, shape = "Next sampling date"),size = size)+
+      geom_point(aes(y = N_SD, shape = "Sampling date"), size = size,  na.rm=TRUE)+
+      geom_point(aes(y = N_nextSD, shape = "Next sampling date"),size = size,  na.rm=TRUE)+
       scale_shape_manual(name = "",values =  c(`Sampling date` = 16, `Next sampling date` = 6))+
       scale_color_manual(name = "", values = "red") +
       labs(title = "Estimated whole crop N uptake",
@@ -158,132 +437,111 @@ shinyServer(function(input, output,session) {
 
 
     P
-
-
-
-
-
   })
 
 
+  # 2nd graph, bar plot for different depths ----
+  N_supply_depth <- reactive({
+    depths <- soil_filter() %>%
+      select(MineralN, Sampling.Depth) %>%
+      mutate(Depth = paste0(Sampling.Depth, "cm"))
+
+      total <- soil_filter() %>%
+        select(MineralN) %>%
+        dplyr::summarise(MineralN = sum(MineralN, na.rm = TRUE)) %>%
+        mutate(Depth = "Total")
+      p <- bind_rows(depths, total) %>%
+        ggplot(aes(Depth, MineralN, fill = Depth)) +
+        geom_col(width = 0.5) +
+        labs(title = "Estimated  soil mineral N supply (from nitrate QT)",
+             x = "",
+             y  = "Soil mineral N supply (kg/ha)")+
+        theme_qtmb() +
+        scale_y_continuous(expand = c(0,0), limits = c(0, max(total$MineralN) + 5 ))
+
+      p
+    })
 
 
-  # SOIL NITROGEN PANEL -----------------------------------------------------
+  # output section ----
 
-  soil.Texture <- reactive({
-    st <- soil$Texture %>%
-      unique()
+  output$soil_filtered <- DT::renderDataTable({
+    tab <- DT::datatable(soil_filter() %>%
+                           select(Texture, Moisture, Sampling.Depth, QTest.Results = qtest_user.input, MineralN),
+                         options = list(dom = 't',
+                                        columnDefs = list(list(className = 'dt-right', targets = '_all'))),
+                         rownames = FALSE)
   })
-  soil.Moisture <- reactive({
-    st <- soil$Moisture %>%
-      unique()
-  })
-
-  crop_period <- reactive({
-    max(Crop_N_graphing()$DAP_annual)
-  })
+  output$AMN <- renderText({AMN_supply()}) # AMN supply output to UI
 
   output$period <- renderText({
     paste("<b>The Crop Period: ", crop_period(), "</b>")
-    })
-  # N test calculation----
-
-  # Qtest supply critical calculation ----
-  # Quick test nitrate-N (mg/kg DM) = Quick test nitrate (mg/L)/CF
-  # Mineral N supply (kg/ha) = Quick test nitrate (mg/L) * CF2/ Ammonium_N_factor(0.95)
-  # CF , CF = filter(Texture, Moisture, depth1)
-
-  # BD same rules as for CF, filtering by textture and mositure and depth
-
-  # CF2  = 1/(CF/(BD * (depth/10)))
-  soil_filter <- reactive({
-    df.1 <- cf_filter(soil, x = input$Texture.1, y = input$Moisture.1, z = 0, zz = input$depth.1, a = input$Qtest1)
-    df.2 <- cf_filter(soil, input$Texture.2, input$Moisture.2, 30, zz = input$depth.2, a = input$Qtest2)
-    df.3 <- cf_filter(soil, input$Texture.3, input$Moisture.3, 60, zz = input$depth.3, a = input$Qtest3)
-
-    df <- bind_rows(df.1,df.2,df.3) %>%
-      mutate(CF2 = 1/(CF/(Bulk.density*((lower- upper)/10))),
-             MineralN = qTestN.mg.L*CF2/0.95,
-             MineralN = round(MineralN, digits = 0))
-    df
   })
-
-  # AMN N supply calculation -----
-  # if(!is.na(test result))
-  # Remaining ON supply (kg/ha) = (crop period - DAP_SD)*data supply rate
-  # if(is.na(test result))
-  #  Remaining ON supply (kg/ha) = (crop period - DAP_SD )* Default Supply Rate (kg N/day)
-
-  # Data supply rate (kg N/day) = test result * converison coefficient/crop period
-
-    AMN_supply <- reactive({
-        if(input$AMN1!=0){
-      converisonF <- ifelse(crop_period() >= 100, 0.9,
-                            ifelse(crop_period() < 40, 0.3, 0.5))
-      AMN_supply1 = (crop_period() - DAP_SD()) * (input$AMN1 * converisonF/crop_period())
-      # AMN_supply2 = (crop_period() - DAP_SD()) * (input$AMN2 * converisonF/crop_period())
-      # AMN_supply3 = (crop_period() - DAP_SD()) * (input$AMN3 * converisonF/crop_period())
-      AMN_supply = round(AMN_supply1, digits = 0)
-      AMN_supply = c(AMN_supply, 0, 0)
-      } else {
-        # converisonF <- ifelse(crop_period() >= 100, 0.9,
-        #                       ifelse(crop_period() < 40, 0.3, 0.5))
-        # AMN_default <- amn %>%
-        #   filter(System == "Pasture conversion",#input$input_system,
-        #          value == 0.9) %>%
-        #   .$AMN_default
-        #
-        # AMN_supply = round((crop_period() - DAP_SD()) * ( AMN_default * converisonF/crop_period()),digits = 0)
-        AMN_supply = c(0, 0, 0)
-        }
-      })
-
-
-  # total N supply from soil - table above
-  Soil_N_supply <- reactive({
-    sn <- sum(soil_filter()$MineralN, na.rm = TRUE) + AMN_supply()[1] # AMN_supply has 3 element.
-    sn
-  })
-
-    # assemble the table
-    output$N.calculated <- DT::renderDataTable({
-      tab <- soil_filter() %>%
-        select(`Quick test nitrate-N (mg/kg DM)` = qTestN.mg.kg,
-               `Mineral N supply (kg/ha)` =  MineralN)
-      tab$`Remaining ON supply (kg/ha) `  <-  AMN_supply()
-      tab <-   t(tab) %>%
-        as.data.frame()
-      colnames(tab) <- paste0("Depth", 1:3)
-      tab$Total <- tab$Depth1 + tab$Depth2+ tab$Depth3
-
-      tab <- DT::datatable(tab,
-                           options = list(dom = 't'))
-
-  })
-
 
   output$distPlot2 <- renderPlot({
-    depths <- soil_filter() %>%
-      select(MineralN) %>%
-      mutate(Depth = as.character(c(paste0(0, "-",input$depth.1, " cm"),
-                                    paste0(input$depth.1,"-",input$depth.2, " cm"),
-                                    paste0(input$depth.2, "-", input$depth.3, " cm"))))
-    total <- soil_filter() %>%
-      select(MineralN) %>%
-      dplyr::summarise(MineralN = sum(MineralN, na.rm = TRUE)) %>%
-      mutate(Depth = "Total")
-    p <- bind_rows(depths, total) %>%
-      ggplot(aes(Depth, MineralN, fill = Depth)) +
-      geom_col(width = 0.5) +
-      labs(title = "Estimated  soil mineral N supply (from nitrate QT)",
-           x = "",
-           y  = "Soil mineral N supply (kg/ha)")+
-      theme_qtmb() +
-      scale_y_continuous(expand = c(0,0), limits = c(0, max(total$MineralN) + 5 ),breaks = pretty(total$MineralN))
-
-    p
-
-
+    N_supply_depth()
   })
+
+  output$DAP <- renderText({
+    paste("<b>Days after planting (t FW/ha): ", DAP_SD(), "</b>")
+  })
+
+  output$N_inCrop <- DT::renderDataTable({
+    tab <- DT::datatable(N_crop(),
+                         rownames = FALSE,
+                         options = list(dom = 't',
+                                        columnDefs = list(list(className = 'dt-right', targets = '_all'))),
+                         colnames = c("", colnames(N_crop())[ncol(N_crop())]))
+  })
+
+
+  output$N_graphing <- DT::renderDataTable({
+    DT::datatable(Crop_N_graphing())
+  })
+
+  output$P_N.uptake <- renderPlot({
+    N_uptake_reactive()
+  })
+
+  output$report <- downloadHandler(
+    # For PDF output, change this to "report.pdf"
+    filename = function() { # https://shiny.rstudio.com/gallery/download-knitr-reports.html
+      paste('my-report', sep = '.', switch(
+        input$format, PDF = 'pdf', HTML = 'html', Word = 'docx'
+      ))
+    },
+    content = function(file) {
+      params <- list(crop_info = crop_info_reactive(),
+                     Soil_N_supply = Soil_N_supply(),
+                     p_N_uptake = N_uptake_reactive(),
+                     p_N_supply = N_supply_depth(),
+                     tab_NCrop = N_crop())
+
+      src <- normalizePath('report.Rmd')
+      # Copy the report file to a temporary directory before processing it, in
+      # case we don't have write permissions to the current working dir (which
+      # can happen when deployed).
+      owd <- setwd(tempdir())
+      on.exit(setwd(owd))
+      file.copy(src, 'report.Rmd', overwrite = TRUE)
+
+      # Set up parameters to pass to Rmd document
+      # params <- list(n = input$slider)
+
+      # Knit the document, passing in the `params` list, and eval it in a
+      # child of the global environment (this isolates the code in the document
+      # from the code in this app).
+      out <- rmarkdown::render('report.Rmd',
+                        switch(
+                          input$format,
+                          PDF = pdf_document(), HTML = html_document(), Word = word_document()
+                        ),
+                        params = params,
+                        envir = new.env(parent = globalenv())
+                        )
+      file.rename(out, file)
+    }
+  )
+# the end of the server----
 
 })
