@@ -343,7 +343,12 @@ shinyServer(function(input, output,session) {
                       "input_componentYield",
                       label = crop.para_filtered()$Harvested.parameter,
                       choices = crop_filtered()$Harvested.value)
+
+
+
   })
+
+  # back and forward for main tabs: crop, soil and report -----
   observeEvent(
     input$JumpToSoil, {
       updateTabsetPanel(session, "app.tabs",
@@ -364,31 +369,40 @@ shinyServer(function(input, output,session) {
       updateTabsetPanel(session, "app.tabs",
                         selected = "soil.info")
     })
-  # observe({
-  #
-  #   toggleState(id = "prevBtn", condition = rv$page > 1)
-  #   toggleState(id = "nextBtn", condition = rv$page < num_pages)
-  #   hide(selector = ".page")
-  #   show(paste0("step", rv$page))
-  # })
+  # radiobuttom 0-30 cm tab back and forward switches ----
+  observeEvent(
+    input$nextLayer.1, {
+      updateTabsetPanel(session, "soil.tabset.layer.1",
+                        selected = "Panel.2")
+    })
 
-#
-#   navPage <- function(direction) {
-#     rv$page <- rv$page + direction
-#   }
-#
-#   observeEvent(input$prevBtn, navPage(-1))
-#   observeEvent(input$nextBtn, navPage(1))
+  observeEvent(
+    input$nextLayer.2, {
+      updateTabsetPanel(session, "soil.tabset.layer.1",
+                        selected = "Panel.1")
+    })
 
-  # currently disable in the UI, total FW biomass seems redundant information for farmers
-  observe({
-    updateSelectInput(session,
-                      "input_targetYield",
-                      label = crop.para_filtered()$Yield.parameter,
-                      choices = crop_filtered_1row()$Yield.value)
-
-  })
-
+  # radiobuttom 0-15 cm tab back and forward switches ----
+  observeEvent(
+    input$nextLayer.1.1, {
+      updateTabsetPanel(session, "soil.tabset.layer.1.1",
+                        selected = "Panel.1.2")
+    })
+  observeEvent(
+    input$nextLayer.1.2, {
+      updateTabsetPanel(session, "soil.tabset.layer.1.1",
+                        selected = "Panel.1.1")
+    })
+  observeEvent(
+    input$nextLayer.1.3, {
+      updateTabsetPanel(session, "soil.tabset.layer.1.1",
+                        selected = "Panel.2")
+    })
+  observeEvent(
+    input$nextLayer.1.4, {
+      updateTabsetPanel(session, "soil.tabset.layer.1.1",
+                        selected = "Panel.1.2")
+    })
 
 # Seasonal N balance PANEL -------
 

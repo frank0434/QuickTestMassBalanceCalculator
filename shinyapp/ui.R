@@ -40,90 +40,123 @@ shinyUI(fluidPage(
              ),
            tabPanel(h3("Soil info"),
                     value = "soil.info",
-
-                    # br(),
-                    #
-                    # #https://github.com/daattali/advanced-shiny/blob/master/multiple-pages/app.R
-                    # useShinyjs(),
-                    # hidden(
-                    #   lapply(seq(num_pages), function(i) {
-                    #     div(
-                    #       class = "page",
-                    #       id = paste0("step", i),
-                    #       "Step", i
-                    #     )
-                    #   })
-                    # ),
                     br(),
-                    # actionButton("prevBtn", "< Previous"),
-                    # actionButton("nextBtn", "Next >")
+                    radioButtons(inputId = "samplingDepth",
+                                 label = "The Top Layer Sampling Depth",
+                                 choices = c(layer.1.1, layer.1)),
+                    conditionalPanel(
+                      condition = "input.samplingDepth == '0-15 cm'",
+                      navbarPage(title = "Sampling Depth",
+                                 id = "soil.tabset.layer.1.1",
+                                 tabPanel("0 - 15 cm",
+                                          value = "Panel.1.1", # the value is link back to the server
+                                          column(width = 12,
+                                                 selectizeInput(inputId = "Texture.1.1", label = "Soil Texture", choices = soil.texture,
+                                                                options = list(
+                                                                  placeholder = 'Please select an option below',
+                                                                  onInitialize = I('function() { this.setValue(""); }')))),
+                                          column(width = 12,
+                                                 selectizeInput(inputId = "Moisture.1.1", label = "Soil Moisture", choices = soil.moisture,
+                                                                options = list(
+                                                                  placeholder = 'Please select an option below',
+                                                                  onInitialize = I('function() { this.setValue(""); }')))),
+                                          column(width = 12,
+                                                 numericInput(inputId = "Qtest1.1", label = "Quick test Nitrate result (mg/L)", min = 0, value = 0)),
+                                          column(width = 12,
+                                                 numericInput(inputId = "AMN1.1", label = "AMN kg/ha @ 0 - 15 cm (if applicable)", min = 0, value = 0)),
+                                          column(12,
+                                                 actionButton("nextLayer.1.1", "Next Layer >"))
+                                          ),
+                                 tabPanel("15 - 30 cm",
+                                          value = "Panel.1.2",
+                                          column(width = 12,
+                                                 selectizeInput(inputId = "Texture.1.2", label = "Soil Texture", choices = soil.texture,
+                                                                options = list(
+                                                                  placeholder = 'Please select an option below',
+                                                                  onInitialize = I('function() { this.setValue(""); }')))),
+                                          column(width = 12,
+                                                 selectizeInput(inputId = "Moisture.1.2", label = "Soil Moisture", choices = soil.moisture,
+                                                                options = list(
+                                                                  placeholder = 'Please select an option below',
+                                                                  onInitialize = I('function() { this.setValue(""); }')))),
+                                          column(width = 12,
+                                                 numericInput(inputId = "Qtest1.2", label = "Quick test Nitrate result (mg/L)", min = 0, value = 0)),
+                                          column(12,
+                                                 actionButton("nextLayer.1.2", "< Previous Layer"),
+                                                 actionButton("nextLayer.1.3", "Next Layer >"))
+                                          ),
+                                 tabPanel("30 - 60 cm",value = "Panel.2",
+                                          column(width = 12,
+                                                 selectizeInput(inputId = "Texture.2", label = "Soil Texture", choices = soil.texture,
+                                                                options = list(
+                                                                  placeholder = 'Please select an option below',
+                                                                  onInitialize = I('function() { this.setValue(""); }')))),
+                                          column(width = 12,
+                                                 selectizeInput(inputId = "Moisture.2", label = "Soil Moisture", choices = soil.moisture,
+                                                                options = list(
+                                                                  placeholder = 'Please select an option below',
+                                                                  onInitialize = I('function() { this.setValue(""); }')))),
+                                          column(width = 12,
+                                                 numericInput(inputId = "Qtest2", label = "Quick test Nitrate result (mg/L)", min = 0, value = 0)),
+                                          column(12,
+                                                 actionButton("nextLayer.1.4", "< Previous Layer"))
+                                 )
+                      )
+                    ),
+                    conditionalPanel(
+                      condition = "input.samplingDepth == '0-30 cm'",
+                      navbarPage(title = "Sampling Depth",
+                                 id = "soil.tabset.layer.1",
+                                 tabPanel("0 - 30 cm",value = "Panel.1",
+                                          column(width = 12,
+                                                 selectizeInput(inputId = "Texture.1", label = "Soil Texture", choices = soil.texture,
+                                                                options = list(
+                                                                  placeholder = 'Please select an option below',
+                                                                  onInitialize = I('function() { this.setValue(""); }')))),
+                                          column(width = 12,
+                                                 selectizeInput(inputId = "Moisture.1", label = "Soil Moisture", choices = soil.moisture,
+                                                                options = list(
+                                                                  placeholder = 'Please select an option below',
+                                                                  onInitialize = I('function() { this.setValue(""); }')))),
+                                          column(width = 12,
+                                                 numericInput(inputId = "Qtest1", label = "Quick test Nitrate result (mg/L)",min = 0, value = 0)),
+                                          column(width = 12,
+                                                 numericInput(inputId = "AMN1", label = "AMN kg/ha @ 0 - 15 cm (if applicable)", min = 0, value = 0)),
+                                          column(12,
+                                                 actionButton("nextLayer.1", "Next Layer >"))
+                                          ),
+                                 tabPanel("30 - 60 cm",value = "Panel.2",
+                                          column(width = 12,
+                                                 selectizeInput(inputId = "Texture.2", label = "Soil Texture", choices = soil.texture,
+                                                                options = list(
+                                                                  placeholder = 'Please select an option below',
+                                                                  onInitialize = I('function() { this.setValue(""); }')))),
+                                          column(width = 12,
+                                                 selectizeInput(inputId = "Moisture.2", label = "Soil Moisture", choices = soil.moisture,
+                                                                options = list(
+                                                                  placeholder = 'Please select an option below',
+                                                                  onInitialize = I('function() { this.setValue(""); }')))),
+                                          column(width = 12,
+                                                 numericInput(inputId = "Qtest2", label = "Quick test Nitrate result (mg/L)", min = 0, value = 0)),
+                                          column(12,
+                                                 actionButton("nextLayer.2", "< Previous Layer"))
+                                          )
+                                 )
+                      ), # the end of 0-30 conditional page
 
-
+                    br(),
+                    br(),
+                    br(),
 
                     # # Sidebar layout with input and output definitions ----
                     # navlistPanel(id = "depth.tabs",
                     #              widths = c(3,9),
-                    #   tabPanel("0 - 15 cm",
-                    #            column(width = 12,
-                    #                   selectizeInput(inputId = "Texture.1.1", label = "Soil Texture", choices = soil.texture,
-                    #                                  options = list(
-                    #                                    placeholder = 'Please select an option below',
-                    #                                    onInitialize = I('function() { this.setValue(""); }')))),
-                    #            column(width = 12,
-                    #                   selectizeInput(inputId = "Moisture.1.1", label = "Soil Moisture", choices = soil.moisture,
-                    #                                  options = list(
-                    #                                    placeholder = 'Please select an option below',
-                    #                                    onInitialize = I('function() { this.setValue(""); }')))),
-                    #            column(width = 12,
-                    #                   numericInput(inputId = "Qtest1.1", label = "Quick test Nitrate result (mg/L)", min = 0, value = 0)),
-                    #            column(width = 12,
-                    #                   numericInput(inputId = "AMN1.1", label = "AMN kg/ha @ 0 - 15 cm (if applicable)", min = 0, value = 0))
+                    #   tabPanel(
                     #            ),
-                    #   tabPanel("15 - 30 cm",
-                    #            column(width = 12,
-                    #                   selectizeInput(inputId = "Texture.1.2", label = "Soil Texture", choices = soil.texture,
-                    #                                  options = list(
-                    #                                    placeholder = 'Please select an option below',
-                    #                                    onInitialize = I('function() { this.setValue(""); }')))),
-                    #            column(width = 12,
-                    #                   selectizeInput(inputId = "Moisture.1.2", label = "Soil Moisture", choices = soil.moisture,
-                    #                                  options = list(
-                    #                                    placeholder = 'Please select an option below',
-                    #                                    onInitialize = I('function() { this.setValue(""); }')))),
-                    #            column(width = 12,
-                    #                   numericInput(inputId = "Qtest1.2", label = "Quick test Nitrate result (mg/L)", min = 0, value = 0))
+                    #   tabPanel(
                     #   ),
-                    #   tabPanel("0 - 30 cm",
-                    #            column(width = 12,
-                    #                   selectizeInput(inputId = "Texture.1", label = "Soil Texture", choices = soil.texture,
-                    #                                  options = list(
-                    #                                    placeholder = 'Please select an option below',
-                    #                                    onInitialize = I('function() { this.setValue(""); }')))),
-                    #            column(width = 12,
-                    #                   selectizeInput(inputId = "Moisture.1", label = "Soil Moisture", choices = soil.moisture,
-                    #                                  options = list(
-                    #                                    placeholder = 'Please select an option below',
-                    #                                    onInitialize = I('function() { this.setValue(""); }')))),
-                    #            column(width = 12,
-                    #                   numericInput(inputId = "Qtest1", label = "Quick test Nitrate result (mg/L)",min = 0, value = 0)),
-                    #            column(width = 12,
-                    #                   numericInput(inputId = "AMN1", label = "AMN kg/ha @ 0 - 15 cm (if applicable)", min = 0, value = 0))
-                    #   ),
-                    #   tabPanel("30 - 60 cm",
-                    #            column(width = 12,
-                    #                   selectizeInput(inputId = "Texture.2", label = "Soil Texture", choices = soil.texture,
-                    #                                  options = list(
-                    #                                    placeholder = 'Please select an option below',
-                    #                                    onInitialize = I('function() { this.setValue(""); }')))),
-                    #            column(width = 12,
-                    #                   selectizeInput(inputId = "Moisture.2", label = "Soil Moisture", choices = soil.moisture,
-                    #                                  options = list(
-                    #                                    placeholder = 'Please select an option below',
-                    #                                    onInitialize = I('function() { this.setValue(""); }')))),
-                    #            column(width = 12,
-                    #                   numericInput(inputId = "Qtest2", label = "Quick test Nitrate result (mg/L)", min = 0, value = 0))
-                    #   )
-                    #   )
+
+
                     column(12,
                            actionButton("JumpToCrop", "< Back to Crop Information"),
                            actionButton("JumpToReport", "Go To Report >")
