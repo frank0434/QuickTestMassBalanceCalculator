@@ -13,6 +13,8 @@ source("functions.R")
 shinyServer(function(input, output,session) {
 
 
+  rv <- reactiveValues(page = 1)
+
 # Crop tab ----
 
   ## crop type filter from the display name
@@ -342,8 +344,41 @@ shinyServer(function(input, output,session) {
                       label = crop.para_filtered()$Harvested.parameter,
                       choices = crop_filtered()$Harvested.value)
   })
+  observeEvent(
+    input$JumpToSoil, {
+      updateTabsetPanel(session, "app.tabs",
+                        selected = "soil.info")
+  })
+  observeEvent(
+    input$JumpToCrop, {
+      updateTabsetPanel(session, "app.tabs",
+                        selected = "crop.info")
+    })
+  observeEvent(
+    input$JumpToReport, {
+      updateTabsetPanel(session, "app.tabs",
+                        selected = "report.tab")
+    })
+  observeEvent(
+    input$JumpToSoil2, {
+      updateTabsetPanel(session, "app.tabs",
+                        selected = "soil.info")
+    })
+  # observe({
+  #
+  #   toggleState(id = "prevBtn", condition = rv$page > 1)
+  #   toggleState(id = "nextBtn", condition = rv$page < num_pages)
+  #   hide(selector = ".page")
+  #   show(paste0("step", rv$page))
+  # })
 
-
+#
+#   navPage <- function(direction) {
+#     rv$page <- rv$page + direction
+#   }
+#
+#   observeEvent(input$prevBtn, navPage(-1))
+#   observeEvent(input$nextBtn, navPage(1))
 
   # currently disable in the UI, total FW biomass seems redundant information for farmers
   observe({
