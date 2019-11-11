@@ -45,9 +45,7 @@ width_box <- 400
 
 layer.1 <- "0-30 cm"
 layer.1.1 <- "0-15 cm"
-layer.1.2 <- "15-30 cm"
-layer.2 <- "30-60 cm"
-layer.3 <- "60-90 cm"
+
 
 
 

@@ -17,6 +17,7 @@ shinyUI(fluidPage(
              fluidRow(
 
                br(),
+               textOutput("comparsion"),
                column(12,
                       selectInput(inputId = "input_system", label = "Farm System", choices = input_systems, width = width_box)),
                column(12,
@@ -43,7 +44,7 @@ shinyUI(fluidPage(
                     br(),
                     radioButtons(inputId = "samplingDepth",
                                  label = "The Top Layer Sampling Depth",
-                                 choices = c(layer.1.1, layer.1)),
+                                 choices = c(layer.1.1, layer.1), selected = ""),
                     conditionalPanel(
                       condition = "input.samplingDepth == '0-15 cm'",
                       navbarPage(title = "Sampling Depth",
@@ -165,46 +166,49 @@ shinyUI(fluidPage(
 
            tabPanel(h3("Report"),
                     value = "report.tab",
-             fixedRow(
-               column(7,
-                      br(),
-                      p(strong(h4("Estimated nitrogen requirement"))),
-                      DT::dataTableOutput("N_inCrop")
-                      ),
-               column(3,
-                      offset = 2,
-                      br(),
-                      br(),
-                      radioButtons('format', 'Document format', c('PDF', 'HTML', 'Word'),
-                                   inline = TRUE),
-                      downloadButton("report", "Download Report",
-                                   style = "border: 3px solid black; padding:14px; font-size:100%")
+                    conditionalPanel(
+                      condition = "is.null(input.samplingDepth)",
 
-               ),
+                      br(),
+                      h3(textOutput("warning"))
+                    ),
+                    conditionalPanel(
+                      condition = "input.samplingDetph !=''",
+                      fixedRow(
+                        column(7,
+                               br(),
+                               # p(strong(h4("Estimated nitrogen requirement"))),
+                               DT::dataTableOutput("N_inCrop")
+                               ),
+                        column(3,
+                               offset = 2,
 
-
-               column(12,
+                               br(),
+                               radioButtons('format', 'Document format', c('PDF', 'HTML', 'Word'), inline = TRUE),
+                               downloadButton("report", "Download Report",
+                                              style = "border: 3px solid black; padding:14px; font-size:100%")
+                               ),
+                        column(12,
+                               hr(),
+                               # p(strong(h4("Supported information for the nitrogen requirement"))),
+                               splitLayout(
+                                 DT::dataTableOutput("soil_filtered")
+                                 #          DT::dataTableOutput("N_inCrop")# will mask the yield selection input
+                                 )
+                               )
+                        ),
                       hr(),
-                      # br(),
-                      p(strong(h4("Supported information for the nitrogen requirement"))),
                       splitLayout(
-                        DT::dataTableOutput("soil_filtered")
-
-               #          DT::dataTableOutput("N_inCrop")# will mask the yield selection input
-               )
-               )
-               ),
-             hr(),
-             splitLayout(
-               plotOutput('P_N.uptake'),
-               plotOutput('distPlot2')
-               # DT::dataTableOutput("N_graphing")
-               ),
-             br(),
-             br(),
-             column(width = 12,
-                    actionButton("JumpToSoil2", "< Back To Soil Information")))
+                        plotOutput('P_N.uptake'),
+                        plotOutput('distPlot2')
+                        # DT::dataTableOutput("N_graphing")
+                        ),
+                      br(),
+                      br(),
+                      column(width = 12,
+                             actionButton("JumpToSoil2", "< Back To Soil Information")))
+                    ) # the end of report tab
            )# the end of the main tabset
-  ) # column control width end
+         ) # column control width end
   ) # fluidpage end
   ) # THE END

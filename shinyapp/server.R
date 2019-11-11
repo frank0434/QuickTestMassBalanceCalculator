@@ -83,61 +83,98 @@ shinyServer(function(input, output,session) {
 
   # process sampling depth ----
 
-  # soil_info_v <- reactive({
-  #   # make all the input avaiable to the entire app
-  #   v <- c(input$Texture.1,
-  #          input$Texture.1.1,
-  #          input$Texture.1.2,
-  #          input$Texture.2 ,
-  #          input$Texture.3,
-  #          input$Moisture.1,
-  #          input$Moisture.1.1,
-  #          input$Moisture.1.2,
-  #          input$Moisture.2,
-  #          input$Moisture.3)
-  #   names(v) <- v
-  # })
+  top_layer <- reactive({input$samplingDepth})
+
 
   depth.15.1 <- reactive({
-    # if texture and moisture have been selected, assign depth to 15
-    if(input$Texture.1.1 %in% soil.texture & input$Moisture.1.1 %in% soil.moisture){
+    if(top_layer() == layer.1.1){
+          as.integer(15)
+    }
+  })
+
+  depth.15.2 <- reactive({
+    if(top_layer() == layer.1.1){
       as.integer(15)
-    } else if (input$Texture.1 %in% soil.moisture){
-      cat("Sampling depth crashed. Can't have both 0-15 and 0-30 for one session.\r\nPlease check 0-30.\r\n")
-    } else {
-      print("Please make sure both texture and moisture have been selected.")
     }
   })
 
 
-  depth.15.2 <- reactive({
-    # if texture and moisture have been selected, assign depth to 15
-    if(input$Texture.1.2 %in% soil.texture & input$Moisture.1.2  %in% soil.moisture){
-      as.integer(15)
-    } else if (input$Moisture.1 %in% soil.moisture){
-      cat("Sampling depth crashed. Can't have both 15-30 and 0-30 for one session.\r\nPlease check 0-30.\r\n")
-    } else {
-      print("Please make sure both texture and moisture have been selected.")
+
+  depth.30.2 <- reactive({
+    if(top_layer() == layer.1.1){
+      as.integer(30)
+    } else if(top_layer == layer.1){
+      as.integer(30)
     }
   })
 
   depth.30.1 <- reactive({
-    # if texture and moisture have been selected, assign depth to 15
-    if(input$Texture.1 %in% soil.texture & input$Moisture.1 %in% soil.moisture){
+    if(top_layer() == layer.1){
       as.integer(30)
-    } else if (input$Moisture.1.1 %in% soil.moisture | soil_info_v()["Moisture.1.2"] %in% soil.moisture){
-      cat("Sampling depth crashed. Can't have both 0-15/15-30 and 0-30 for one session.\r\nPlease check 0-15/15-30.\r\n")
-    } else {
-      print("Please make sure both texture and moisture have been selected.")
     }
   })
 
-  depth.30.2 <- reactive({
-    # if texture and moisture have been selected, assign depth to 15
-    if(input$Texture.2 %in% soil.texture & input$Moisture.2 %in% soil.moisture){
-      as.integer(30)
-    } else {
-      print("Please make sure both texture and moisture have been selected.")
+  # quick test results ----
+  Qtest.15.1 <- reactive({
+    if(top_layer() == "0-15 cm"){
+      val0_15 <- as.integer(input$Qtest1.1)
+      if(val0_15 < 0){
+        # feature to be added ~ if user type in negative values shold give a warning!!!
+        val0_15 = 0
+        } else if (is.na(val0_15)){
+          val0_15 = 0
+          } else{
+            val0_15
+          }
+      }
+    })
+
+  Qtest.15.2 <- reactive({
+    if(top_layer() == "0-15 cm"){
+        val15_30 <- as.integer(input$Qtest1.2)
+        if(val15_30 < 0){
+          # feature to be added ~ if user type in negative values shold give a warning!!!
+          print("Quick test resutls must be 0 or positive numbers.") # the print here won't be seen by users!!!
+        } else if (is.na(val15_30)){
+          val15_30 = 0
+        } else{
+          val15_30
+        }
+    }
+  })
+
+  Qtest.30.2 <- reactive({
+    if(top_layer() == "0-15 cm"){
+        val30_60 <- as.integer(input$Qtest2)
+
+        if(val30_60 < 0){
+          print("Quick test resutls must be 0 or positive numbers.")
+        } else if (is.na(val30_60)){
+          val30_60 = 0
+        } else{
+          val30_60
+        }
+    } else if(top_layer() == "0-30 cm"){
+      val30_60 <- as.integer(input$Qtest2)
+      if(val30_60 < 0){
+        print("Quick test resutls must be 0 or positive numbers.")
+      } else if (is.na(val30_60)){
+        val30_60 = 0
+      } else{
+        val30_60
+      }
+    }
+  })
+  Qtest.30.1 <- reactive({
+    if(top_layer() == layer.1){
+    val0_30 <- as.integer(input$Qtest1)
+    if(val0_30 < 0){
+      print("Quick test resutls must be 0 or positive numbers.")
+      } else if (is.na(val0_30)){
+        val0_30 = 0
+        } else{
+          val0_30
+        }
     }
   })
 
@@ -145,68 +182,6 @@ shinyServer(function(input, output,session) {
   # depth.30.3
   # Texture.3
   # Moisture.3
-
-  # quick test results ----
-
-  Qtest.15.1 <- reactive({
-    # if Qtest1.1 has input, check type and if crash with 0-30
-    val0_15 <- as.integer(input$Qtest1.1)
-    val0_30 <- as.integer(input$Qtest1)
-    if(val0_15 < 0){
-      print("Quick test resutls must be 0 or positive numbers.")
-      val0_15 = 0
-    } else if (is.na(val0_15)){
-      val0_15 = 0
-    } else if(val0_30 > 0 ){
-      print("Quick test resutls can't have both 0-15 and 0-30 presnet in one session")
-      print("Please check if values have been filled in 0-30 accidently.")
-    } else{
-      val0_15
-    }
-  })
-  Qtest.15.2 <-  reactive({
-    # if Qtest1.1 has input, check type and if crash with 0-30
-    val15_30 <- as.integer(input$Qtest1.2)
-    val0_30 <- as.integer(input$Qtest1)
-    if(val15_30 < 0){
-      print("Quick test resutls must be 0 or positive numbers.")
-    } else if (is.na(val15_30)){
-      val15_30 = 0
-    } else if(val0_30 > 0 ){
-      print("Quick test resutls can't have both 0-15 and 0-30 presnet in one session")
-      print("Please check if values have been filled in 0-30 accidently.")
-    } else{
-      val15_30
-    }
-  })
-  Qtest.30.1 <- reactive({
-    # if Qtest1.1 has input, check type and if crash with 0-30
-    val0_15 <- as.integer(input$Qtest1.1)
-    val15_30 <- as.integer(input$Qtest1.2)
-    val0_30 <- as.integer(input$Qtest1)
-    if(val0_30 < 0){
-      print("Quick test resutls must be 0 or positive numbers.")
-    } else if (is.na(val0_30)){
-      val0_30 = 0
-    } else if(val0_15 > 0 |  val15_30 > 0){
-      print("Quick test resutls can have both 0-15 and 0-30 presnet in one session.")
-      print("Please check if values have been filled in 0-15/15-30 accidently.")
-    } else{
-      val0_30
-    }
-  })
-  Qtest.30.2 <- reactive({
-    # if Qtest1.1 has input, check type and if crash with 0-30
-    val30_60 <- as.integer(input$Qtest2)
-
-    if(val30_60 < 0){
-      print("Quick test resutls must be 0 or positive numbers.")
-    } else if (is.na(val30_60)){
-      val30_60 = 0
-    } else{
-      val30_60
-    }
-  })
   # Qtest.30.3 # currently disabled
 
 
@@ -491,35 +466,45 @@ shinyServer(function(input, output,session) {
 
   # 2nd graph, bar plot for different depths ----
   N_supply_depth <- reactive({
-    depths <- soil_filter() %>%
-      select(MineralN, Sampling.Depth) %>%
-      mutate(Depth = paste0(Sampling.Depth, "cm"))
+    if(is.null(top_layer())){
+      cat("User hasn't selected any soil layer.\r\n")
+    } else {
+      depths <- soil_filter() %>%
+        select(MineralN, Sampling.Depth) %>%
+        mutate(Depth = paste0(Sampling.Depth, "cm"))
 
-      total <- soil_filter() %>%
-        select(MineralN) %>%
-        dplyr::summarise(MineralN = sum(MineralN, na.rm = TRUE)) %>%
-        mutate(Depth = "Total")
-      p <- bind_rows(depths, total) %>%
-        ggplot(aes(Depth, MineralN, fill = Depth)) +
-        geom_col(width = 0.5) +
-        labs(title = "Estimated  soil mineral N supply (from nitrate QT)",
-             x = "",
-             y  = "Soil mineral N supply (kg/ha)")+
-        theme_qtmb() +
-        scale_y_continuous(expand = c(0,0), limits = c(0, max(total$MineralN) + 5 ))
+        total <- soil_filter() %>%
+          select(MineralN) %>%
+          dplyr::summarise(MineralN = sum(MineralN, na.rm = TRUE)) %>%
+          mutate(Depth = "Total")
+        p <- bind_rows(depths, total) %>%
+          ggplot(aes(Depth, MineralN, fill = Depth)) +
+          geom_col(width = 0.5) +
+          labs(title = "Estimated  soil mineral N supply (from nitrate QT)",
+               x = "",
+               y  = "Soil mineral N supply (kg/ha)")+
+          theme_qtmb() +
+          scale_y_continuous(expand = c(0,0), limits = c(0, max(total$MineralN) + 5 ))
 
-      p
+        p
+      }
     })
 
 
   # output section ----
 
   output$soil_filtered <- DT::renderDataTable({
+    # if the user select onthing in the soil tab, show nothing to the user.
+    if(is.null(top_layer())){
+      cat("Please fill the soil info tab first.\r\n")
+
+    } else {
     tab <- DT::datatable(soil_filter() %>%
                            select(Texture, Moisture, Sampling.Depth, QTest.Results = qtest_user.input, MineralN),
                          options = list(dom = 't',
                                         columnDefs = list(list(className = 'dt-right', targets = '_all'))),
                          rownames = FALSE)
+    }
   })
   output$AMN <- renderText({AMN_supply()}) # AMN supply output to UI
 
@@ -536,11 +521,16 @@ shinyServer(function(input, output,session) {
   })
 
   output$N_inCrop <- DT::renderDataTable({
+    if(is.null(top_layer())){
+      cat("Please fill the soil info tab first.\r\n")
+
+    } else {
     tab <- DT::datatable(N_crop(),
                          rownames = FALSE,
                          options = list(dom = 't',
                                         columnDefs = list(list(className = 'dt-right', targets = '_all'))),
                          colnames = c("", colnames(N_crop())[ncol(N_crop())]))
+    }
   })
 
 
@@ -549,7 +539,18 @@ shinyServer(function(input, output,session) {
   })
 
   output$P_N.uptake <- renderPlot({
+    if(is.null(top_layer())){
+      cat("Please fill the soil info tab first.\r\n")
+
+    } else {
     N_uptake_reactive()
+      }
+  })
+
+  output$warning <- renderText({
+    if(is.null(top_layer())){
+      "Please fill the soil info tab first."
+    }
   })
 
   output$report <- downloadHandler(
