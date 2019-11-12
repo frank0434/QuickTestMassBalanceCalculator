@@ -1,0 +1,58 @@
+---
+title: "Quick test mass calculator report"
+author: "PFR"
+date: "`r format(Sys.time(), ' %a %X, %d %B %Y')`"
+output: pdf_document
+params:
+  crop_info: NA
+  Soil_N_supply: NA
+  p_N_uptake: NA
+  p_N_supply: NA
+  tab_NCrop: NA
+  tab_N_require: NA 
+  tab_N_supply: NA
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
+```
+
+## Crop information
+
+
+
+```{r}
+knitr::kable(params$crop_info, caption = "Information about the crop")
+```
+
+## Nitrogen staus in soil
+
+```{r}
+knitr::kable(params$Soil_N_supply, caption = "Soil nitrogen supply.")
+```
+
+
+
+## Graph
+
+
+```{r, fig.height=12, fig.width=10, dpi=300}
+library(cowplot)
+
+plot_grid(params$p_N_uptake, params$p_N_supply, align = "v", ncol = 1)
+# +  theme(legend.position = c(0.15, 0.8))
+```
+
+## Acknowledgement 
+
+Funded by [FAR](https://www.far.org.nz/)
+
+Projected was leaded by MATTHEW NORRIS.
+
+Matt also developed the original excel tool which is free to download on the FAR website. 
+
+
+The app is a remake by Jian Liu from [Plant and Food Research](https://www.plantandfood.co.nz/)
+
+Code is avaiable on [GitHub](https://github.com/PlantandFoodResearch/QuickTestMassBalanceCalculator)
+

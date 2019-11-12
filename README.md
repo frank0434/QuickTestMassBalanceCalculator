@@ -1,6 +1,7 @@
 # Qtest_shinyApp
 
 <!-- badges: start -->
+[![Travis build status](https://travis-ci.org/frank0434/QuickTestMassBalanceCalculator.svg?branch=master)](https://travis-ci.org/frank0434/QuickTestMassBalanceCalculator)
 <!-- badges: end -->
 
 The goal of Qtest_shinyApp is to implementate shiny application to QTMB as developed in N messure it mange it SFF project
@@ -81,5 +82,9 @@ Remaining ON supply (kg/ha)
 3. UI development
 
 
+# Unit Testing
+
+`shinytest` is used for the testing. 
+[More details](https://rstudio.github.io/shinytest/articles/shinytest.html)
 
 
