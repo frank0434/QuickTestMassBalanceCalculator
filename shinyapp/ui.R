@@ -5,6 +5,9 @@ source("global.R")
 
 shinyUI(fluidPage(
   useShinyjs(),
+  shinyjs::useShinyjs(),
+  shinyjs::extendShinyjs(text = "shinyjs.refresh = function() { location.reload(); }"),
+
 
   column(width = 10,
          offset = 1,
@@ -34,8 +37,8 @@ shinyUI(fluidPage(
                       selectInput("input_componentYield", label = "Harvested component (t FW/ha)", choices =  c(""), width = width_box)
                       ),
                column(12,
-                 actionButton("JumpToSoil", "Next >")
-                 )
+                      actionButton("JumpToSoil", "Next >")
+                      )
                # column(6,
                #        selectInput("input_targetYield", label = "Target yield (t FW/ha)", choices =  c(""))
                #        ) # disable the total fresh weight value
@@ -44,9 +47,16 @@ shinyUI(fluidPage(
            tabPanel(h3("Soil info"),
                     value = "soil.info",
                     br(),
-                    radioButtons(inputId = "samplingDepth",
-                                 label = "The Top Layer Sampling Depth",
-                                 choices = c(layer.1.1, layer.1), selected = ""),
+                    fluidRow(
+                      column(width = 4,
+                             radioButtons(inputId = "samplingDepth",
+                                          label = "The Top Layer Sampling Depth",
+                                          choices = c(layer.1.1, layer.1), selected = "")),
+                      column(width = 2,
+                             br(),
+
+                             actionButton("refresh", "Start a New Session?"))
+                      ),
                     conditionalPanel(
                       condition = "input.samplingDepth == '0-15 cm'",
                       navbarPage(title = "Sampling Depth",
@@ -107,6 +117,7 @@ shinyUI(fluidPage(
                       )
                     ),
                     conditionalPanel(
+                      # conditional panel: inputId must not be the same
                       condition = "input.samplingDepth == '0-30 cm'",
                       navbarPage(title = "Sampling Depth",
                                  id = "soil.tabset.layer.1",
@@ -128,19 +139,19 @@ shinyUI(fluidPage(
                                           column(12,
                                                  actionButton("nextLayer.1", "Next Layer >"))
                                           ),
-                                 tabPanel("30 - 60 cm",value = "Panel.2",
+                                 tabPanel("30 - 60 cm",value = "Panel.2.1",
                                           column(width = 12,
-                                                 selectizeInput(inputId = "Texture.2", label = "Soil Texture", choices = soil.texture,
+                                                 selectizeInput(inputId = "Texture.2.1", label = "Soil Texture", choices = soil.texture,
                                                                 options = list(
                                                                   placeholder = 'Please select an option below',
                                                                   onInitialize = I('function() { this.setValue(""); }')))),
                                           column(width = 12,
-                                                 selectizeInput(inputId = "Moisture.2", label = "Soil Moisture", choices = soil.moisture,
+                                                 selectizeInput(inputId = "Moisture.2.1", label = "Soil Moisture", choices = soil.moisture,
                                                                 options = list(
                                                                   placeholder = 'Please select an option below',
                                                                   onInitialize = I('function() { this.setValue(""); }')))),
                                           column(width = 12,
-                                                 numericInput(inputId = "Qtest2", label = "Quick test Nitrate result (mg/L)", min = 0, value = 0)),
+                                                 numericInput(inputId = "Qtest2.1", label = "Quick test Nitrate result (mg/L)", min = 0, value = 0)),
                                           column(12,
                                                  actionButton("nextLayer.2", "< Previous Layer"))
                                           )
@@ -158,8 +169,8 @@ shinyUI(fluidPage(
                     #            ),
                     #   tabPanel(
                     #   ),
-                    column(12,
-                           actionButton("resetSoil", "Reset all")),
+                    # column(12,
+                    #        actionButton("resetSoil", "Reset all")),
                     column(12,
                            actionButton("JumpToCrop", "< Back to Crop Information"),
                            actionButton("JumpToReport", "Go To Report >")

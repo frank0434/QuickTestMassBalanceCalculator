@@ -5,8 +5,8 @@
 
 library(shiny)
 library(shinyjs)
+library(V8)
 library(ggplot2)
-library(data.table)
 library(dplyr)
 library(DBI)
 library(tidyr)

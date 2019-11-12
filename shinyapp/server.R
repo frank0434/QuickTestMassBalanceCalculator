@@ -11,10 +11,6 @@ source("functions.R")
 
 # Define server logic required to draw a histogram
 shinyServer(function(input, output,session) {
-
-
-  rv <- reactiveValues(page = 1)
-
 # Crop tab ----
 
   ## crop type filter from the display name
@@ -155,7 +151,7 @@ shinyServer(function(input, output,session) {
           val30_60
         }
     } else if(top_layer() == layer.1){
-      val30_60 <- as.integer(input$Qtest2)
+      val30_60 <- as.integer(input$Qtest2.1)
       if(val30_60 < 0){
         print("Quick test resutls must be 0 or positive numbers.")
       } else if (is.na(val30_60)){
@@ -210,22 +206,9 @@ shinyServer(function(input, output,session) {
                Sampling.Depth == "0-30") %>%
         mutate(qtest_user.input = Qtest.15.2(),
                Sample.length = as.integer(15),
-               Sampling.Depth = "0-15")
+               Sampling.Depth = "15-30")
       # depth 0-15 & 15-30
       df.1 <- bind_rows(df.1.1, df.1.2)
-    } else if (top_layer() == layer.1){
-      # depth 0-30
-      df.1 <- soil %>%
-        filter(Texture == input$Texture.1,
-               Moisture == input$Moisture.1,
-               Sampling.Depth == "0-30") %>%
-        mutate(qtest_user.input = Qtest.30.2(),
-               Sample.length = as.integer(30))
-    }
-
-
-    # depth 30-60
-    if(!is.null(top_layer())){
       df.2 <- soil %>%
         filter(
           Texture == input$Texture.2,
@@ -233,8 +216,22 @@ shinyServer(function(input, output,session) {
           Sampling.Depth == "30-60") %>%
         mutate(qtest_user.input = Qtest.30.2(),
                Sample.length = as.integer(30))
+    } else if (top_layer() == layer.1){
+      # depth 0-30
+      df.1 <- soil %>%
+        filter(Texture == input$Texture.1,
+               Moisture == input$Moisture.1,
+               Sampling.Depth == "0-30") %>%
+        mutate(qtest_user.input = Qtest.30.1(),
+               Sample.length = as.integer(30))
+      df.2 <- soil %>%
+        filter(
+          Texture == input$Texture.2.1,
+          Moisture == input$Moisture.2.1,
+          Sampling.Depth == "30-60") %>%
+        mutate(qtest_user.input = Qtest.30.2(),
+               Sample.length = as.integer(30))
     }
-
 
     #depth 60-90 disabled.
     # df.3 <- cf_filter(soil, input$Texture.3, input$Moisture.3, 60, zz = input$depth.3, a = input$Qtest3)
@@ -380,8 +377,8 @@ shinyServer(function(input, output,session) {
       updateTabsetPanel(session, "soil.tabset.layer.1.1",
                         selected = "Panel.1.2")
     })
-  observeEvent(input$resetSoil,{
-    shinyjs::reset("app.tabs")
+  observeEvent(input$refresh, {
+    shinyjs::js$refresh()
   })
 
 # Seasonal N balance PANEL -------
