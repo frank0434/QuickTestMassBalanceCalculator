@@ -4,6 +4,8 @@
 source("global.R")
 
 shinyUI(fluidPage(
+  useShinyjs(),
+
   column(width = 10,
          offset = 1,
          headerPanel('Quick Test Mass Calculator'),
@@ -156,8 +158,8 @@ shinyUI(fluidPage(
                     #            ),
                     #   tabPanel(
                     #   ),
-
-
+                    column(12,
+                           actionButton("resetSoil", "Reset all")),
                     column(12,
                            actionButton("JumpToCrop", "< Back to Crop Information"),
                            actionButton("JumpToReport", "Go To Report >")

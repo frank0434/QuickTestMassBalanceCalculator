@@ -116,7 +116,7 @@ shinyServer(function(input, output,session) {
 
   # quick test results ----
   Qtest.15.1 <- reactive({
-    if(top_layer() == "0-15 cm"){
+    if(top_layer() == layer.1.1){
       val0_15 <- as.integer(input$Qtest1.1)
       if(val0_15 < 0){
         # feature to be added ~ if user type in negative values shold give a warning!!!
@@ -130,7 +130,7 @@ shinyServer(function(input, output,session) {
     })
 
   Qtest.15.2 <- reactive({
-    if(top_layer() == "0-15 cm"){
+    if(top_layer() == layer.1.1){
         val15_30 <- as.integer(input$Qtest1.2)
         if(val15_30 < 0){
           # feature to be added ~ if user type in negative values shold give a warning!!!
@@ -144,7 +144,7 @@ shinyServer(function(input, output,session) {
   })
 
   Qtest.30.2 <- reactive({
-    if(top_layer() == "0-15 cm"){
+    if(top_layer() == layer.1.1){
         val30_60 <- as.integer(input$Qtest2)
 
         if(val30_60 < 0){
@@ -154,7 +154,7 @@ shinyServer(function(input, output,session) {
         } else{
           val30_60
         }
-    } else if(top_layer() == "0-30 cm"){
+    } else if(top_layer() == layer.1){
       val30_60 <- as.integer(input$Qtest2)
       if(val30_60 < 0){
         print("Quick test resutls must be 0 or positive numbers.")
@@ -196,22 +196,24 @@ shinyServer(function(input, output,session) {
   soil_filter <- reactive({
 
 
-    if(Qtest.15.1() >= 0 & Qtest.15.2() >= 0){
+    if(top_layer() == layer.1.1){
       df.1.1 <- soil %>%
         filter(Texture == input$Texture.1.1,
                Moisture == input$Moisture.1.1,
                Sampling.Depth == "0-30") %>%
         mutate(qtest_user.input = Qtest.15.1(),
-               Sample.length = as.integer(15))
+               Sample.length = as.integer(15),
+               Sampling.Depth = "0-15")
       df.1.2 <- soil %>%
         filter(Texture == input$Texture.1.2,
                Moisture == input$Moisture.1.2,
                Sampling.Depth == "0-30") %>%
         mutate(qtest_user.input = Qtest.15.2(),
-               Sample.length = as.integer(15))
+               Sample.length = as.integer(15),
+               Sampling.Depth = "0-15")
       # depth 0-15 & 15-30
       df.1 <- bind_rows(df.1.1, df.1.2)
-    } else if (Qtest.30.1() >= 0){
+    } else if (top_layer() == layer.1){
       # depth 0-30
       df.1 <- soil %>%
         filter(Texture == input$Texture.1,
@@ -223,7 +225,7 @@ shinyServer(function(input, output,session) {
 
 
     # depth 30-60
-    if(Qtest.30.2() >= 0 & Qtest.30.2() >= 0){
+    if(!is.null(top_layer())){
       df.2 <- soil %>%
         filter(
           Texture == input$Texture.2,
@@ -378,6 +380,9 @@ shinyServer(function(input, output,session) {
       updateTabsetPanel(session, "soil.tabset.layer.1.1",
                         selected = "Panel.1.2")
     })
+  observeEvent(input$resetSoil,{
+    shinyjs::reset("app.tabs")
+  })
 
 # Seasonal N balance PANEL -------
 
