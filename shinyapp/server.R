@@ -479,6 +479,7 @@ shinyServer(function(input, output,session) {
 
   # 2nd graph, bar plot for different depths ----
   N_supply_depth <- reactive({
+    # maybe we can cut this plot down to make the app mobile friendly !!!
 
     validate(
       need(!is.null(top_layer()), warning_report.tab)

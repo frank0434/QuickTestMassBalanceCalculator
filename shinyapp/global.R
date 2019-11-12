@@ -48,4 +48,16 @@ layer.1.1 <- "0-15 cm"
 warning_report.tab  <- as.character("Please fill in the soil tab first.")
 
 
+btn_style <- ".btn {
+              display:block;
+              color: black;
+              border: 2px solid grey;
+              background-color:rgb(0, 158, 115);
+              height: 40px;
+              width: 240px;
+              font-size: 15px;
+              font-weight:bold;
+              } "
 
+
+# style = "border: 3px solid black; padding:14px; font-size:100%"

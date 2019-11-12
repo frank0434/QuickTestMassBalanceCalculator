@@ -22,7 +22,8 @@ shinyUI(fluidPage(
              fluidRow(
 
                br(),
-               textOutput("comparsion"),
+               tags$head(
+                 tags$style(HTML(btn_style))),
                column(12,
                       selectInput(inputId = "input_system", label = "Farm System", choices = input_systems, width = width_box)),
                column(12,
@@ -52,7 +53,7 @@ shinyUI(fluidPage(
                              radioButtons(inputId = "samplingDepth",
                                           label = "The Top Layer Sampling Depth",
                                           choices = c(layer.1.1, layer.1), selected = "")),
-                      column(width = 2,
+                      column(width = 4,
                              br(),
 
                              actionButton("refresh", "Start a New Session?"))
@@ -197,8 +198,7 @@ shinyUI(fluidPage(
 
                                br(),
                                radioButtons('format', 'Document format', c('PDF', 'HTML', 'Word'), inline = TRUE),
-                               downloadButton("report", "Download Report",
-                                              style = "border: 3px solid black; padding:14px; font-size:100%")
+                               downloadButton("report", "Download Report")
                                ),
                         column(12,
                                hr(),
