@@ -400,7 +400,7 @@ shinyServer(function(input, output,session) {
   # crop n requirement unitl next sampling date, a value -----
   crop.N.req.until.next.SD <- reactive({
     if(input$Sampling.Date >= input$input_nextsamplingDate){
-      val <- "NA. sampling date must be greater than the next sampling date."
+      val <- "NA. Sampling date must be smaller than the next sampling date."
     } else {
       N_require <- crop_filtered_1row() %>%
         mutate(N_require = round(Seasonal.N.uptake - (C + A)/(1 + exp(-B*(DAP_nextSD() - M))), digits = 0)) %>%
@@ -414,12 +414,15 @@ shinyServer(function(input, output,session) {
       net <- Soil_N_supply() - crop.N.req.until.next.SD()
       net <- ifelse(net.to.next.SD() > 0, "No extra N needed to next sampling/side dressing date", as.numeric(-net))
     } else {
-      val <- "NA. sampling date must be greater than the next sampling date."
+      val <- "NA. Sampling date must be smaller than the next sampling date."
     }
   })
 
   # Crop N requirement table ----
   N_crop <- reactive({
+    validate(
+      need(input$input_nextsamplingDate > input$Sampling.Date, "Sampling date must be smaller than the next sampling date.")
+    )
 
     x <- ifelse(is.numeric(crop.N.req.until.next.SD()), crop.N.req.until.next.SD(), net.to.next.SD())
     tab <- tibble(`Seasonal N Balance`= c("Estimated total N uptake",
@@ -476,9 +479,13 @@ shinyServer(function(input, output,session) {
 
   # 2nd graph, bar plot for different depths ----
   N_supply_depth <- reactive({
-    if(is.null(top_layer())){
-      cat("User hasn't selected any soil layer.\r\n")
-    } else {
+
+    validate(
+      need(!is.null(top_layer()), warning_report.tab)
+    )
+    validate(
+      need(input$input_nextsamplingDate > input$Sampling.Date, "Sampling date must be smaller than the next sampling date.")
+    )
       depths <- soil_filter() %>%
         select(MineralN, Sampling.Depth) %>%
         mutate(Depth = paste0(Sampling.Depth, "cm"))
@@ -497,7 +504,7 @@ shinyServer(function(input, output,session) {
           scale_y_continuous(expand = c(0,0), limits = c(0, max(total$MineralN) + 5 ))
 
         p
-      }
+
     })
 
 
@@ -505,10 +512,12 @@ shinyServer(function(input, output,session) {
 
   output$soil_filtered <- DT::renderDataTable({
     # if the user select onthing in the soil tab, show nothing to the user.
-    if(is.null(top_layer())){
-      cat("Please fill the soil info tab first.\r\n")
-
-    } else if(!is.null(soil_filter())){
+    validate(
+      need(!is.null(top_layer()), warning_report.tab)
+    )
+    validate(
+      need(nrow(soil_filter()) > 0, "Please provide quick test results.")
+    )
       no.ofRows <- nrow(soil_filter())-1
       times <- ifelse(no.ofRows < 0 ,0 , no.ofRows)
     tab <- DT::datatable(soil_filter() %>%
@@ -527,7 +536,7 @@ shinyServer(function(input, output,session) {
                          options = list(dom = 't',
                                         columnDefs = list(list(className = 'dt-left', targets = '_all'))),
                          rownames = FALSE)
-    }
+
   })
   output$AMN <- renderText({AMN_supply()}) # AMN supply output to UI
 
@@ -562,16 +571,11 @@ shinyServer(function(input, output,session) {
 
   output$P_N.uptake <- renderPlot({
     validate(
-      need(!is.null(top_layer()), warning_report.tab)
+      need(!is.null(top_layer()), warning_report.tab),
+      need(crop_period() > DAP_nextSD() & crop_period() > DAP_SD(), "The sampling date must be within the crop growing period.")
     )
         N_uptake_reactive()
 
-  })
-
-  output$warning <- renderText({
-    if(is.null(top_layer())){
-      "Please fill the soil info tab first."
-    }
   })
 
   output$report <- downloadHandler(
