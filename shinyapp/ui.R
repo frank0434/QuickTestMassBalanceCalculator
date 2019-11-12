@@ -179,21 +179,20 @@ shinyUI(fluidPage(
 
            tabPanel(h3("Report"),
                     value = "report.tab",
-                    conditionalPanel(
-                      condition = "is.null(input.samplingDepth)",
+                    tags$head(
+                    tags$style(HTML("
+                    .shiny-output-error-validation {
+                    color: black;
+                    font-size: 20px;
+                    font-weight:bold;
+                    } "))),
 
-                      br(),
-                      h3(textOutput("warning"))
-                    ),
-                    conditionalPanel(
-                      condition = "input.samplingDetph !=''",
-                      fixedRow(
-                        column(7,
-                               br(),
-                               # p(strong(h4("Estimated nitrogen requirement"))),
-                               DT::dataTableOutput("N_inCrop")
-                               ),
-                        column(3,
+                      column(7,
+                             br(),
+                             # p(strong(h4("Estimated nitrogen requirement"))),
+                             DT::dataTableOutput("N_inCrop")
+                             ),
+                      column(3,
                                offset = 2,
 
                                br(),
@@ -207,9 +206,7 @@ shinyUI(fluidPage(
                                splitLayout(
                                  DT::dataTableOutput("soil_filtered")
                                  #          DT::dataTableOutput("N_inCrop")# will mask the yield selection input
-                                 )
-                               )
-                        ),
+                                 ),
                       hr(),
                       splitLayout(
                         plotOutput('P_N.uptake'),

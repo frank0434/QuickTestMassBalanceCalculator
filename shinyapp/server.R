@@ -75,6 +75,7 @@ shinyServer(function(input, output,session) {
   })
 
 
+
 # Soil tab ----
 
   # process sampling depth ----
@@ -347,7 +348,7 @@ shinyServer(function(input, output,session) {
   observeEvent(
     input$nextLayer.1, {
       updateTabsetPanel(session, "soil.tabset.layer.1",
-                        selected = "Panel.2")
+                        selected = "Panel.2.1")
     })
 
   observeEvent(
@@ -399,7 +400,7 @@ shinyServer(function(input, output,session) {
   # crop n requirement unitl next sampling date, a value -----
   crop.N.req.until.next.SD <- reactive({
     if(input$Sampling.Date >= input$input_nextsamplingDate){
-      val <- "NA.sampling date is greater than the next sampling date."
+      val <- "NA. sampling date must be greater than the next sampling date."
     } else {
       N_require <- crop_filtered_1row() %>%
         mutate(N_require = round(Seasonal.N.uptake - (C + A)/(1 + exp(-B*(DAP_nextSD() - M))), digits = 0)) %>%
@@ -410,20 +411,27 @@ shinyServer(function(input, output,session) {
 
   net.to.next.SD <- reactive({
     if(input$input_nextsamplingDate > input$Sampling.Date){
-      Soil_N_supply() - crop.N.req.until.next.SD()
+      net <- Soil_N_supply() - crop.N.req.until.next.SD()
+      net <- ifelse(net.to.next.SD() > 0, "No extra N needed to next sampling/side dressing date", as.numeric(-net))
+    } else {
+      val <- "NA. sampling date must be greater than the next sampling date."
     }
   })
 
   # Crop N requirement table ----
   N_crop <- reactive({
-    tab <- tibble(`Seasonal N Balance`= c("Crop N requirement until next sampling/side dressing date",
-                                          "Remaining crop N requirement",
-                                          "Estimated total N uptake",
-                                          "Soil Plant Avilable N to Plants"),
-                  `kg N/ha` = c(crop.N.req.until.next.SD(),
-                                remaining.crop.N.requirement()$N_remain,
-                                Seasonal.N.uptake(),
-                                Soil_N_supply()))
+
+    x <- ifelse(is.numeric(crop.N.req.until.next.SD()), crop.N.req.until.next.SD(), net.to.next.SD())
+    tab <- tibble(`Seasonal N Balance`= c("Estimated total N uptake",
+                                          "Estimated Soil Avilable N to Plants",
+                                          "Suggestions on N application till next sampling/side dressing date"
+                                          # "Remaining crop N requirement",
+                                          ),
+                  `kg N/ha` = c(Seasonal.N.uptake(),
+                                Soil_N_supply(),
+                                x
+                                # remaining.crop.N.requirement()$N_remain,
+                                ))
 
   })
 
@@ -500,11 +508,24 @@ shinyServer(function(input, output,session) {
     if(is.null(top_layer())){
       cat("Please fill the soil info tab first.\r\n")
 
-    } else {
+    } else if(!is.null(soil_filter())){
+      no.ofRows <- nrow(soil_filter())-1
+      times <- ifelse(no.ofRows < 0 ,0 , no.ofRows)
     tab <- DT::datatable(soil_filter() %>%
-                           select(Texture, Moisture, Sampling.Depth, QTest.Results = qtest_user.input, MineralN),
+                           select(Texture, Moisture, Sampling.Depth, QTest.Results = qtest_user.input, MineralN) %>%
+                           mutate(AMN = c(AMN_supply(), rep(0, times)),
+                                  SubTotal = as.numeric(AMN) + MineralN) %>%
+                           add_row(.,
+                                   Texture = "",
+                                   Moisture = "",
+                                   Sampling.Depth = "",
+                                   QTest.Results = "",
+                                   MineralN = "",
+                                   AMN = "",
+                                   SubTotal = paste0("Total N: ",sum(.$SubTotal))
+                                   ),
                          options = list(dom = 't',
-                                        columnDefs = list(list(className = 'dt-right', targets = '_all'))),
+                                        columnDefs = list(list(className = 'dt-left', targets = '_all'))),
                          rownames = FALSE)
     }
   })
@@ -523,16 +544,15 @@ shinyServer(function(input, output,session) {
   })
 
   output$N_inCrop <- DT::renderDataTable({
-    if(is.null(top_layer())){
-      cat("Please fill the soil info tab first.\r\n")
-
-    } else {
+    validate(
+      need(!is.null(top_layer()), warning_report.tab)
+    )
     tab <- DT::datatable(N_crop(),
                          rownames = FALSE,
                          options = list(dom = 't',
-                                        columnDefs = list(list(className = 'dt-right', targets = '_all'))),
+                                        columnDefs = list(list(className = 'dt-left', targets = '_all'))),
                          colnames = c("", colnames(N_crop())[ncol(N_crop())]))
-    }
+
   })
 
 
@@ -541,12 +561,11 @@ shinyServer(function(input, output,session) {
   })
 
   output$P_N.uptake <- renderPlot({
-    if(is.null(top_layer())){
-      cat("Please fill the soil info tab first.\r\n")
+    validate(
+      need(!is.null(top_layer()), warning_report.tab)
+    )
+        N_uptake_reactive()
 
-    } else {
-    N_uptake_reactive()
-      }
   })
 
   output$warning <- renderText({

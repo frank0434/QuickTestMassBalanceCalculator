@@ -45,7 +45,7 @@ width_box <- 400
 
 layer.1 <- "0-30 cm"
 layer.1.1 <- "0-15 cm"
-
+warning_report.tab  <- as.character("Please fill in the soil tab first.")
 
 
 
