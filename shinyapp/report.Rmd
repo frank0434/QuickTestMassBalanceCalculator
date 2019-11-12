@@ -47,7 +47,8 @@ plot_grid(params$p_N_uptake, params$p_N_supply, align = "v", ncol = 1)
 
 Funded by [FAR](https://www.far.org.nz/)
 
-Projected was leaded by MATTHEW NORRIS
+Projected was leaded by MATTHEW NORRIS.
+
 Matt also developed the original excel tool which is free to download on the FAR website. 
 
 
