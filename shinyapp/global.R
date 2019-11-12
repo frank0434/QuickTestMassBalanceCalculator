@@ -17,23 +17,31 @@ library(knitr)
 # selectInput -------------------------------------------------------------
 
 ## System
+
+#connect to the sqlite file
 conn <- dbConnect(RSQLite::SQLite(), "qtmb_data.sqlite3")
 
+#read the amn tab in for the system information
 systems <- dbReadTable(conn, "tab_AMN")
 input_systems <- unique(systems$System)
-## Crop
 
+## Crop
+#read parameter tab in and unique the crop names
 crop.para <- dbReadTable(conn, "tab_crop.para")
 crops <- unique(crop.para$Crop_name_display)
 
+#read the yield tab in
 crop.yield <- dbReadTable(conn, "tab_crop")
 
+#read the soil tab in and trim the conversion factor to 2 decimal
 soil <- dbReadTable(conn, "tab_soil")%>%
   mutate(CF = round(CF, digits = 2))
+
+#unique the texture and moisture for user selection
 soil.texture <- unique(soil$Texture)
 soil.moisture <- unique(soil$Moisture)
 
-amn <- dbReadTable(conn, "tab_AMN")
+#disconnect the file
 dbDisconnect(conn)
 
 
@@ -42,12 +50,13 @@ dbDisconnect(conn)
 width_box <- 400
 
 # constants----
-
+#two top layer options
 layer.1 <- "0-30 cm"
 layer.1.1 <- "0-15 cm"
+#message to show in the UI
 warning_report.tab  <- as.character("Please fill in the soil tab first.")
-
-
+warning_soil.tab <- as.character("Quick test result must be 0 or positive number.\r\nPlease go back to the soil tab and check.")
+# action button style text ----
 btn_style <- ".btn {
               display:block;
               color: black;

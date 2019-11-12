@@ -7,6 +7,14 @@
 #    http://shiny.rstudio.com/
 #
 
+# Note:
+# 1. use reactive to make inputs avaiable to the whole app
+# 2. reactive objects have to be sourced with empty brackets behind
+# 3. be careful with `observer` sessions since some of them can cancel each other
+#    and leave no options in the UI
+# 4. `validate` with `need` call provide the neat way to pass feedback message to the UI
+# 5. `trycatch` only report messages in the log not in the front end
+
 source("functions.R")
 
 # Define server logic required to draw a histogram
@@ -42,7 +50,7 @@ shinyServer(function(input, output,session) {
       filter(Crop == input_crop(), Harvested.value == input$input_componentYield)
     df
   })
-
+  ## make a data frame to feed into the downloadable report
   crop_info_reactive <- reactive({
     tab <- tibble(" " = c("Crop Selected",
                           "Farm System",
@@ -53,10 +61,13 @@ shinyServer(function(input, output,session) {
                   "  " = c(input$input_crop,
                            input$input_system,
                            input$input_componentYield,
-                           as.character(input$input_PlantingDate),
-                           as.character(input$Sampling.Date),
-                           as.character(input$input_nextsamplingDate)))
+                           format(as.Date(input$input_PlantingDate, format = "%F"), "%d %B %Y"),
+                           format(as.Date(input$Sampling.Date, format = "%F"), "%d %B %Y"),
+                           format(as.Date(input$input_nextsamplingDate, format = "%F"), "%d %B %Y")))
   })
+
+  ## the crop life time - it is calcuated from the consumption of estimated whole season N uptake
+  ## the number of growing days depends on the crop
   crop_period <- reactive({
     max(Crop_N_graphing()$DAP_annual)
   })
@@ -77,15 +88,14 @@ shinyServer(function(input, output,session) {
 
 
 # Soil tab ----
-
   # process sampling depth ----
-
+  #take the radiobutton inputs as the key
   top_layer <- reactive({input$samplingDepth})
 
-
+  # if the user chose 0-15 then only process and show the appropriate sampling depth
   depth.15.1 <- reactive({
     if(top_layer() == layer.1.1){
-          as.integer(15)
+          as.integer(15) # constrain the type
     }
   })
 
@@ -94,8 +104,6 @@ shinyServer(function(input, output,session) {
       as.integer(15)
     }
   })
-
-
 
   depth.30.2 <- reactive({
     if(top_layer() == layer.1.1){
@@ -113,24 +121,22 @@ shinyServer(function(input, output,session) {
 
   # quick test results ----
   Qtest.15.1 <- reactive({
-    if(top_layer() == layer.1.1){
-      val0_15 <- as.integer(input$Qtest1.1)
-      if(val0_15 < 0){
-        # feature to be added ~ if user type in negative values shold give a warning!!!
-        val0_15 = 0
-        } else if (is.na(val0_15)){
-          val0_15 = 0
-          } else{
-            val0_15
-          }
-      }
+    # if user choose one of the top layer, proceed.
+    # otherwise, pass the message to the report tab in the UI via Qtest.15.1 or other objects
+    validate(
+      need(top_layer() == layer.1.1, "Please chose the sampling method.")
+    )
+    val0_15 <- as.integer(input$Qtest1.1)
+    validate(
+      need(val0_15 >= 0, warning_soil.tab)
+    )
+    val0_15
     })
 
   Qtest.15.2 <- reactive({
     if(top_layer() == layer.1.1){
         val15_30 <- as.integer(input$Qtest1.2)
         if(val15_30 < 0){
-          # feature to be added ~ if user type in negative values shold give a warning!!!
           print("Quick test resutls must be 0 or positive numbers.") # the print here won't be seen by users!!!
         } else if (is.na(val15_30)){
           val15_30 = 0
@@ -141,6 +147,7 @@ shinyServer(function(input, output,session) {
   })
 
   Qtest.30.2 <- reactive({
+    # two conditionalPanle both have the 30-60 layer - need to provide twice
     if(top_layer() == layer.1.1){
         val30_60 <- as.integer(input$Qtest2)
 
@@ -163,32 +170,23 @@ shinyServer(function(input, output,session) {
     }
   })
   Qtest.30.1 <- reactive({
-    if(top_layer() == layer.1){
+    validate(
+      need(top_layer() == layer.1, "Please chose the sampling method.")
+    )
     val0_30 <- as.integer(input$Qtest1)
-    if(val0_30 < 0){
-      print("Quick test resutls must be 0 or positive numbers.")
-      } else if (is.na(val0_30)){
-        val0_30 = 0
-        } else{
-          val0_30
-        }
-    }
+    validate(
+      need(val0_30 >= 0, warning_soil.tab)
+    )
+    val0_30
   })
 
   ## 60-90 is diabled
-  # depth.30.3
-  # Texture.3
-  # Moisture.3
-  # Qtest.30.3 # currently disabled
-
 
   # quick test nitrate-N (mg/kg DM) calculation----
   ## Quick test nitrate-N (mg/kg DM) = Quick test nitrate (mg/L) (user input)/CF
   # Mineral N supply (kg/ha) = Quick test nitrate (mg/L) * CF2/ Ammonium_N_factor(0.95)
   # CF , CF = filter(Texture, Moisture, depth1)
-
   # BD same rules as for CF, filtering by textture and mositure and depth
-
   # CF2  = 1/(CF/(BD * (depth/10)))
   soil_filter <- reactive({
 
@@ -268,14 +266,11 @@ shinyServer(function(input, output,session) {
   # if(!is.na(test result))
   # Remaining ON supply (kg/ha) = (crop period - DAP_SD)*data supply rate
   # if(is.na(test result))
-
-  #  Remaining ON supply (kg/ha) = (crop period - DAP_SD )* Default Supply Rate (kg N/day)
-
-
+  # Remaining ON supply (kg/ha) = (crop period - DAP_SD )* Default Supply Rate (kg N/day)
   # Data supply rate (kg N/day) = test result * converison coefficient/crop period
 
   AMN_supply <- reactive({
-
+    # the raw data is from the excel file. two small to keep in a tab in the sqlite file
     AMN_default <- switch (input$input_system,
                            "Mixed cropping/arable" = as.integer(90),
                            "Intensive vegetable production" = as.integer(50),
@@ -300,48 +295,41 @@ shinyServer(function(input, output,session) {
 
   })
 
-
   # total N supply from soil - minN + AMN
   Soil_N_supply <- reactive({
     sn <- sum(soil_filter()$MineralN, na.rm = TRUE) + AMN_supply() # AMN_supply has 3 element.
     sn
   })
 
-
-
-
 # updating user selection -----
-
   observe({
     # Marketable Yield dropdown list - key component
+    # updating by crop name
     updateSelectInput(session,
                       "input_componentYield",
                       label = crop.para_filtered()$Harvested.parameter,
                       choices = crop_filtered()$Harvested.value)
-
-
-
   })
 
   # back and forward for main tabs: crop, soil and report -----
   observeEvent(
     input$JumpToSoil, {
-      updateTabsetPanel(session, "app.tabs",
+      updateTabsetPanel(session, inputId = "app.tabs",
                         selected = "soil.info")
   })
   observeEvent(
     input$JumpToCrop, {
-      updateTabsetPanel(session, "app.tabs",
+      updateTabsetPanel(session, inputId = "app.tabs",
                         selected = "crop.info")
     })
   observeEvent(
     input$JumpToReport, {
-      updateTabsetPanel(session, "app.tabs",
+      updateTabsetPanel(session, inputId = "app.tabs",
                         selected = "report.tab")
     })
   observeEvent(
     input$JumpToSoil2, {
-      updateTabsetPanel(session, "app.tabs",
+      updateTabsetPanel(session, inputId = "app.tabs",
                         selected = "soil.info")
     })
   # radiobuttom 0-30 cm tab back and forward switches ----
@@ -353,36 +341,35 @@ shinyServer(function(input, output,session) {
 
   observeEvent(
     input$nextLayer.2, {
-      updateTabsetPanel(session, "soil.tabset.layer.1",
+      updateTabsetPanel(session, inputId = "soil.tabset.layer.1",
                         selected = "Panel.1")
     })
 
   # radiobuttom 0-15 cm tab back and forward switches ----
   observeEvent(
     input$nextLayer.1.1, {
-      updateTabsetPanel(session, "soil.tabset.layer.1.1",
+      updateTabsetPanel(session, inputId = "soil.tabset.layer.1.1",
                         selected = "Panel.1.2")
     })
   observeEvent(
     input$nextLayer.1.2, {
-      updateTabsetPanel(session, "soil.tabset.layer.1.1",
+      updateTabsetPanel(session, inputId = "soil.tabset.layer.1.1",
                         selected = "Panel.1.1")
     })
   observeEvent(
     input$nextLayer.1.3, {
-      updateTabsetPanel(session, "soil.tabset.layer.1.1",
+      updateTabsetPanel(session, inputId = "soil.tabset.layer.1.1",
                         selected = "Panel.2")
     })
   observeEvent(
     input$nextLayer.1.4, {
-      updateTabsetPanel(session, "soil.tabset.layer.1.1",
+      updateTabsetPanel(session, inputId = "soil.tabset.layer.1.1",
                         selected = "Panel.1.2")
     })
+  # refresh button ----
   observeEvent(input$refresh, {
     shinyjs::js$refresh()
   })
-
-# Seasonal N balance PANEL -------
 
   # Crop alone remaining N required (critical calculation) ----
   remaining.crop.N.requirement <- reactive({
@@ -435,17 +422,31 @@ shinyServer(function(input, output,session) {
                                 x
                                 # remaining.crop.N.requirement()$N_remain,
                                 ))
-
-  })
-
-
-
-
+    })
+  # Quick test result + AMN supply table
+  table_soil_N <- reactive({
+    validate(
+      need(nrow(soil_filter()) > 0, "Please provide quick test information.")
+    )
+    no.ofRows <- nrow(soil_filter())-1
+    times <- ifelse(no.ofRows < 0 ,0 , no.ofRows)
+    table <- soil_filter() %>%
+      select(Texture, Moisture, Sampling.Depth, QTest.Results = qtest_user.input, MineralN) %>%
+      mutate(AMN = c(AMN_supply(), rep(0, times)),
+             SubTotal = as.numeric(AMN) + MineralN) %>%
+      add_row(.,
+              Texture = "",
+              Moisture = "",
+              Sampling.Depth = "",
+              QTest.Results = "",
+              MineralN = "",
+              AMN = "",
+              SubTotal = paste0("Total N: ",sum(.$SubTotal))
+      )})
+  # key intermediate data - crop growing period and N uptake to draw 1st plot ----
   Crop_N_graphing <- reactive({
-    # whole crop n uptake plot ----
-    df <- tibble(DAP_annual = seq(0, 365, by = 1),  list(crop_filtered_1row()))
 
-    # critical calculation for plot 1 ----
+    df <- tibble(DAP_annual = seq(0, 365, by = 1),  list(crop_filtered_1row()))
     df <- unnest(df) %>%
       mutate(Predicted.N.Uptake = (A+C)/(1+exp(-B*(DAP_annual - M))),
              Predicted.N.Uptake = ifelse(Predicted.N.Uptake <0, 0, Predicted.N.Uptake),
@@ -471,16 +472,11 @@ shinyServer(function(input, output,session) {
            x = "Days after planting",
            y  = "Whole crop N uptake (kg/ha)")+
       theme_qtmb()
-
-
     P
   })
-
-
   # 2nd graph, bar plot for different depths ----
   N_supply_depth <- reactive({
     # maybe we can cut this plot down to make the app mobile friendly !!!
-
     validate(
       need(!is.null(top_layer()), warning_report.tab)
     )
@@ -503,54 +499,24 @@ shinyServer(function(input, output,session) {
                y  = "Soil mineral N supply (kg/ha)")+
           theme_qtmb() +
           scale_y_continuous(expand = c(0,0), limits = c(0, max(total$MineralN) + 5 ))
-
         p
-
     })
-
-
-  # output section ----
-
+# Report tab ----
   output$soil_filtered <- DT::renderDataTable({
-    # if the user select onthing in the soil tab, show nothing to the user.
+    # if the user select nothing in the soil tab, show nothing to the user.
     validate(
       need(!is.null(top_layer()), warning_report.tab)
     )
-    validate(
-      need(nrow(soil_filter()) > 0, "Please provide quick test results.")
-    )
-      no.ofRows <- nrow(soil_filter())-1
-      times <- ifelse(no.ofRows < 0 ,0 , no.ofRows)
-    tab <- DT::datatable(soil_filter() %>%
-                           select(Texture, Moisture, Sampling.Depth, QTest.Results = qtest_user.input, MineralN) %>%
-                           mutate(AMN = c(AMN_supply(), rep(0, times)),
-                                  SubTotal = as.numeric(AMN) + MineralN) %>%
-                           add_row(.,
-                                   Texture = "",
-                                   Moisture = "",
-                                   Sampling.Depth = "",
-                                   QTest.Results = "",
-                                   MineralN = "",
-                                   AMN = "",
-                                   SubTotal = paste0("Total N: ",sum(.$SubTotal))
-                                   ),
+
+    tab <- DT::datatable(table_soil_N(),
                          options = list(dom = 't',
                                         columnDefs = list(list(className = 'dt-left', targets = '_all'))),
                          rownames = FALSE)
 
   })
-  output$AMN <- renderText({AMN_supply()}) # AMN supply output to UI
-
-  output$period <- renderText({
-    paste("<b>The Crop Period: ", crop_period(), "</b>")
-  })
 
   output$distPlot2 <- renderPlot({
     N_supply_depth()
-  })
-
-  output$DAP <- renderText({
-    paste("<b>Days after planting (t FW/ha): ", DAP_SD(), "</b>")
   })
 
   output$N_inCrop <- DT::renderDataTable({
@@ -565,11 +531,6 @@ shinyServer(function(input, output,session) {
 
   })
 
-
-  output$N_graphing <- DT::renderDataTable({
-    DT::datatable(Crop_N_graphing())
-  })
-
   output$P_N.uptake <- renderPlot({
     validate(
       need(!is.null(top_layer()), warning_report.tab),
@@ -580,15 +541,17 @@ shinyServer(function(input, output,session) {
   })
 
   output$report <- downloadHandler(
+
     # For PDF output, change this to "report.pdf"
     filename = function() { # https://shiny.rstudio.com/gallery/download-knitr-reports.html
       paste('my-report', sep = '.', switch(
         input$format, PDF = 'pdf', HTML = 'html', Word = 'docx'
       ))
     },
+
     content = function(file) {
       params <- list(crop_info = crop_info_reactive(),
-                     Soil_N_supply = Soil_N_supply(),
+                     Soil_N_supply = table_soil_N(),
                      p_N_uptake = N_uptake_reactive(),
                      p_N_supply = N_supply_depth(),
                      tab_NCrop = N_crop())

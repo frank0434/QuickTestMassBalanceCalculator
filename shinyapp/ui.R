@@ -1,13 +1,23 @@
-#
-# This is the user-interface definition of a Shiny web application. You can
-# Define UI for application that draws a histogram
+# draw a UI plan first on the paper first.
+# Note:
+# 1. all id for inputs or tabs should be unique and have cooresponding objects in the server
+# 2. full page is width 12. only integer is acceptable
+# 3. conditionalPanel won't work properly if there are duplicated `id` names in the UI and server
+# 4. `inline` argument usually to control the text direaction, either horizontal or vertical
+# 5. The styling text seems only to take affect after restart R session.
+
+# source the global file for necessary pkgs and input data
 source("global.R")
 
+# the UI
 shinyUI(fluidPage(
+
+  #use shinyjs package for refresh feature
   useShinyjs(),
   shinyjs::useShinyjs(),
   shinyjs::extendShinyjs(text = "shinyjs.refresh = function() { location.reload(); }"),
 
+  #beginning of the page layout. column to control the width of the layout
 
   column(width = 10,
          offset = 1,
@@ -17,13 +27,18 @@ shinyUI(fluidPage(
          # navlistPanel( # tabs on the right hand side
          tabsetPanel( # tabs on top
            id = "app.tabs",
+           #beginning of the tabs
+           # crop tab ----
            tabPanel(h3("Crop info"),
                     value = "crop.info",
-             fluidRow(
 
+                    #the internal layout of the first tab
+             fluidRow(
                br(),
+               #define the style of the action button - this affects all the buttons
                tags$head(
                  tags$style(HTML(btn_style))),
+               #the selectInput layout
                column(12,
                       selectInput(inputId = "input_system", label = "Farm System", choices = input_systems, width = width_box)),
                column(12,
@@ -40,24 +55,24 @@ shinyUI(fluidPage(
                column(12,
                       actionButton("JumpToSoil", "Next >")
                       )
-               # column(6,
-               #        selectInput("input_targetYield", label = "Target yield (t FW/ha)", choices =  c(""))
-               #        ) # disable the total fresh weight value
                )
              ),
+           # soil tab ----
            tabPanel(h3("Soil info"),
                     value = "soil.info",
                     br(),
+                    #two top layer options for user to choose the sampling method
                     fluidRow(
                       column(width = 4,
                              radioButtons(inputId = "samplingDepth",
                                           label = "The Top Layer Sampling Depth",
                                           choices = c(layer.1.1, layer.1), selected = "")),
+                      # the refresh page button ----
                       column(width = 4,
                              br(),
-
                              actionButton("refresh", "Start a New Session?"))
                       ),
+                    #the conditionalPanel will show the desired sampling depth after user's selection
                     conditionalPanel(
                       condition = "input.samplingDepth == '0-15 cm'",
                       navbarPage(title = "Sampling Depth",
@@ -95,8 +110,9 @@ shinyUI(fluidPage(
                                                                   onInitialize = I('function() { this.setValue(""); }')))),
                                           column(width = 12,
                                                  numericInput(inputId = "Qtest1.2", label = "Quick test Nitrate result (mg/L)", min = 0, value = 0)),
-                                          column(12,
-                                                 actionButton("nextLayer.1.2", "< Previous Layer"),
+                                          column(2,
+                                                 actionButton("nextLayer.1.2", "< Previous Layer")),
+                                          column(2,
                                                  actionButton("nextLayer.1.3", "Next Layer >"))
                                           ),
                                  tabPanel("30 - 60 cm",value = "Panel.2",
@@ -118,7 +134,6 @@ shinyUI(fluidPage(
                       )
                     ),
                     conditionalPanel(
-                      # conditional panel: inputId must not be the same
                       condition = "input.samplingDepth == '0-30 cm'",
                       navbarPage(title = "Sampling Depth",
                                  id = "soil.tabset.layer.1",
@@ -163,23 +178,15 @@ shinyUI(fluidPage(
                     br(),
                     br(),
 
-                    # # Sidebar layout with input and output definitions ----
-                    # navlistPanel(id = "depth.tabs",
-                    #              widths = c(3,9),
-                    #   tabPanel(
-                    #            ),
-                    #   tabPanel(
-                    #   ),
-                    # column(12,
-                    #        actionButton("resetSoil", "Reset all")),
-                    column(12,
-                           actionButton("JumpToCrop", "< Back to Crop Information"),
-                           actionButton("JumpToReport", "Go To Report >")
-                    )
-                    ),
-
+                    flowLayout(column(2,
+                           actionButton("JumpToCrop", "< Back to Crop Information")),
+                    column(2,
+                           actionButton("JumpToReport", "Go To Report >"))
+                    )),
+           # report tab ----
            tabPanel(h3("Report"),
                     value = "report.tab",
+                    # define the style of feedback message
                     tags$head(
                     tags$style(HTML("
                     .shiny-output-error-validation {
@@ -187,35 +194,33 @@ shinyUI(fluidPage(
                     font-size: 20px;
                     font-weight:bold;
                     } "))),
-
-                      column(7,
+                    column(7,
                              br(),
                              # p(strong(h4("Estimated nitrogen requirement"))),
                              DT::dataTableOutput("N_inCrop")
                              ),
-                      column(3,
-                               offset = 2,
-
-                               br(),
-                               radioButtons('format', 'Document format', c('PDF', 'HTML', 'Word'), inline = TRUE),
-                               downloadButton("report", "Download Report")
+                    column(3,
+                             offset = 1,
+                             br(),
+                             radioButtons('format', 'Document format', c('PDF', 'HTML', 'Word'), inline = TRUE),
+                             downloadButton("report", "Download Report")
                                ),
-                        column(12,
-                               hr(),
-                               # p(strong(h4("Supported information for the nitrogen requirement"))),
-                               splitLayout(
-                                 DT::dataTableOutput("soil_filtered")
-                                 #          DT::dataTableOutput("N_inCrop")# will mask the yield selection input
-                                 ),
-                      hr(),
-                      splitLayout(
-                        plotOutput('P_N.uptake'),
-                        plotOutput('distPlot2')
-                        # DT::dataTableOutput("N_graphing")
-                        ),
-                      br(),
-                      br(),
-                      column(width = 12,
+                    column(12,
+                           hr(),
+                           # p(strong(h4("Supported information for the nitrogen requirement"))),
+                           splitLayout(
+                             DT::dataTableOutput("soil_filtered")
+                             #          DT::dataTableOutput("N_inCrop")# will mask the yield selection input
+                             ), # splitlayout
+                           br(),
+                           hr(),
+                           splitLayout(
+                             plotOutput('P_N.uptake'),
+                             plotOutput('distPlot2')
+                             ),
+                           br(),
+                           br(),
+                           column(width = 12,
                              actionButton("JumpToSoil2", "< Back To Soil Information")))
                     ) # the end of report tab
            )# the end of the main tabset
