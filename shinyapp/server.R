@@ -50,6 +50,15 @@ shinyServer(function(input, output,session) {
       filter(Crop == input_crop(), Harvested.value == input$input_componentYield)
     df
   })
+
+  ## paddock information for multi tests
+  paddock <- reactive({
+    validate(
+      need(!is.null(input$input_paddock.id), "")
+    )
+    as.character(input$input_paddock.id)
+  })
+
   ## make a data frame to feed into the downloadable report
   crop_info_reactive <- reactive({
     tab <- tibble(" " = c("Crop Selected",
@@ -433,16 +442,8 @@ shinyServer(function(input, output,session) {
     table <- soil_filter() %>%
       select(Texture, Moisture, Sampling.Depth, QTest.Results = qtest_user.input, MineralN) %>%
       mutate(AMN = c(AMN_supply(), rep(0, times)),
-             SubTotal = as.numeric(AMN) + MineralN) %>%
-      add_row(.,
-              Texture = "",
-              Moisture = "",
-              Sampling.Depth = "",
-              QTest.Results = "",
-              MineralN = "",
-              AMN = "",
-              SubTotal = paste0("Total N: ",sum(.$SubTotal))
-      )})
+             SubTotal = as.numeric(AMN) + MineralN)
+    })
   # key intermediate data - crop growing period and N uptake to draw 1st plot ----
   Crop_N_graphing <- reactive({
 
@@ -508,7 +509,15 @@ shinyServer(function(input, output,session) {
       need(!is.null(top_layer()), warning_report.tab)
     )
 
-    tab <- DT::datatable(table_soil_N(),
+    tab <- DT::datatable(table_soil_N()%>%
+                           add_row(.,
+                                   Texture = "",
+                                   Moisture = "",
+                                   Sampling.Depth = "",
+                                   QTest.Results = "",
+                                   MineralN = "",
+                                   AMN = "",
+                                   SubTotal = paste0("Total N: ",sum(.$SubTotal))),
                          options = list(dom = 't',
                                         columnDefs = list(list(className = 'dt-left', targets = '_all'))),
                          rownames = FALSE)
@@ -580,6 +589,27 @@ shinyServer(function(input, output,session) {
                         )
       file.rename(out, file)
     }
+  )
+
+  output$qTestResults.csv <- downloadHandler(
+
+
+    filename = function() {
+      paste0('my Quick Test Result', sep = '.', switch(
+        input$format_data, csv = 'csv', Excel = "xlsx"
+      ))
+    },
+    content = function(file) {
+      if(input$format_data == "Excel"){
+        openxlsx::write.xlsx(x = table_soil_N() %>%
+                               mutate(Paddock = paddock()), file = file)
+      } else{
+        write.csv(table_soil_N()%>%
+                    mutate(Paddock = paddock()), file,row.names = FALSE)
+      }
+    }
+
+
   )
 # the end of the server----
 

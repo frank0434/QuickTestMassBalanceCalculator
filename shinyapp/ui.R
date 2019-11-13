@@ -53,6 +53,8 @@ shinyUI(fluidPage(
                       selectInput("input_componentYield", label = "Harvested component (t FW/ha)", choices =  c(""), width = width_box)
                       ),
                column(12,
+                      textInput(inputId = "input_paddock.id", label = "Paddock Name/Number (Optional)", width = width_box)),
+               column(12,
                       actionButton("JumpToSoil", "Next >")
                       )
                )
@@ -194,17 +196,21 @@ shinyUI(fluidPage(
                     font-size: 20px;
                     font-weight:bold;
                     } "))),
-                    column(7,
+                    fluidRow(column(6,
                              br(),
                              # p(strong(h4("Estimated nitrogen requirement"))),
                              DT::dataTableOutput("N_inCrop")
                              ),
                     column(3,
-                             offset = 1,
-                             br(),
-                             radioButtons('format', 'Document format', c('PDF', 'HTML', 'Word'), inline = TRUE),
-                             downloadButton("report", "Download Report")
-                               ),
+                           br(),
+                           radioButtons('format_data', 'File format', c('csv', 'Excel'), inline = TRUE),
+                           downloadButton("qTestResults.csv", "Download Test Results")
+                           ),
+                    column(3,
+                           br(),
+                           radioButtons('format', 'Document format', c('PDF', 'Word'), inline = TRUE),
+                           downloadButton("report", "Download Report")
+                           )),
                     column(12,
                            hr(),
                            # p(strong(h4("Supported information for the nitrogen requirement"))),
