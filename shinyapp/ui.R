@@ -198,12 +198,14 @@ shinyUI(fluidPage(
                     font-size: 20px;
                     font-weight:bold;
                     } "))),
-                    fluidRow(column(6,
+                    column(12,
+                      fluidRow(
+                      column(5,
                              br(),
                              # p(strong(h4("Estimated nitrogen requirement"))),
                              DT::dataTableOutput("N_inCrop")
                              ),
-                    column(3,
+                    fluidRow(column(3,
                            br(),
                            radioButtons('format_data', 'File format', c('csv', 'Excel'), inline = TRUE),
                            downloadButton("qTestResults.csv", "Download Test Results")
@@ -212,7 +214,7 @@ shinyUI(fluidPage(
                            br(),
                            radioButtons('format', 'Document format', c('PDF', 'Word'), inline = TRUE),
                            downloadButton("report", "Download Report")
-                           )),
+                           )))),
                     column(12,
                            hr(),
                            # p(strong(h4("Supported information for the nitrogen requirement"))),
