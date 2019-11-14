@@ -420,16 +420,18 @@ shinyServer(function(input, output,session) {
       need(input$input_nextsamplingDate > input$Sampling.Date, "Sampling date must be smaller than the next sampling date.")
     )
 
-    x <- ifelse(is.numeric(crop.N.req.until.next.SD()), crop.N.req.until.next.SD(), net.to.next.SD())
-    tab <- tibble(`Seasonal N Balance`= c("Estimated total N uptake",
-                                          "Estimated Soil Avilable N to Plants",
-                                          "Suggestions on N application till next sampling/side dressing date"
-                                          # "Remaining crop N requirement",
-                                          ),
+    x <- ifelse(Soil_N_supply() > Seasonal.N.uptake(), "Surplus", "Deficit")
+    tab <- tibble(`Seasonal N Balance`= c("Estimated Total Crop N uptake",
+                                          "Estimated Plant Avilable N",
+                                          "Remaining crop N requirement",
+                                          "N Required to Reach Target Yield"),
                   `kg N/ha` = c(Seasonal.N.uptake(),
                                 Soil_N_supply(),
-                                x
-                                # remaining.crop.N.requirement()$N_remain,
+                                Crop_N_graphing() %>%
+                                  filter(DAP_annual == DAP_SD()) %>%
+                                  .$Remaining.N.Requirement %>%
+                                  round(.),
+                                paste0(Soil_N_supply() - Seasonal.N.uptake(), "(",x,")")
                                 ))
     })
   # Quick test result + AMN supply table
@@ -517,7 +519,7 @@ shinyServer(function(input, output,session) {
                                    QTest.Results = "",
                                    MineralN = "",
                                    AMN = "",
-                                   SubTotal = paste0("Total N: ",sum(.$SubTotal))),
+                                   SubTotal = paste0("Total plant available N: ",sum(.$SubTotal))),
                          options = list(dom = 't',
                                         columnDefs = list(list(className = 'dt-left', targets = '_all'))),
                          rownames = FALSE)
@@ -534,16 +536,22 @@ shinyServer(function(input, output,session) {
     )
     tab <- DT::datatable(N_crop(),
                          rownames = FALSE,
-                         options = list(dom = 't',
+                         options = list(dom = 't', #https://datatables.net/reference/option/dom
                                         columnDefs = list(list(className = 'dt-left', targets = '_all'))),
-                         colnames = c("", colnames(N_crop())[ncol(N_crop())]))
+                         colnames = c("", colnames(N_crop())[ncol(N_crop())])) %>%
+      DT::formatStyle(#https://rstudio.github.io/DT/010-style.html
+        'Seasonal N Balance',
+        target = 'row',
+        backgroundColor = DT::styleEqual("N Required to Reach Target Yield", "yellow")
+      )
 
   })
 
   output$P_N.uptake <- renderPlot({
     validate(
       need(!is.null(top_layer()), warning_report.tab),
-      need(crop_period() > DAP_nextSD() & crop_period() > DAP_SD(), "The sampling date must be within the crop growing period.")
+      need(crop_period() > DAP_nextSD() & crop_period() > DAP_SD(),
+           "Your next sampling date must be within the crop growing period.")
     )
         N_uptake_reactive()
 

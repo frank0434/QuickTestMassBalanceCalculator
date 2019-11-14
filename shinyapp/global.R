@@ -13,6 +13,7 @@ library(tidyr)
 library(rmarkdown)
 library(knitr)
 library(openxlsx)
+library(DT)
 
 # selectInput -------------------------------------------------------------
 
@@ -54,8 +55,10 @@ width_box <- 400
 layer.1 <- "0-30 cm"
 layer.1.1 <- "0-15 cm"
 #message to show in the UI
-warning_report.tab  <- as.character("Please fill in the soil tab first.")
+warning_report.tab  <- as.character("WARNING! Please fill in the soil tab first.")
 warning_soil.tab <- as.character("Quick test result must be 0 or positive number.\r\nPlease go back to the soil tab and check.")
+warning_samplingdate <- as.character("WARNING! \r\nSampling date must be smaller than the next sampling date.")
+
 # action button style text ----
 btn_style <- ".btn {
               display:block;

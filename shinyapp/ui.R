@@ -195,7 +195,7 @@ shinyUI(fluidPage(
                     tags$head(
                     tags$style(HTML("
                     .shiny-output-error-validation {
-                    color: black;
+                    color: red;
                     font-size: 20px;
                     font-weight:bold;
                     } "))),
