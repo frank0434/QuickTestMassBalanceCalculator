@@ -112,12 +112,13 @@ shinyUI(fluidPage(
                                                                   onInitialize = I('function() { this.setValue(""); }')))),
                                           column(width = 12,
                                                  numericInput(inputId = "Qtest1.2", label = "Quick test Nitrate result (mg/L)", min = 0, value = 0)),
-                                          column(width = 12,
-                                            fluidRow(column(4,
-                                                 actionButton("nextLayer.1.2", "< Previous Layer")),
 
-                                          column(4,
-                                                 actionButton("nextLayer.1.3", "Next Layer >"))))
+                                          column(12,
+                                                 actionButton("nextLayer.1.3", "Next Layer >")),
+
+                                          column(12,
+                                                 actionButton("nextLayer.1.2", "< Previous Layer"))
+
                                           ),
                                  tabPanel("30 - 60 cm",value = "Panel.2",
                                           column(width = 12,
@@ -181,12 +182,12 @@ shinyUI(fluidPage(
                     br(),
                     br(),
                     br(),
+                    column(12,
+                           actionButton("JumpToReport", "Go To Report >")),
+                    column(12,
+                           actionButton("JumpToCrop", "< Back to Crop Information"))
 
-                    fluidRow(column(4,
-                           actionButton("JumpToCrop", "< Back to Crop Information")),
-                    column(4,
-                           actionButton("JumpToReport", "Go To Report >"))
-                    )),
+                    ),
            # report tab ----
            tabPanel(h3("Report"),
                     value = "report.tab",
