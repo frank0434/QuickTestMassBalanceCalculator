@@ -406,12 +406,12 @@ shinyServer(function(input, output,session) {
   })
 
   net.to.next.SD <- reactive({
-    if(input$input_nextsamplingDate > input$Sampling.Date){
+    # if(input$input_nextsamplingDate > input$Sampling.Date){
       net <- Soil_N_supply() - crop.N.req.until.next.SD()
-      net <- ifelse(net.to.next.SD() > 0, "No extra N needed to next sampling/side dressing date", as.numeric(-net))
-    } else {
-      val <- "NA. Sampling date must be smaller than the next sampling date."
-    }
+      net <- ifelse(net > 0, "No extra N needed to next sampling/side dressing date", as.numeric(-net))
+    # } else {
+      # val <- "NA. Sampling date must be smaller than the next sampling date."
+    # }
   })
 
   # Crop N requirement table ----
@@ -422,16 +422,31 @@ shinyServer(function(input, output,session) {
 
     x <- ifelse(Soil_N_supply() > Seasonal.N.uptake(), "Surplus", "Deficit")
     tab <- tibble(`Seasonal N Balance`= c("Estimated Total Crop N uptake",
-                                          "Estimated Plant Avilable N",
-                                          "Remaining crop N requirement",
-                                          "N Required to Reach Target Yield"),
+                                          # "Estimated Plant Avilable N",
+                                          "Remaining crop N requirement"
+                                          # "N Required to Reach Target Yield"
+                                          ),
                   `kg N/ha` = c(Seasonal.N.uptake(),
-                                Soil_N_supply(),
+                                # Soil_N_supply(),
                                 Crop_N_graphing() %>%
                                   filter(DAP_annual == DAP_SD()) %>%
                                   .$Remaining.N.Requirement %>%
-                                  round(.),
-                                paste0(Soil_N_supply() - Seasonal.N.uptake(), "(",x,")")
+                                  round(.)
+                                # paste0(Soil_N_supply() - Seasonal.N.uptake(), "(",x,")")
+                                ))
+    })
+  report.tab_2 <- reactive({
+    validate(
+      need(input$input_nextsamplingDate > input$Sampling.Date, "")
+    )
+
+    x <- ifelse(Soil_N_supply() > Seasonal.N.uptake(), "Surplus", "Deficit")
+    tab <- tibble(`Seasonal N Balance`= c("Estimated Plant Available N",
+                                          "N Required to Reach Target Yield",
+                                          paste0("N Required to Next SD (", input$input_nextsamplingDate, ")")),
+                  `kg N/ha` = c(Soil_N_supply(),
+                                paste0(Soil_N_supply() - Seasonal.N.uptake(), "(",x,")"),
+                                net.to.next.SD()
                                 ))
     })
   # Quick test result + AMN supply table
@@ -519,10 +534,29 @@ shinyServer(function(input, output,session) {
                                    QTest.Results = "",
                                    MineralN = "",
                                    AMN = "",
-                                   SubTotal = paste0("Total plant available N: ",sum(.$SubTotal))),
+                                   SubTotal = paste0("Total plant available N: ",sum(.$SubTotal), "kg/ha"))%>%
+                           rename('Sampling.Depth (cm)' = Sampling.Depth,
+                                  'QTest.Results (mg/L)' = QTest.Results,
+                                  'Mineral N (kg/ha)' = MineralN,
+                                  'AMN (kg/ha)' = AMN,
+                                  'SubTotal (kg/ha)' = SubTotal),
                          options = list(dom = 't',
                                         columnDefs = list(list(className = 'dt-left', targets = '_all'))),
                          rownames = FALSE)
+
+  })
+
+  output$report.table2 <- DT::renderDataTable({
+    DT::datatable(report.tab_2(),
+                  options = list(dom = 't',
+                                 columnDefs = list(list(className = 'dt-left', targets = '_all'))),
+                  rownames = FALSE,
+                  colnames = c("", colnames(N_crop())[ncol(N_crop())])) %>%
+      DT::formatStyle(#https://rstudio.github.io/DT/010-style.html
+        'Seasonal N Balance',
+        target = 'row',
+        backgroundColor = DT::styleEqual("N Required to Reach Target Yield", "yellow")
+      )
 
   })
 
