@@ -236,6 +236,10 @@ shinyUI(fluidPage(
                            br(),
                            column(width = 12,
                              actionButton("JumpToSoil2", "< Back To Soil Information")))
+                    ), # the end of report tab
+           tabPanel(h3("debugging tab"),
+                    DT::dataTableOutput("df_graph"),
+                    DT::dataTableOutput("df_graph2")
                     ) # the end of report tab
            )# the end of the main tabset
          ) # column control width end

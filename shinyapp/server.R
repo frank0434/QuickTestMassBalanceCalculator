@@ -463,8 +463,8 @@ shinyServer(function(input, output,session) {
   # key intermediate data - crop growing period and N uptake to draw 1st plot ----
   Crop_N_graphing <- reactive({
 
-    df <- tibble(DAP_annual = seq(0, 365, by = 1),  list(crop_filtered_1row()))
-    df <- unnest(df) %>%
+    df <- tibble::tibble(DAP_annual = seq(0, 365, by = 1),  list(crop_filtered_1row()))
+    df <- unnest(df,cols = c(`list(crop_filtered_1row())`)) %>%
       mutate(Predicted.N.Uptake = (A+C)/(1+exp(-B*(DAP_annual - M))),
              Predicted.N.Uptake = ifelse(Predicted.N.Uptake <0, 0, Predicted.N.Uptake),
              Remaining.N.Requirement = remaining.crop.N.requirement()$N_remain - Predicted.N.Uptake) %>%
@@ -473,6 +473,9 @@ shinyServer(function(input, output,session) {
              N_nextSD = ifelse(DAP_annual == DAP_nextSD(), Predicted.N.Uptake, NA))
   })
 
+  # debugging the issue 14----
+  output$df_graph <- DT::renderDataTable({Crop_N_graphing()})
+  output$df_graph2 <- DT::renderDataTable({crop_filtered_1row()})
   # 1st graph, line plot for N estimation ----
   N_uptake_reactive <- reactive({
     #plotting
