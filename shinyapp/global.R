@@ -73,3 +73,7 @@ btn_style <- ".btn {
 
 
 # style = "border: 3px solid black; padding:14px; font-size:100%"
+
+# plotting -----
+
+

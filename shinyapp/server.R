@@ -382,14 +382,16 @@ shinyServer(function(input, output,session) {
 
   # Crop alone remaining N required (critical calculation) ----
   remaining.crop.N.requirement <- reactive({
-    # Remaining.CropN.requirement = estimated.seasonal.Nuptake - (C+A)/(1 + exp(-B*(DAP - M)))
-    N_remain <- crop_filtered_1row() %>%
-      mutate(N_remain = round(Seasonal.N.uptake - (C + A)/(1 + exp(-B*(DAP_SD() - M))), digits = 0))
+    # Remaining.CropN.requirement = estimated.seasonal.Nuptake - C+A/(1 + exp(-B*(DAP - M)))
+    N_remain <- Crop_N_graphing() %>%
+      filter(DAP_annual == DAP_SD()) %>%
+      .$Remaining.N.Requirement %>%
+      round(., digits = 0)
   })
 
   # seasonal N net
   net.whole.season <- reactive({
-    net = Soil_N_supply() - remaining.crop.N.requirement()
+    net = Soil_N_supply() - crop_filtered_1row()$Seasonal.N.uptake
     net = ifelse(net > 0, paste0(net, "(surplus)"), paste0(net, "(deficit)"))
   })
 
@@ -398,17 +400,15 @@ shinyServer(function(input, output,session) {
     if(input$Sampling.Date >= input$input_nextsamplingDate){
       val <- "NA. Sampling date must be smaller than the next sampling date."
     } else {
-      N_require <- crop_filtered_1row() %>%
-        mutate(N_require = round(Seasonal.N.uptake - (C + A)/(1 + exp(-B*(DAP_nextSD() - M))), digits = 0)) %>%
-        .$N_require
-      remaining.crop.N.requirement()$N_remain - N_require
+      na.omit(Crop_N_graphing()$N_nextSD) - na.omit(Crop_N_graphing()$N_SD)
     }
   })
 
   net.to.next.SD <- reactive({
     # if(input$input_nextsamplingDate > input$Sampling.Date){
       net <- Soil_N_supply() - crop.N.req.until.next.SD()
-      net <- ifelse(net > 0, "No extra N needed to next sampling/side dressing date", as.numeric(-net))
+      net <- round(net, digits = 0)
+      net <- ifelse(net > 0, "No extra N needed to next sampling/side dressing date", as.numeric(net))
     # } else {
       # val <- "NA. Sampling date must be smaller than the next sampling date."
     # }
@@ -427,10 +427,7 @@ shinyServer(function(input, output,session) {
                                           ),
                   `kg N/ha` = c(Seasonal.N.uptake(),
                                 # Soil_N_supply(),
-                                Crop_N_graphing() %>%
-                                  filter(DAP_annual == DAP_SD()) %>%
-                                  .$Remaining.N.Requirement %>%
-                                  round(.)
+                                remaining.crop.N.requirement()
                                 # paste0(Soil_N_supply() - Seasonal.N.uptake(), "(",x,")")
                                 ))
     })
@@ -444,7 +441,7 @@ shinyServer(function(input, output,session) {
                                           "N Required to Reach Target Yield",
                                           paste0("N Required to Next SD (", input$input_nextsamplingDate, ")")),
                   `kg N/ha` = c(Soil_N_supply(),
-                                paste0(Soil_N_supply() - Seasonal.N.uptake(), "(",x,")"),
+                                paste0(Soil_N_supply() - remaining.crop.N.requirement(), "(",x,")"),
                                 net.to.next.SD()
                                 ))
     })
@@ -463,12 +460,12 @@ shinyServer(function(input, output,session) {
   # key intermediate data - crop growing period and N uptake to draw 1st plot ----
   Crop_N_graphing <- reactive({
 
-    df <- tibble::tibble(DAP_annual = seq(0, 365, by = 1),  list(crop_filtered_1row()))
+    df <- tibble::tibble(DAP_annual = seq(0, 200, by = 1),  list(crop_filtered_1row()))
     df <- unnest(df,cols = c(`list(crop_filtered_1row())`)) %>%
       mutate(Predicted.N.Uptake = A+C/(1+exp(-B*(DAP_annual - M))),
              Predicted.N.Uptake = ifelse(Predicted.N.Uptake <0, 0, Predicted.N.Uptake),
-             Remaining.N.Requirement = remaining.crop.N.requirement()$N_remain - Predicted.N.Uptake) %>%
-      filter(Remaining.N.Requirement > 0 ) %>%
+             Remaining.N.Requirement = crop_filtered_1row()$Seasonal.N.uptake - Predicted.N.Uptake) %>%
+      filter(Remaining.N.Requirement > as.numeric(-1) ) %>%
       mutate(N_SD = ifelse(DAP_annual == DAP_SD(), Predicted.N.Uptake, NA),
              N_nextSD = ifelse(DAP_annual == DAP_nextSD(), Predicted.N.Uptake, NA))
   })
@@ -479,14 +476,17 @@ shinyServer(function(input, output,session) {
   # 1st graph, line plot for N estimation ----
   N_uptake_reactive <- reactive({
     #plotting
+    ## graphy customisation
     size = 5
+    color_point = "orange"
+
     P <- Crop_N_graphing() %>%
       ggplot(aes(x = DAP_annual)) +
       # geom_point(aes(y = Predicted.N.Uptake)) +
       geom_line(aes(y = Predicted.N.Uptake, color = "Predicted.N.Uptake"))+
-      geom_point(aes(y = N_SD, shape = "Sampling date"), size = size,  na.rm=TRUE)+
+      geom_point(aes(y = N_SD, shape = "Sampling date"), size = size, color = color_point, na.rm=TRUE)+
       geom_point(aes(y = N_nextSD, shape = "Next sampling date"),size = size,  na.rm=TRUE)+
-      scale_shape_manual(name = "",values =  c(`Sampling date` = 16, `Next sampling date` = 6))+
+      scale_shape_manual(name = "",values =  c(`Sampling date` = 16, `Next sampling date` = 4))+
       scale_color_manual(name = "", values = "red") +
       labs(title = "Estimated whole crop N uptake",
            x = "Days after planting",
