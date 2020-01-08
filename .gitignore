@@ -5,3 +5,4 @@
 
 # unwanted files
 *.xlsx
+*.sqlite3
