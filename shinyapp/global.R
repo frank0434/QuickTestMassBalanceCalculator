@@ -56,7 +56,7 @@ layer.1 <- "0-30 cm"
 layer.1.1 <- "0-15 cm"
 #message to show in the UI
 warning_report.tab  <- as.character("WARNING! Please fill in the soil tab first.")
-warning_soil.tab <- as.character("Quick test result must be 0 or positive number.\r\nPlease go back to the soil tab and check.")
+warning_soil.tab <- as.character("Quick test result must be between 0 and 2147483647.")
 warning_samplingdate <- as.character("WARNING! \r\nSampling date must be smaller than the next sampling date.")
 
 # action button style text ----
