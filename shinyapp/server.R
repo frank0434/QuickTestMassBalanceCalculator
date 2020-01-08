@@ -143,16 +143,15 @@ shinyServer(function(input, output,session) {
     })
 
   Qtest.15.2 <- reactive({
-    if(top_layer() == layer.1.1){
-        val15_30 <- as.integer(input$Qtest1.2)
-        if(val15_30 < 0){
-          print("Quick test resutls must be 0 or positive numbers.") # the print here won't be seen by users!!!
-        } else if (is.na(val15_30)){
-          val15_30 = 0
-        } else{
-          val15_30
-        }
-    }
+
+    validate(
+      need(top_layer() == layer.1.1, "Please chose the sampling method.")
+    )
+    val15_30 <- as.integer(input$Qtest1.2)
+    validate(
+      need(val15_30 >= 0, warning_soil.tab)
+    )
+    val15_30
   })
 
   Qtest.30.2 <- reactive({
@@ -189,7 +188,7 @@ shinyServer(function(input, output,session) {
     val0_30
   })
 
-  ## 60-90 is diabled
+  ## 60-90 is disabled
 
   # quick test nitrate-N (mg/kg DM) calculation----
   ## Quick test nitrate-N (mg/kg DM) = Quick test nitrate (mg/L) (user input)/CF
@@ -303,6 +302,7 @@ shinyServer(function(input, output,session) {
     }
 
   })
+
 
   # total N supply from soil - minN + AMN
   Soil_N_supply <- reactive({
@@ -420,7 +420,6 @@ shinyServer(function(input, output,session) {
       need(input$input_nextsamplingDate > input$Sampling.Date, "Sampling date must be smaller than the next sampling date.")
     )
 
-    x <- ifelse(Soil_N_supply() > Seasonal.N.uptake(), "Surplus", "Deficit")
     tab <- tibble(`Seasonal N Balance`= c("Estimated Total Crop N uptake",
                                           # "Estimated Plant Avilable N",
                                           "Remaining crop N requirement"
