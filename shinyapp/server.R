@@ -465,7 +465,7 @@ shinyServer(function(input, output,session) {
 
     df <- tibble::tibble(DAP_annual = seq(0, 365, by = 1),  list(crop_filtered_1row()))
     df <- unnest(df,cols = c(`list(crop_filtered_1row())`)) %>%
-      mutate(Predicted.N.Uptake = (A+C)/(1+exp(-B*(DAP_annual - M))),
+      mutate(Predicted.N.Uptake = A+C/(1+exp(-B*(DAP_annual - M))),
              Predicted.N.Uptake = ifelse(Predicted.N.Uptake <0, 0, Predicted.N.Uptake),
              Remaining.N.Requirement = remaining.crop.N.requirement()$N_remain - Predicted.N.Uptake) %>%
       filter(Remaining.N.Requirement > 0 ) %>%
