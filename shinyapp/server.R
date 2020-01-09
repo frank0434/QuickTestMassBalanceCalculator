@@ -279,6 +279,7 @@ shinyServer(function(input, output,session) {
 
   AMN_supply <- reactive({
     # the raw data is from the excel file. two small to keep in a tab in the sqlite file
+    # crop system default AMN reserves
     AMN_default <- switch (input$input_system,
                            "Mixed cropping/arable" = as.integer(90),
                            "Intensive vegetable production" = as.integer(50),
@@ -287,22 +288,27 @@ shinyServer(function(input, output,session) {
     if(input$AMN1.1!=0){
       converisonF <- ifelse(crop_period() >= 100, 0.9,
                             ifelse(crop_period() < 40, 0.3, 0.5))
-      AMN_supply1 = (crop_period() - DAP_SD()) * (input$AMN1.1 * converisonF/crop_period())
-      AMN_supply = round(AMN_supply1, digits = 0)
+      DataSupplyRate = input$AMN1.1 * converisonF / crop_period()
+      AMN_remaining = round(crop_period() * DataSupplyRate - DAP_SD() * DataSupplyRate, digits = 0)
+      return(AMN_remaining)
     } else if(input$AMN1 != 0){
       converisonF <- ifelse(crop_period() >= 100, 0.9,
                             ifelse(crop_period() < 40, 0.3, 0.5))
-      AMN_supply1 = (crop_period() - DAP_SD()) * (input$AMN1 * converisonF/crop_period())
-      AMN_supply = round(AMN_supply1, digits = 0)
+      DataSupplyRate = input$AMN1 * converisonF / crop_period()
+      AMN_remaining = round(crop_period() * DataSupplyRate - DAP_SD() * DataSupplyRate, digits = 0)
+      return(AMN_remaining)
     } else {
       converisonF <- ifelse(crop_period() >= 100, 0.9,
                             ifelse(crop_period() < 40, 0.3, 0.5))
-      AMN_supply1 = (crop_period() - DAP_SD()) * (AMN_default * converisonF/crop_period())
-      AMN_supply = round(AMN_supply1, digits = 0)
+      DefaultSupplyRate = AMN_default * converisonF / crop_period()
+      AMN_remaining = round(crop_period() * DefaultSupplyRate - DAP_SD() * DefaultSupplyRate, digits = 0)
+      return(AMN_remaining)
     }
 
   })
-
+  # debugging AMN supply -----
+  output$df_AMN <-  renderText({AMN_supply()})
+  output$df_days <-  renderText({DAP_SD()})
 
   # total N supply from soil - minN + AMN
   Soil_N_supply <- reactive({
@@ -436,7 +442,7 @@ shinyServer(function(input, output,session) {
       need(input$input_nextsamplingDate > input$Sampling.Date, "")
     )
 
-    x <- ifelse(Soil_N_supply() > Seasonal.N.uptake(), "Surplus", "Deficit")
+    x <- ifelse(Soil_N_supply() > remaining.crop.N.requirement(), "Surplus", "Deficit")
     tab <- tibble(`Seasonal N Balance`= c("Estimated Plant Available N",
                                           "N Required to Reach Target Yield",
                                           paste0("N Required to Next SD (", input$input_nextsamplingDate, ")")),

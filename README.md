@@ -71,9 +71,23 @@ Quick test nitrate (mg/L)
 Quick test nitrate-N (mg/kg DM)
 Mineral N supply (kg/ha)
 
-AMN Test
+### AMN Test -----
 Test value (kg/ha) 
-Remaining ON supply (kg/ha) 
+
+if test value exist:
+Remaining ON supply (kg/ha) = crop period * data supply rate - (sampling date - planting date) * datasupply rate
+else
+Remaining ON supply (kg/ha) = default supply * default supply rate - (sampling date - planting date) * default supply rate
+
+
+datasupply rate = test results * 0.9 /crop period 
+datasupply rate = test results * 0.5/crop period 
+datasupply rate = test results * 0.3 /crop period 
+
+default supply rate depends on the crop period:
+over 100 days = AMN default * 0.9 / crop period
+under 40 days = AMN default * 0.3 / crop period
+in between = AMN default * 0.5 / crop period
 
 # Steps
 
@@ -86,5 +100,6 @@ Remaining ON supply (kg/ha)
 
 `shinytest` is used for the testing. 
 [More details](https://rstudio.github.io/shinytest/articles/shinytest.html)
+
 
 
