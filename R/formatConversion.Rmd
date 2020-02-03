@@ -129,9 +129,10 @@ crop_para <- crop_para %>%
                                       Yield.paramater, Harvested.parameter),
          Crop_name_display = gsub("(_)(Autumn|Summer|Spring|Winter)",
                                   " - \\2 planting", Crop),
-         Crop_name_display = case_when(Crop_name_display == "Baby_Spinach" ~ "Baby Spinach",
-         Crop_name_display == "Wheat - Autumn planting" ~ "Wheat - Autumn sown", 
-         Crop_name_display == "Wheat - Spring planting" ~ "Wheat - Spring sown"))  
+         Crop_name_display = recode(Crop_name_display, 
+                                    "Baby_Spinach" = "Baby Spinach",
+                                    "Wheat - Autumn planting" = "Wheat - Autumn sown", 
+                                    "Wheat - Spring planting" = "Wheat - Spring sown"))  
 ```
 
 # Crop N
