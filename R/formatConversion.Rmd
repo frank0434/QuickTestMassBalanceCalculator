@@ -125,8 +125,13 @@ names(crop_para) <- cols_new
 ##### Revise the crop parameter values
 ```{r recode the harvested parameter}
 crop_para <- crop_para %>% 
-  mutate(Harvested.parameter = ifelse(is.na(Harvested.parameter), Yield.paramater, Harvested.parameter))
-
+  mutate(Harvested.parameter = ifelse(is.na(Harvested.parameter),
+                                      Yield.paramater, Harvested.parameter),
+         Crop_name_display = gsub("(_)(Autumn|Summer|Spring|Winter)",
+                                  " - \\2 planting", Crop),
+         Crop_name_display = case_when(Crop_name_display == "Baby_Spinach" ~ "Baby Spinach",
+         Crop_name_display == "Wheat - Autumn planting" ~ "Wheat - Autumn sown", 
+         Crop_name_display == "Wheat - Spring planting" ~ "Wheat - Spring sown"))  
 ```
 
 # Crop N
@@ -158,7 +163,7 @@ tab_AMN <- tab_AMN %>%
 
 
 ```{r sql connection and write out}
-con <- dbConnect(RSQLite::SQLite(),'../QTMB/qtmb_data.sqlite3')
+con <- dbConnect(RSQLite::SQLite(),'../shinyapp/qtmb_data.sqlite3')
 dbListTables(con)
 dbWriteTable(con, "tab_AMN", tab_AMN, overwrite = TRUE)
 dbWriteTable(con, "tab_crop.para", crop_para, overwrite = TRUE)
