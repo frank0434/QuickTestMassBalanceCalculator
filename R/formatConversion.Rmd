@@ -132,7 +132,9 @@ crop_para <- crop_para %>%
          Crop_name_display = recode(Crop_name_display, 
                                     "Baby_Spinach" = "Baby Spinach",
                                     "Wheat - Autumn planting" = "Wheat - Autumn sown", 
-                                    "Wheat - Spring planting" = "Wheat - Spring sown"))  
+                                    "Wheat - Spring planting" = "Wheat - Spring sown",
+                                    "Barley - Autumn planting" = "Barley - Autumn sown",
+                                    "Barley - Spring planting" = "Barley - Spring sown"))  
 ```
 
 # Crop N

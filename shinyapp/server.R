@@ -434,7 +434,7 @@ shinyServer(function(input, output,session) {
     validate(
       need(input$input_nextsamplingDate > input$Sampling.Date,
            "Sampling date must be smaller than the next sampling date."),
-      need(!is.na(Seasonal.N.uptake()) &&!is.na(remaining.crop.N.requirement()),
+      need(!is.na(Seasonal.N.uptake()) &&!is.null(remaining.crop.N.requirement()),
            "Sampling date is out of range!")
     )
 
@@ -452,7 +452,7 @@ shinyServer(function(input, output,session) {
   report.tab_2 <- reactive({
     validate(
       need(input$input_nextsamplingDate > input$Sampling.Date, ""),
-      need(!is.na(remaining.crop.N.requirement), "Next sampling date is out of growing period.")
+      need(!is.null(remaining.crop.N.requirement), "Next sampling date is out of growing period.")
     )
 
     x <- ifelse(Soil_N_supply() > remaining.crop.N.requirement(), "Surplus", "Deficit")

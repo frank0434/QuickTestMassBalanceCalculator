@@ -18,14 +18,14 @@ test_that("Output matches Input", {
   app$setInputs(input_system = "Pasture conversion")
   app$setInputs(input_crop = "Barley_Spring")
   app$setInputs(input_PlantingDate = "2018-10-25")
-  app$setInputs(input_targetYield = "179")
+  app$setInputs(input_targetYield = "10")
   vals <- app$getAllValues()
 
 
   vals$output$Harvested_value
 
   #expect
-  expect_equal(vals$output$Harvested_value, "<b>Harvested component (t FW/ha):  8 </b>")
+  expect_equal(vals$output$Seasonal.N.uptake, "224")
 
 })
 

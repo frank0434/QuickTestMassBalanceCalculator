@@ -9,8 +9,7 @@ params:
   p_N_uptake: NA
   p_N_supply: NA
   tab_NCrop: NA
-  tab_N_require: NA 
-  tab_N_supply: NA
+
 ---
 
 ```{r setup, include=FALSE}
