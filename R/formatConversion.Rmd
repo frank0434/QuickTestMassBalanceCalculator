@@ -12,10 +12,10 @@ library(tidyverse)
 library(DBI)
 library(RSQLite)
 
-sheets <- excel_sheets("../QTMB Tool - V 2.1.xlsx")
+sheets <- excel_sheets("C:/Users/Administrator/Dropbox/QTMB Tool - V 2.1.xlsx")
 sh <- grep("parameters| graphing|AMN input", sheets, value = T,ignore.case = T)
 # l <- lapply(sh, function(x) read_excel("../QTMB Tool - V 2.1.xlsx", sheet = x))
-path <- "../QTMB Tool - V 2.1.xlsx"
+path <- "C:/Users/Administrator/Dropbox/QTMB Tool - V 2.1.xlsx"
 ```
 _Note_
 

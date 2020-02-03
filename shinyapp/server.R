@@ -198,6 +198,11 @@ shinyServer(function(input, output,session) {
   # CF2  = 1/(CF/(BD * (depth/10)))
   soil_filter <- reactive({
 
+    #
+    validate(
+      need(!is.na(top_layer()), "\r\n\r\n\r\nPlease select sampling method")
+    )
+
 
     if(top_layer() == layer.1.1){
       df.1.1 <- soil %>%
@@ -414,19 +419,23 @@ shinyServer(function(input, output,session) {
   })
 
   net.to.next.SD <- reactive({
-    # if(input$input_nextsamplingDate > input$Sampling.Date){
+    validate(
+      need(!is.na(Soil_N_supply()), message = FALSE),
+      need(!is.na(crop.N.req.until.next.SD()), message = FALSE)
+    )
       net <- Soil_N_supply() - crop.N.req.until.next.SD()
       net <- round(net, digits = 0)
       net <- ifelse(net > 0, "No extra N needed to next sampling/side dressing date", as.numeric(net))
-    # } else {
-      # val <- "NA. Sampling date must be smaller than the next sampling date."
-    # }
+
   })
 
   # Crop N requirement table ----
   N_crop <- reactive({
     validate(
-      need(input$input_nextsamplingDate > input$Sampling.Date, "Sampling date must be smaller than the next sampling date.")
+      need(input$input_nextsamplingDate > input$Sampling.Date,
+           "Sampling date must be smaller than the next sampling date."),
+      need(!is.na(Seasonal.N.uptake()) &&!is.na(remaining.crop.N.requirement()),
+           "Sampling date is out of range!")
     )
 
     tab <- tibble(`Seasonal N Balance`= c("Estimated Total Crop N uptake",
@@ -442,7 +451,8 @@ shinyServer(function(input, output,session) {
     })
   report.tab_2 <- reactive({
     validate(
-      need(input$input_nextsamplingDate > input$Sampling.Date, "")
+      need(input$input_nextsamplingDate > input$Sampling.Date, ""),
+      need(!is.na(remaining.crop.N.requirement), "Next sampling date is out of growing period.")
     )
 
     x <- ifelse(Soil_N_supply() > remaining.crop.N.requirement(), "Surplus", "Deficit")
@@ -469,13 +479,16 @@ shinyServer(function(input, output,session) {
   # key intermediate data - crop growing period and N uptake to draw 1st plot ----
   Crop_N_graphing <- reactive({
 
-    df <- tibble::tibble(DAP_annual = seq(0, 200, by = 1),  list(crop_filtered_1row()))
+    #construct a df for the annual crop growing period and the paras from the model
+    df <- tibble::tibble(DAP_annual = seq(0, 365, by = 1),  list(crop_filtered_1row()))
+
+    #expand the model paras and calculate the curve
     df <- unnest(df,cols = c(`list(crop_filtered_1row())`)) %>%
       mutate(Predicted.N.Uptake = A+C/(1+exp(-B*(DAP_annual - M))),
              Predicted.N.Uptake = ifelse(Predicted.N.Uptake <0, 0, Predicted.N.Uptake),
              Remaining.N.Requirement = crop_filtered_1row()$Seasonal.N.uptake - Predicted.N.Uptake) %>%
-      filter(Remaining.N.Requirement > as.numeric(-1) ) %>%
-      mutate(N_SD = ifelse(DAP_annual == DAP_SD(), Predicted.N.Uptake, NA),
+      mutate(Remaining.N.Requirement = ifelse(Remaining.N.Requirement >  0 , Remaining.N.Requirement, 0),
+             N_SD = ifelse(DAP_annual == DAP_SD(), Predicted.N.Uptake, NA),
              N_nextSD = ifelse(DAP_annual == DAP_nextSD(), Predicted.N.Uptake, NA))
   })
 
@@ -593,7 +606,7 @@ shinyServer(function(input, output,session) {
     validate(
       need(!is.null(top_layer()), warning_report.tab),
       need(crop_period() > DAP_nextSD() & crop_period() > DAP_SD(),
-           "Your next sampling date must be within the crop growing period.")
+           "Your next sampling date must be within the crop growing period (within 365 days).")
     )
         N_uptake_reactive()
 
