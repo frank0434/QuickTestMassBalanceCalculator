@@ -1,0 +1,51 @@
+{
+  "input": {
+    "AMN1": 0,
+    "AMN1.1": 0,
+    "app.tabs": "soil.info",
+    "format": "PDF",
+    "format_data": "csv",
+    "input_componentYield": "10",
+    "input_crop": "Barley - Autumn sown",
+    "input_nextsamplingDate": "2020-05-09",
+    "input_paddock.id": "",
+    "input_PlantingDate": "2020-03-01",
+    "input_system": "Mixed cropping/arable",
+    "JumpToCrop": 0,
+    "JumpToReport": 1,
+    "JumpToSoil": 1,
+    "JumpToSoil2": 0,
+    "Moisture.1": "",
+    "Moisture.1.1": "Moist-Dry",
+    "Moisture.1.2": "Moist",
+    "Moisture.2": "",
+    "Moisture.2.1": "",
+    "nextLayer.1": 0,
+    "nextLayer.1.1": 1,
+    "nextLayer.1.2": 0,
+    "nextLayer.1.3": 0,
+    "nextLayer.1.4": 0,
+    "nextLayer.2": 0,
+    "Qtest1": 0,
+    "Qtest1.1": 0,
+    "Qtest1.2": 0,
+    "Qtest2": 0,
+    "Qtest2.1": 0,
+    "refresh": 0,
+    "Sampling.Date": "2020-03-26",
+    "samplingDepth": "0-15 cm",
+    "soil.tabset.layer.1": "Panel.1",
+    "soil.tabset.layer.1.1": "Panel.1.2",
+    "Texture.1": "",
+    "Texture.1.1": "Clay loam",
+    "Texture.1.2": "Clay loam",
+    "Texture.2": "",
+    "Texture.2.1": ""
+  },
+  "output": {
+
+  },
+  "export": {
+
+  }
+}

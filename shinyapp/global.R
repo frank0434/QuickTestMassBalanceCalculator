@@ -2,7 +2,7 @@
 # Author: Jian (AKA Frank) Liu
 # Aim: Loading essentials for the shiny app
 # Date: 2019-09-09
-
+Sys.setlocale("LC_ALL","English")
 library(shiny)
 library(shinyjs)
 library(V8)
