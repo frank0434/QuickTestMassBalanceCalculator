@@ -5,9 +5,9 @@ account: climate-change
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 1209617
-bundleId: 2772999
+bundleId: 2773041
 url: https://agricultural-landscape.shinyapps.io/QTMB_dev/
-when: 1580780376.07299
+when: 1580781784.65713
 asMultiple: FALSE
 asStatic: FALSE
 ignoredFiles: tests/mytest.R|tests/mytest-expected/001.json|tests/mytest-expected/001.png

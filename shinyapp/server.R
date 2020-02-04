@@ -425,7 +425,7 @@ shinyServer(function(input, output,session) {
     )
       net <- Soil_N_supply() - crop.N.req.until.next.SD()
       net <- round(net, digits = 0)
-      net <- ifelse(net > 0, "No extra N needed to next sampling/side dressing date", as.numeric(net))
+      net <- ifelse(net > 0, "No extra N needed to next sampling/side dressing date", as.numeric(-net))
 
   })
 
@@ -460,7 +460,7 @@ shinyServer(function(input, output,session) {
                                           "N Required to Reach Target Yield",
                                           paste0("N Required to Next SD (", input$input_nextsamplingDate, ")")),
                   `kg N/ha` = c(Soil_N_supply(),
-                                paste0(Soil_N_supply() - remaining.crop.N.requirement(), "(",x,")"),
+                                paste0(abs(Soil_N_supply() - remaining.crop.N.requirement()), "(",x,")"),
                                 net.to.next.SD()
                                 ))
     })
