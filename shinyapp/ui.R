@@ -273,9 +273,10 @@ shinyUI(fluidPage(
                            fluidRow(
                              column(width = 6,
                                     plotOutput('distPlot2')),
-                             column(width = 6,
-                                    plotOutput('P_N.uptake'))
-
+                             conditionalPanel(
+                               condition = "input.FallowOrCropping == 'Cropping'",
+                               column(width = 6,
+                                      plotOutput('P_N.uptake')))
                              ),
                            br(),
                            br(),
