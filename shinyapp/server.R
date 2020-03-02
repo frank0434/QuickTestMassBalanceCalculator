@@ -510,7 +510,15 @@ shinyServer(function(input, output,session) {
       labs(title = "Estimated whole crop N uptake",
            x = "Days after planting",
            y  = "Whole crop N uptake (kg/ha)")+
-      theme_qtmb()
+      theme_qtmb() +
+      annotate("text",
+               x = median(Crop_N_graphing()$DAP_annual),
+               y = max(Crop_N_graphing()$Predicted.N.Uptake)/2 - 3,
+               # vjust = 0.3,
+               alpha = 0.5, size = 5.5, angle = -30,
+               label = "bold(\"This graph is only an indicator.
+               \nNot necessary represent \nthe actual situtation for the tested paddock!\")",
+               parse = TRUE)
     P
   })
   # 2nd graph, bar plot for different depths ----

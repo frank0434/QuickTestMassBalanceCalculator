@@ -228,9 +228,11 @@ shinyUI(fluidPage(
                              ), # splitlayout
                            br(),
                            hr(),
-                           splitLayout(cellWidths = c("47%","52%"),
-                             plotOutput('distPlot2'),
-                             plotOutput('P_N.uptake')
+                           fluidRow(
+                             column(width = 6,
+                                    plotOutput('distPlot2')),
+                             column(width = 6,
+                                    plotOutput('P_N.uptake'))
 
                              ),
                            br(),
