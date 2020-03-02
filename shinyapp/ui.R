@@ -29,7 +29,7 @@ shinyUI(fluidPage(
            id = "app.tabs",
            #beginning of the tabs
            # crop tab ----
-           tabPanel(h3("Crop info"),
+           tabPanel(h3("1. Crop info"),
                     value = "crop.info",
 
                     #the internal layout of the first tab
@@ -60,7 +60,7 @@ shinyUI(fluidPage(
                )
              ),
            # soil tab ----
-           tabPanel(h3("Soil info"),
+           tabPanel(h3("2. Soil info"),
                     value = "soil.info",
                     br(),
                     #two top layer options for user to choose the sampling method
@@ -189,7 +189,7 @@ shinyUI(fluidPage(
 
                     ),
            # report tab ----
-           tabPanel(h3("Report"),
+           tabPanel(h3("3. Report"),
                     value = "report.tab",
                     # define the style of feedback message
                     tags$head(
