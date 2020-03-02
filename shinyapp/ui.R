@@ -31,33 +31,74 @@ shinyUI(fluidPage(
            # crop tab ----
            tabPanel(h3("1. Crop info"),
                     value = "crop.info",
+                    br(),
 
-                    #the internal layout of the first tab
-             fluidRow(
-               br(),
-               #define the style of the action button - this affects all the buttons
-               tags$head(
-                 tags$style(HTML(btn_style))),
-               #the selectInput layout
-               column(12,
-                      selectInput(inputId = "input_system", label = "Farm System", choices = input_systems, width = width_box)),
-               column(12,
-                      selectInput(inputId = "input_crop", label = "Crop Type", choices = crops, width = width_box)),
-               column(12,
-                      dateInput("input_PlantingDate", label = "Planting Date", width = width_box, format = "d MM yyyy")),
-               column(12,
-                      dateInput("Sampling.Date", label = "Sampling Date", width = width_box, format = "d MM yyyy")),
-               column(12,
-                      dateInput(inputId = "input_nextsamplingDate", label = "Next Sampling Date/Side Dressing", width = width_box, format = "d MM yyyy")),
-               column(12,
-                      selectInput("input_componentYield", label = "Harvested component (t FW/ha)", choices =  c(""), width = width_box)
+                    fluidRow(
+                      column(width = 4,
+                             radioButtons(inputId = "FallowOrCropping",
+                                          label = "Paddock Status",
+                                          choices = c("Fallow", "Cropping"), selected = "")),
+                      # the refresh page button ----
+                      column(width = 4,
+                             br(),
+                             actionButton("refresh", "Start a New Session?"))
+                    ),
+                    conditionalPanel(
+                      condition = "input.FallowOrCropping == 'Fallow'",
+
+                      #the internal layout for fallow
+                        fluidRow(
+                          br(),
+                          #define the style of the action button - this affects all the buttons
+                          tags$head(
+                            tags$style(HTML(btn_style))),
+                          #the selectInput layout
+                          column(12,
+                                 selectInput(inputId = "input_system_fallow", label = "Farm System", choices = input_systems, width = width_box)),
+                          column(12,
+                                 dateInput("Sampling.Date_fallow", label = "Sampling Date", width = width_box, format = "d MM yyyy",value = "")),
+                          column(12,
+                                 dateInput(inputId = "input_nextsamplingDate_fallow", label = "Next Sampling Date", width = width_box, format = "d MM yyyy", value = "")),
+                          column(12,
+                                 textInput(inputId = "input_paddock.id_fallow", label = "Paddock Name/Number (Optional)", width = width_box)),
+                          column(12,
+                                 actionButton("JumpToSoil", "Next >")
+                          )
+                        )
                       ),
-               column(12,
-                      textInput(inputId = "input_paddock.id", label = "Paddock Name/Number (Optional)", width = width_box)),
-               column(12,
-                      actionButton("JumpToSoil", "Next >")
+                    conditionalPanel(
+                      condition = "input.FallowOrCropping == 'Cropping'",
+
+                      #the internal layout of the first tab
+                      fluidRow(
+                        br(),
+                        #define the style of the action button - this affects all the buttons
+                        tags$head(
+                          tags$style(HTML(btn_style))),
+                        #the selectInput layout
+                        column(12,
+                               selectInput(inputId = "input_system", label = "Farm System", choices = input_systems, width = width_box)),
+                        column(12,
+                               selectInput(inputId = "input_crop", label = "Crop Type", choices = crops, width = width_box)),
+                        column(12,
+                               dateInput("input_PlantingDate", label = "Planting Date", width = width_box, format = "d MM yyyy")),
+                        column(12,
+                               dateInput("Sampling.Date", label = "Sampling Date", width = width_box, format = "d MM yyyy")),
+                        column(12,
+                               dateInput(inputId = "input_nextsamplingDate", label = "Next Sampling Date/Side Dressing", width = width_box, format = "d MM yyyy")),
+                        column(12,
+                               selectInput("input_componentYield", label = "Harvested component (t FW/ha)", choices =  c(""), width = width_box)
+                        ),
+                        column(12,
+                               textInput(inputId = "input_paddock.id", label = "Paddock Name/Number (Optional)", width = width_box)),
+                        column(12,
+                               actionButton("JumpToSoil", "Next >")
+                        )
                       )
-               )
+
+
+                    )
+
              ),
            # soil tab ----
            tabPanel(h3("2. Soil info"),
@@ -201,24 +242,25 @@ shinyUI(fluidPage(
                     } "))),
                     column(12,
                       fluidRow(
-                      column(5,
-                             br(),
-                             # p(strong(h4("Estimated nitrogen requirement"))),
-                             DT::dataTableOutput("N_inCrop"),
-                             br(),
-                             DT::dataTableOutput("report.table2")
-                             ),
-                    column(5,offset = 2,
-                      verticalLayout(column(5,
-                           br(),
-                           radioButtons('format_data', 'File format', c('csv', 'Excel'), inline = TRUE),
-                           downloadButton("qTestResults.csv", "Download Test Results")
-                           ),
-                    column(5,
-                           br(),
-                           radioButtons('format', 'Document format', c('PDF', 'Word'), inline = TRUE),
-                           downloadButton("report", "Download Report")
-                           ))))),
+                        conditionalPanel(
+                          condition = "input.FallowOrCropping == 'Cropping'",
+                          column(5,
+                                 br(),
+                                 # p(strong(h4("Estimated nitrogen requirement"))),
+                                 DT::dataTableOutput("N_inCrop"),
+                                 br(),
+                                 DT::dataTableOutput("report.table2")
+                                 )),
+                        column(5,offset = 2,
+                               verticalLayout(column(5,
+                                                     br(),
+                                                     radioButtons('format_data', 'File format', c('csv', 'Excel'), inline = TRUE),
+                                                     downloadButton("qTestResults.csv", "Download Test Results")),
+                                              column(5,
+                                                     br(),
+                                                     radioButtons('format', 'Document format', c('PDF', 'Word'), inline = TRUE),
+                                                     downloadButton("report", "Download Report"))
+                                              )))),
                     column(12,
                            hr(),
                            # p(strong(h4("Supported information for the nitrogen requirement"))),
