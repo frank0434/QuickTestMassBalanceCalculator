@@ -83,7 +83,7 @@ shinyServer(function(input, output,session) {
   ## the number of growing days depends on the crop
   crop_period <- reactive({
     if(paddock.status() == "Cropping"){
-      max(Crop_N_graphing()$DAP_annual)
+      nrow(subset(Crop_N_graphing(), Remaining.N.Requirement != 0))
     } else {
       # if the paddock is fallow, use the days differences between two sampling dates
       DAP_nextSD()
@@ -312,6 +312,7 @@ shinyServer(function(input, output,session) {
                            "Intensive vegetable production" = as.integer(50),
                            "Pasture conversion" = as.integer(180)
                            )
+    ture_period <- crop_period()
     if(input$AMN1.1!=0){
       converisonF <- ifelse(crop_period() >= 100, 0.9,
                             ifelse(crop_period() < 40, 0.3, 0.5))
@@ -336,6 +337,7 @@ shinyServer(function(input, output,session) {
   # debugging AMN supply -----
   output$df_AMN <-  renderText({AMN_supply()})
   output$df_days <-  renderText({DAP_SD()})
+  output$crop_period <- renderText({crop_period()})
   # debugging the issue 14----
   output$df_graph <- DT::renderDataTable({Crop_N_graphing()})
   output$df_graph2 <- DT::renderDataTable({crop_filtered_1row()})
@@ -647,7 +649,7 @@ shinyServer(function(input, output,session) {
     validate(
       need(!is.null(top_layer()), warning_report.tab),
       need(crop_period() > DAP_nextSD() & crop_period() > DAP_SD(),
-           "Your next sampling date must be within the crop growing period (within 365 days).")
+           paste0("Your next sampling date must be within the crop growing period (within ", crop_period() ," days)."))
     )
         N_uptake_reactive()
 
@@ -670,7 +672,8 @@ shinyServer(function(input, output,session) {
                        Soil_N_supply = table_soil_N(),
                        p_N_uptake = N_uptake_reactive(),
                        p_N_supply = N_supply_depth(),
-                       tab_NCrop = N_crop())
+                       tab_NCrop = N_crop(),
+                       tab_N_requirements = report.tab_2())
 
         src <- normalizePath('report.Rmd')
         # Copy the report file to a temporary directory before processing it, in

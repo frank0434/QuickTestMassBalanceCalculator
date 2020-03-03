@@ -8,7 +8,7 @@ params:
   p_N_uptake: NA
   p_N_supply: NA
   tab_NCrop: NA
-
+  tab_N_requirements: NA
 ---
 
 ```{r setup, include=FALSE}
@@ -27,6 +27,19 @@ knitr::kable(params$crop_info, caption = "Information about the crop")
 
 ```{r}
 knitr::kable(params$Soil_N_supply, caption = "Soil nitrogen supply.")
+```
+
+## Estimated Crop Nitrogen Uptake with Remaining Crop Nitrogen Requirement
+
+```{r}
+knitr::kable(params$tab_N_requirements, caption = "Soil nitrogen supply.")
+```
+
+
+## Nitrogen requirement to Next Sampling Date 
+
+```{r}
+knitr::kable(params$tab_N_requirements, caption = "Soil nitrogen supply.")
 ```
 
 
