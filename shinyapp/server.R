@@ -21,6 +21,10 @@ source("functions.R")
 shinyServer(function(input, output,session) {
 # Crop tab ----
 
+  paddock.status <- reactive({
+    input$FallowOrCropping
+  })
+
   ## crop type filter from the display name
   input_crop <- reactive({
     ### only need the vector value
@@ -78,7 +82,13 @@ shinyServer(function(input, output,session) {
   ## the crop life time - it is calcuated from the consumption of estimated whole season N uptake
   ## the number of growing days depends on the crop
   crop_period <- reactive({
-    max(Crop_N_graphing()$DAP_annual)
+    if(paddock.status() == "Cropping"){
+      max(Crop_N_graphing()$DAP_annual)
+    } else {
+      # if the paddock is fallow, use the days differences between two sampling dates
+      DAP_nextSD()
+    }
+
   })
 
   # report back to the Estimated seasonal N uptake (kg/ha)
@@ -86,13 +96,25 @@ shinyServer(function(input, output,session) {
 
   # days after planting information ----
   DAP_SD <- reactive({
-    DAP <- as.Date(input$Sampling.Date) - as.Date(input$input_PlantingDate)
-    DAP <- ifelse(DAP < 0, 0, DAP)
+    if(paddock.status() == "Cropping"){
+      DAP <- as.Date(input$Sampling.Date) - as.Date(input$input_PlantingDate)
+      DAP <- ifelse(DAP < 0, 0, DAP)
+    } else{
+      # fallow situation will be no planting date
+      # but how can be so sure that the organic N pool will have that much N?
+      DAP <- as.integer(0)
+    }
+
   })
   DAP_nextSD <- reactive({
-    DAP <- as.Date(input$input_nextsamplingDate) - as.Date(input$input_PlantingDate)
-    DAP <- ifelse(DAP < 0, 0, DAP)
-  })
+    if(paddock.status() == "Cropping"){
+      DAP <- as.Date(input$input_nextsamplingDate) - as.Date(input$Sampling.Date)
+      DAP <- ifelse(DAP < 0, 0, DAP)
+    } else{
+      DAP <- as.Date(input$input_nextsamplingDate_fallow) - as.Date(input$Sampling.Date_fallow)
+      DAP <- ifelse(DAP < 0, 0, DAP)
+      }
+    })
 
 
 
@@ -228,10 +250,10 @@ shinyServer(function(input, output,session) {
           Sampling.Depth == "30-60") %>%
         mutate(qtest_user.input = Qtest.30.2(),
                Sample.length = as.integer(30))
-    } else if (top_layer() == layer.1){
-      # depth 0-30
-      df.1 <- soil %>%
-        filter(Texture == input$Texture.1,
+      } else if (top_layer() == layer.1){
+        # depth 0-30
+        df.1 <- soil %>%
+          filter(Texture == input$Texture.1,
                Moisture == input$Moisture.1,
                Sampling.Depth == "0-30") %>%
         mutate(qtest_user.input = Qtest.30.1(),
@@ -478,19 +500,20 @@ shinyServer(function(input, output,session) {
     })
   # key intermediate data - crop growing period and N uptake to draw 1st plot ----
   Crop_N_graphing <- reactive({
+    if(paddock.status() == "Cropping"){
+      #construct a df for the annual crop growing period and the paras from the model
+      df <- tibble::tibble(DAP_annual = seq(0, 365, by = 1),  list(crop_filtered_1row()))
 
-    #construct a df for the annual crop growing period and the paras from the model
-    df <- tibble::tibble(DAP_annual = seq(0, 365, by = 1),  list(crop_filtered_1row()))
-
-    #expand the model paras and calculate the curve
-    df <- unnest(df,cols = c(`list(crop_filtered_1row())`)) %>%
-      mutate(Predicted.N.Uptake = A+C/(1+exp(-B*(DAP_annual - M))),
-             Predicted.N.Uptake = ifelse(Predicted.N.Uptake <0, 0, Predicted.N.Uptake),
-             Remaining.N.Requirement = crop_filtered_1row()$Seasonal.N.uptake - Predicted.N.Uptake) %>%
-      mutate(Remaining.N.Requirement = ifelse(Remaining.N.Requirement >  0 , Remaining.N.Requirement, 0),
-             N_SD = ifelse(DAP_annual == DAP_SD(), Predicted.N.Uptake, NA),
-             N_nextSD = ifelse(DAP_annual == DAP_nextSD(), Predicted.N.Uptake, NA))
-  })
+      #expand the model paras and calculate the curve
+      df <- unnest(df,cols = c(`list(crop_filtered_1row())`)) %>%
+        mutate(Predicted.N.Uptake = A+C/(1+exp(-B*(DAP_annual - M))),
+               Predicted.N.Uptake = ifelse(Predicted.N.Uptake <0, 0, Predicted.N.Uptake),
+               Remaining.N.Requirement = crop_filtered_1row()$Seasonal.N.uptake - Predicted.N.Uptake) %>%
+        mutate(Remaining.N.Requirement = ifelse(Remaining.N.Requirement >  0 , Remaining.N.Requirement, 0),
+               N_SD = ifelse(DAP_annual == DAP_SD(), Predicted.N.Uptake, NA),
+               N_nextSD = ifelse(DAP_annual == DAP_nextSD(), Predicted.N.Uptake, NA))
+    }
+    })
 
   # 1st graph, line plot for N estimation ----
   N_uptake_reactive <- reactive({
@@ -528,25 +551,30 @@ shinyServer(function(input, output,session) {
       need(!is.null(top_layer()), warning_report.tab)
     )
     validate(
-      need(input$input_nextsamplingDate > input$Sampling.Date, "Sampling date must be smaller than the next sampling date.")
+      need(input$input_nextsamplingDate > input$Sampling.Date | input$input_nextsamplingDate_fallow > input$Sampling.Date_fallow,
+           "Sampling date must be smaller than the next sampling date.")
     )
-      depths <- soil_filter() %>%
-        select(MineralN, Sampling.Depth) %>%
-        mutate(Depth = paste0(Sampling.Depth, "cm"))
+    depths <- soil_filter() %>%
+      select(MineralN, Sampling.Depth) %>%
+      mutate(Depth = paste0(Sampling.Depth, "cm"))
 
-        total <- soil_filter() %>%
-          select(MineralN) %>%
-          dplyr::summarise(MineralN = sum(MineralN, na.rm = TRUE)) %>%
-          mutate(Depth = "Total")
-        p <- bind_rows(depths, total) %>%
-          ggplot(aes(Depth, MineralN, fill = Depth)) +
-          geom_col(width = 0.5) +
-          labs(title = "Estimated  soil mineral N supply (from nitrate QT)",
-               x = "",
-               y  = "Soil mineral N supply (kg/ha)")+
-          theme_qtmb() +
-          scale_y_continuous(expand = c(0,0), limits = c(0, max(total$MineralN) + 5 ))
-        p
+    # summarised the numbers
+    total <- soil_filter() %>%
+      select(MineralN) %>%
+      dplyr::summarise(MineralN = sum(MineralN, na.rm = TRUE)) %>%
+      mutate(Depth = "Total")
+
+    # draw a bar graph
+    p <- bind_rows(depths, total) %>%
+      ggplot(aes(Depth, MineralN, fill = Depth)) +
+      geom_col(width = 0.5) +
+      labs(title = "Estimated  soil mineral N supply (from nitrate QT)",
+           x = "",
+           y  = "Soil mineral N supply (kg/ha)")+
+      theme_qtmb() +
+      scale_y_continuous(expand = c(0,0), limits = c(0, max(total$MineralN) + 5 ))
+
+    p
     })
 # Report tab ----
   output$soil_filtered <- DT::renderDataTable({
@@ -670,14 +698,24 @@ shinyServer(function(input, output,session) {
         input$format_data, csv = 'csv', Excel = "xlsx"
       ))
     },
+
     content = function(file) {
+      # the content
+      df <- table_soil_N() %>%
+        mutate(Paddock = paddock())
+      #unit
+
+      unitLine <- "(),(),(cm),(mg/L),(kg/ha),(kg/ha),(kg/ha),(kg/ha),()"
+
       if(input$format_data == "Excel"){
-        openxlsx::write.xlsx(x = table_soil_N() %>%
-                               mutate(Paddock = paddock()), file = file)
+        openxlsx::write.xlsx(x = df, file = file)
       } else{
-        write.csv(table_soil_N()%>%
-                    mutate(Paddock = paddock()), file,row.names = FALSE)
-      }
+        f <- file(file, "w")
+        cat(format(unitLine), "\r",file = f)
+        write.table(df, file = f, append = TRUE, quote = FALSE, sep = ",", eol = "\r", row.names=F)
+        close(f)
+
+        }
     }
 
 

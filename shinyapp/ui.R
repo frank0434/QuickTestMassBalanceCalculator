@@ -37,7 +37,7 @@ shinyUI(fluidPage(
                       column(width = 4,
                              radioButtons(inputId = "FallowOrCropping",
                                           label = "Paddock Status",
-                                          choices = c("Fallow", "Cropping"), selected = "")),
+                                          choices = c("Fallow", "Cropping"), selected = " ")),
                       # the refresh page button ----
                       column(width = 4,
                              br(),
@@ -56,9 +56,9 @@ shinyUI(fluidPage(
                           column(12,
                                  selectInput(inputId = "input_system_fallow", label = "Farm System", choices = input_systems, width = width_box)),
                           column(12,
-                                 dateInput("Sampling.Date_fallow", label = "Sampling Date", width = width_box, format = "d MM yyyy",value = "")),
+                                 dateInput("Sampling.Date_fallow", label = "Sampling Date", width = width_box, format = "d MM yyyy")),
                           column(12,
-                                 dateInput(inputId = "input_nextsamplingDate_fallow", label = "Next Sampling Date", width = width_box, format = "d MM yyyy", value = "")),
+                                 dateInput(inputId = "input_nextsamplingDate_fallow", label = "Next Sampling Date", width = width_box, format = "d MM yyyy")),
                           column(12,
                                  textInput(inputId = "input_paddock.id_fallow", label = "Paddock Name/Number (Optional)", width = width_box)),
                           column(12,
@@ -109,11 +109,11 @@ shinyUI(fluidPage(
                       column(width = 4,
                              radioButtons(inputId = "samplingDepth",
                                           label = "The Top Layer Sampling Depth",
-                                          choices = c(layer.1.1, layer.1), selected = "")),
+                                          choices = c(layer.1.1, layer.1), selected = ""))
                       # the refresh page button ----
-                      column(width = 4,
-                             br(),
-                             actionButton("refresh", "Start a New Session?"))
+                      # column(width = 4,
+                      #        br(),
+                      #        actionButton("refresh.soil", "Start a New Session?"))
                       ),
                     #the conditionalPanel will show the desired sampling depth after user's selection
                     conditionalPanel(
