@@ -1,6 +1,6 @@
 ---
 title: "Quick test mass calculator report"
-date: "`r format(Sys.time(), ' %a %X, %d %B %Y')`"
+date: "`r format(Sys.time(), ' %a %X, %d %B %Y', tz = 'Pacific/Auckland')`"
 output: pdf_document
 params:
   crop_info: NA
@@ -26,20 +26,34 @@ knitr::kable(params$crop_info, caption = "Information about the crop")
 ## Nitrogen staus in soil
 
 ```{r}
-knitr::kable(params$Soil_N_supply, caption = "Soil nitrogen supply.")
+
+df <- params$Soil_N_supply
+profile.depth <-  gsub("-.+-", "-", x = paste(df$Sampling.Depth, collapse = "-"))
+
+df <- params$Soil_N_supply
+df <- rbind(df, c("Total", "",profile.depth, "","","", sum(df$SubTotal)))
+knitr::kable(df, caption = "Soil nitrogen supply in sampling layers.")
 ```
 
 ## Estimated Crop Nitrogen Uptake with Remaining Crop Nitrogen Requirement
 
 ```{r}
-knitr::kable(params$tab_N_requirements, caption = "Soil nitrogen supply.")
+knitr::kable(params$tab_NCrop, caption = "Crop nitrogen requirements.")
 ```
 
 
 ## Nitrogen requirement to Next Sampling Date 
 
 ```{r}
-knitr::kable(params$tab_N_requirements, caption = "Soil nitrogen supply.")
+# string1 <- c("0-15", "15-30")
+# string2 <- c("0-15", "15-30","30-60")
+# 
+# gsub("-.+-", "-", x = paste(string1, collapse = "-"))
+# gsub("-.+-", "-", x = paste(string2, collapse = "-"))
+
+df4 <- params$tab_N_requirements
+caption <- paste0("Nitrogen application information (", profile.depth, "cm).")
+knitr::kable(df4, caption = caption)
 ```
 
 
@@ -55,14 +69,33 @@ plot_grid(params$p_N_supply, params$p_N_uptake,  align = "v", ncol = 1)
 
 ## Acknowledgement 
 
-Funded by [FAR](https://www.far.org.nz/)
+The aim of the MPI SFF project Nitrogen – Measure it and Manage it was to develop a nitrate quick test management tool to assist with N fertiliser decisions for arable and vegetable crops.
 
-Projected was leaded by MATTHEW NORRIS.
+MPI’s Sustainable Farming Fund was the main funder for the three year programme of work, with co-funding and in-kind support from; FAR, HortNZ’s VR&I Board, Waikato Regional Council, Ravensdown, Ballance Agri-Nutrients, Hawke’s Bay Regional Council and Potatoes NZ.
 
-Matthew also developed the original excel tool which is free to download on the FAR website. 
+The collaborating research organisation delivering the science programme was   
+Plant & Food Research.
+
+Shiny application developer:  
+Jian Liu, Plant & Food Research  
+
+Contributors:   
+Diana Mathers, Foundation for Arable Research   
+Steven Dellow, Plant & Food Research   
+Hymmi Kong, Plant & Food Research   
+Matthew Norris, Waikato Regional Council   
+Adrian Hunt, Hort Innovation   
+
+Source code is avaiable on GitHub <https://github.com/frank0434/QuickTestMassBalanceCalculator>
 
 
-The app is a remake by [Jian Liu](https://www.linkedin.com/in/jian-aka-frank-liu-9623379a/) from [Plant and Food Research](https://www.plantandfood.co.nz/)
-
-Code is avaiable on [GitHub](https://github.com/PlantandFoodResearch/QuickTestMassBalanceCalculator)
-
+<span style="font-size:smaller;">Disclaimer</span>
+<span style="font-size:smaller;">
+This report is copyright to the Foundation for Arable Research (FAR) and may not be reproduced or copied
+in any form whatsoever without FAR’s written permission. The report is intended to provide accurate and
+adequate information relating to the subject matters contained in it and is based on information current at the time of
+report. Information contained in this report is general in nature and not intended as a substitute for specific
+professional advice on any matter and should not be relied upon for that purpose. It has been prepared and made
+available to all persons and entities strictly on the basis that FAR, its researchers and authors are fully excluded from
+any liability for damages arising out of any reliance in part or in full upon any of the information for any purpose.
+</span>

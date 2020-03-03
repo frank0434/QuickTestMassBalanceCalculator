@@ -123,17 +123,25 @@ shinyUI(fluidPage(
                                  tabPanel("0 - 15 cm",
                                           value = "Panel.1.1", # the value is link back to the server
                                           column(width = 12,
-                                                 selectizeInput(inputId = "Texture.1.1", label = "Soil Texture", choices = soil.texture,
+                                                 selectizeInput(inputId = "Texture.1.1",
+                                                                label = p("Soil Texture",
+                                                                          a('(Help Document)', href = 'https://www.far.org.nz/assets/files/blog/files//e7b9c43f-c4f6-52cb-b0f9-1e9e6539bb91.pdf', target = "_blank"
+                                                                            )),
+                                                                choices = soil.texture,
                                                                 options = list(
                                                                   placeholder = 'Please select an option below',
                                                                   onInitialize = I('function() { this.setValue(""); }')))),
                                           column(width = 12,
-                                                 selectizeInput(inputId = "Moisture.1.1", label = "Soil Moisture", choices = soil.moisture,
+                                                 selectizeInput(inputId = "Moisture.1.1",
+                                                                label = p("Soil Texture",
+                                                                          a('(Help Document)', href = 'https://www.far.org.nz/assets/files/blog/files//e7b9c43f-c4f6-52cb-b0f9-1e9e6539bb91.pdf', target = "_blank"
+                                                                          )),
+                                                                choices = soil.moisture,
                                                                 options = list(
                                                                   placeholder = 'Please select an option below',
                                                                   onInitialize = I('function() { this.setValue(""); }')))),
                                           column(width = 12,
-                                                 numericInput(inputId = "Qtest1.1", label = "Quick test Nitrate result (mg/L)", min = 0, value = 0)),
+                                                 numericInput(inputId = "Qtest1.1", label = "Quick test result in Nitrate-N (mg/L)", min = 0, value = 0)),
                                           column(width = 12,
                                                  numericInput(inputId = "AMN1.1", label = "AMN kg/ha @ 0 - 15 cm (if applicable)", min = 0, value = 0)),
                                           column(12,
@@ -142,17 +150,25 @@ shinyUI(fluidPage(
                                  tabPanel("15 - 30 cm",
                                           value = "Panel.1.2",
                                           column(width = 12,
-                                                 selectizeInput(inputId = "Texture.1.2", label = "Soil Texture", choices = soil.texture,
+                                                 selectizeInput(inputId = "Texture.1.2",
+                                                                label = p("Soil Texture",
+                                                                          a('(Help Document)', href = 'https://www.far.org.nz/assets/files/blog/files//e7b9c43f-c4f6-52cb-b0f9-1e9e6539bb91.pdf', target = "_blank"
+                                                                            )),
+                                                                choices = soil.texture,
                                                                 options = list(
                                                                   placeholder = 'Please select an option below',
                                                                   onInitialize = I('function() { this.setValue(""); }')))),
                                           column(width = 12,
-                                                 selectizeInput(inputId = "Moisture.1.2", label = "Soil Moisture", choices = soil.moisture,
+                                                 selectizeInput(inputId = "Moisture.1.2",
+                                                                label = p("Soil Texture",
+                                                                          a('(Help Document)', href = 'https://www.far.org.nz/assets/files/blog/files//e7b9c43f-c4f6-52cb-b0f9-1e9e6539bb91.pdf', target = "_blank"
+                                                                          )),
+                                                                choices = soil.moisture,
                                                                 options = list(
                                                                   placeholder = 'Please select an option below',
                                                                   onInitialize = I('function() { this.setValue(""); }')))),
                                           column(width = 12,
-                                                 numericInput(inputId = "Qtest1.2", label = "Quick test Nitrate result (mg/L)", min = 0, value = 0)),
+                                                 numericInput(inputId = "Qtest1.2", label = "Quick test result in Nitrate-N (mg/L)", min = 0, value = 0)),
 
                                           column(12,
                                                  actionButton("nextLayer.1.3", "Next Layer >")),
@@ -163,17 +179,25 @@ shinyUI(fluidPage(
                                           ),
                                  tabPanel("30 - 60 cm",value = "Panel.2",
                                           column(width = 12,
-                                                 selectizeInput(inputId = "Texture.2", label = "Soil Texture", choices = soil.texture,
+                                                 selectizeInput(inputId = "Texture.2",
+                                                                label = p("Soil Texture",
+                                                                          a('(Help Document)', href = 'https://www.far.org.nz/assets/files/blog/files//e7b9c43f-c4f6-52cb-b0f9-1e9e6539bb91.pdf', target = "_blank"
+                                                                            )),
+                                                                choices = soil.texture,
                                                                 options = list(
                                                                   placeholder = 'Please select an option below',
                                                                   onInitialize = I('function() { this.setValue(""); }')))),
                                           column(width = 12,
-                                                 selectizeInput(inputId = "Moisture.2", label = "Soil Moisture", choices = soil.moisture,
+                                                 selectizeInput(inputId = "Moisture.2",
+                                                                label = p("Soil Texture",
+                                                                          a('(Help Document)', href = 'https://www.far.org.nz/assets/files/blog/files//e7b9c43f-c4f6-52cb-b0f9-1e9e6539bb91.pdf', target = "_blank"
+                                                                          )),
+                                                                choices = soil.moisture,
                                                                 options = list(
                                                                   placeholder = 'Please select an option below',
                                                                   onInitialize = I('function() { this.setValue(""); }')))),
                                           column(width = 12,
-                                                 numericInput(inputId = "Qtest2", label = "Quick test Nitrate result (mg/L)", min = 0, value = 0)),
+                                                 numericInput(inputId = "Qtest2", label = "Quick test result in Nitrate-N (mg/L)", min = 0, value = 0)),
                                           column(12,
                                                  actionButton("nextLayer.1.4", "< Previous Layer"))
                                  )
@@ -185,17 +209,25 @@ shinyUI(fluidPage(
                                  id = "soil.tabset.layer.1",
                                  tabPanel("0 - 30 cm",value = "Panel.1",
                                           column(width = 12,
-                                                 selectizeInput(inputId = "Texture.1", label = "Soil Texture", choices = soil.texture,
+                                                 selectizeInput(inputId = "Texture.1",
+                                                                label = p("Soil Texture",
+                                                                          a('(Help Document)', href = 'https://www.far.org.nz/assets/files/blog/files//e7b9c43f-c4f6-52cb-b0f9-1e9e6539bb91.pdf', target = "_blank"
+                                                                            )),
+                                                                choices = soil.texture,
                                                                 options = list(
                                                                   placeholder = 'Please select an option below',
                                                                   onInitialize = I('function() { this.setValue(""); }')))),
                                           column(width = 12,
-                                                 selectizeInput(inputId = "Moisture.1", label = "Soil Moisture", choices = soil.moisture,
+                                                 selectizeInput(inputId = "Moisture.1",
+                                                                label = p("Soil Moisture",
+                                                                          a('(Help Document)', href = 'https://www.far.org.nz/assets/files/blog/files//e7b9c43f-c4f6-52cb-b0f9-1e9e6539bb91.pdf', target = "_blank"
+                                                                            )),
+                                                                choices = soil.moisture,
                                                                 options = list(
                                                                   placeholder = 'Please select an option below',
                                                                   onInitialize = I('function() { this.setValue(""); }')))),
                                           column(width = 12,
-                                                 numericInput(inputId = "Qtest1", label = "Quick test Nitrate result (mg/L)",min = 0, value = 0)),
+                                                 numericInput(inputId = "Qtest1", label = "Quick test result in Nitrate-N (mg/L)",min = 0, value = 0)),
                                           column(width = 12,
                                                  numericInput(inputId = "AMN1", label = "AMN kg/ha @ 0 - 15 cm (if applicable)", min = 0, value = 0)),
                                           column(12,
@@ -203,17 +235,25 @@ shinyUI(fluidPage(
                                           ),
                                  tabPanel("30 - 60 cm",value = "Panel.2.1",
                                           column(width = 12,
-                                                 selectizeInput(inputId = "Texture.2.1", label = "Soil Texture", choices = soil.texture,
+                                                 selectizeInput(inputId = "Texture.2.1",
+                                                                label = p("Soil Texture",
+                                                                          a('(Help Document)', href = 'https://www.far.org.nz/assets/files/blog/files//e7b9c43f-c4f6-52cb-b0f9-1e9e6539bb91.pdf', target = "_blank"
+                                                                          )),
+                                                                choices = soil.texture,
                                                                 options = list(
                                                                   placeholder = 'Please select an option below',
                                                                   onInitialize = I('function() { this.setValue(""); }')))),
                                           column(width = 12,
-                                                 selectizeInput(inputId = "Moisture.2.1", label = "Soil Moisture", choices = soil.moisture,
+                                                 selectizeInput(inputId = "Moisture.2.1",
+                                                                label = p("Soil Texture",
+                                                                          a('(Help Document)', href = 'https://www.far.org.nz/assets/files/blog/files//e7b9c43f-c4f6-52cb-b0f9-1e9e6539bb91.pdf', target = "_blank"
+                                                                          )),
+                                                                choices = soil.moisture,
                                                                 options = list(
                                                                   placeholder = 'Please select an option below',
                                                                   onInitialize = I('function() { this.setValue(""); }')))),
                                           column(width = 12,
-                                                 numericInput(inputId = "Qtest2.1", label = "Quick test Nitrate result (mg/L)", min = 0, value = 0)),
+                                                 numericInput(inputId = "Qtest2.1", label = "Quick test result in Nitrate-N (mg/L)", min = 0, value = 0)),
                                           column(12,
                                                  actionButton("nextLayer.2", "< Previous Layer"))
                                           )

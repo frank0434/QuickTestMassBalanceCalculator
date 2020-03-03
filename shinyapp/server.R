@@ -527,13 +527,13 @@ shinyServer(function(input, output,session) {
     #plotting
     ## graphy customisation
     size = 5
-    color_point = "orange"
+
 
     P <- Crop_N_graphing() %>%
       ggplot(aes(x = DAP_annual)) +
       # geom_point(aes(y = Predicted.N.Uptake)) +
       geom_line(aes(y = Predicted.N.Uptake, color = "Predicted.N.Uptake"))+
-      geom_point(aes(y = N_SD, shape = "Sampling date"), size = size, color = color_point, na.rm=TRUE)+
+      geom_point(aes(y = N_SD, shape = "Sampling date"), size = size, na.rm=TRUE)+
       geom_point(aes(y = N_nextSD, shape = "Next sampling date"),size = size,  na.rm=TRUE)+
       scale_shape_manual(name = "",values =  c(`Sampling date` = 16, `Next sampling date` = 4))+
       scale_color_manual(name = "", values = "red") +
@@ -563,16 +563,22 @@ shinyServer(function(input, output,session) {
     )
     depths <- soil_filter() %>%
       select(MineralN, Sampling.Depth) %>%
-      mutate(Depth = paste0(Sampling.Depth, "cm"))
+      mutate(Depth = paste0(Sampling.Depth, " cm"))
+
+    # profile sampling depth
+    profile.depth <-  gsub("-.+-", "-", x = paste(depths$Depth, collapse = "-"))
 
     # summarised the numbers
     total <- soil_filter() %>%
       select(MineralN) %>%
       dplyr::summarise(MineralN = sum(MineralN, na.rm = TRUE)) %>%
-      mutate(Depth = "Total")
+      mutate(Depth = paste("Total", profile.depth))
+
 
     # draw a bar graph
     p <- bind_rows(depths, total) %>%
+      # mutate(Depth = as.factor(Depth),
+      #        Depth = factor(Depth, levels = levels(Depth)[c("")])) # attempt to fix the order of layers
       ggplot(aes(Depth, MineralN, fill = Depth)) +
       geom_col(width = 0.5) +
       labs(title = "Estimated  soil mineral N supply (from nitrate QT)",
