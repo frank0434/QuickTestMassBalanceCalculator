@@ -62,7 +62,7 @@ shinyUI(fluidPage(
                           column(12,
                                  textInput(inputId = "input_paddock.id_fallow", label = "Paddock Name/Number (Optional)", width = width_box)),
                           column(12,
-                                 actionButton("JumpToSoil", "Next >")
+                                 actionButton("JumpToSoil_fallow", "Next >")
                           )
                         )
                       ),

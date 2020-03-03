@@ -358,6 +358,11 @@ shinyServer(function(input, output,session) {
 
   # back and forward for main tabs: crop, soil and report -----
   observeEvent(
+    input$JumpToSoil_fallow, {
+      updateTabsetPanel(session, inputId = "app.tabs",
+                        selected = "soil.info")
+    })
+  observeEvent(
     input$JumpToSoil, {
       updateTabsetPanel(session, inputId = "app.tabs",
                         selected = "soil.info")
