@@ -652,9 +652,10 @@ shinyServer(function(input, output,session) {
 
     # For PDF output, change this to "report.pdf"
     filename = function() { # https://shiny.rstudio.com/gallery/download-knitr-reports.html
-      paste('my-report', sep = '.', switch(
-        input$format, PDF = 'pdf', HTML = 'html', Word = 'docx'
-      ))
+      paste('my-report',  "pdf",sep = '.')
+      #       switch(
+      #   input$format, PDF = 'pdf', HTML = 'html', Word = 'docx'
+      # ))
     },
 
     content = function(file) {
@@ -678,11 +679,11 @@ shinyServer(function(input, output,session) {
       # Knit the document, passing in the `params` list, and eval it in a
       # child of the global environment (this isolates the code in the document
       # from the code in this app).
-      out <- rmarkdown::render('report.Rmd',
-                        switch(
-                          input$format,
-                          PDF = pdf_document(), HTML = html_document(), Word = word_document()
-                        ),
+      out <- rmarkdown::render('report.Rmd',output_format = pdf_document(),
+                        # switch(
+                        #   input$format,
+                        #   PDF = pdf_document(), HTML = html_document(), Word = word_document()
+                        # ),
                         params = params,
                         envir = new.env(parent = globalenv())
                         )
@@ -694,9 +695,11 @@ shinyServer(function(input, output,session) {
 
 
     filename = function() {
-      paste0('my Quick Test Result', sep = '.', switch(
-        input$format_data, csv = 'csv', Excel = "xlsx"
-      ))
+      "my Quick Test Result.csv"
+      # ,sep = '.')
+      #        switch(
+      #   input$format_data, csv = 'csv', Excel = "xlsx"
+      # ))
     },
 
     content = function(file) {
@@ -707,9 +710,9 @@ shinyServer(function(input, output,session) {
 
       unitLine <- "(),(),(cm),(mg/L),(kg/ha),(kg/ha),(kg/ha),()"
 
-      if(input$format_data == "Excel"){
-        openxlsx::write.xlsx(x = df, file = file)
-      } else{
+      # if(input$format_data == "Excel"){
+      #   openxlsx::write.xlsx(x = df, file = file)
+      # } else{
         f <- file(file, "w")
         cat("Texture,More detials refers to https://soils.landcareresearch.co.nz/understanding-soils/get-dirty/", "\r",file = f)
         cat("Moisture,", "\r", file = f)
@@ -724,7 +727,7 @@ shinyServer(function(input, output,session) {
         write.table(df, file = f, append = TRUE, quote = FALSE, sep = ",", eol = "\r", row.names=F)
         close(f)
 
-        }
+        # }
     }
 
 

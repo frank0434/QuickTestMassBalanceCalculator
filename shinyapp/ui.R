@@ -254,11 +254,11 @@ shinyUI(fluidPage(
                         column(5,offset = 2,
                                verticalLayout(column(5,
                                                      br(),
-                                                     radioButtons('format_data', 'File format', c('csv', 'Excel'), inline = TRUE),
+                                                     # radioButtons('format_data', 'File format', c('csv', 'Excel'), inline = TRUE),
                                                      downloadButton("qTestResults.csv", "Download Test Results")),
                                               column(5,
                                                      br(),
-                                                     radioButtons('format', 'Document format', c('PDF', 'Word'), inline = TRUE),
+                                                     # radioButtons('format', 'Document format', c('PDF', 'Word'), inline = TRUE),
                                                      downloadButton("report", "Download Report"))
                                               )))),
                     column(12,
