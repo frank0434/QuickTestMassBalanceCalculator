@@ -751,7 +751,7 @@ shinyServer(function(input, output,session) {
         cat("MineralN,Mineral Nitrogen Test", "\r", file = f)
         cat("AMN,Anaerobic Mineralisable N Test", "\r", file = f)
         cat("SubTotal,Total N (MineralN + AMN) in each sampled layer.", "\r", file = f)
-        cat("Paddock,Paddock name if have multiple tests.", "\r\n", file = f)
+        cat("Paddock,Paddock name if have multiple tests.", "\r\r\n", file = f)
 
         cat(format(unitLine), "\r",file = f)
         write.table(df, file = f, append = TRUE, quote = FALSE, sep = ",", eol = "\r", row.names=F)
