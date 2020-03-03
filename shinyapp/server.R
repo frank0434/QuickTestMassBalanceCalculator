@@ -705,12 +705,21 @@ shinyServer(function(input, output,session) {
         mutate(Paddock = paddock())
       #unit
 
-      unitLine <- "(),(),(cm),(mg/L),(kg/ha),(kg/ha),(kg/ha),(kg/ha),()"
+      unitLine <- "(),(),(cm),(mg/L),(kg/ha),(kg/ha),(kg/ha),()"
 
       if(input$format_data == "Excel"){
         openxlsx::write.xlsx(x = df, file = file)
       } else{
         f <- file(file, "w")
+        cat("Texture,More detials refers to https://soils.landcareresearch.co.nz/understanding-soils/get-dirty/", "\r",file = f)
+        cat("Moisture,", "\r", file = f)
+        cat("Sampling.Depth,Layers in cm", "\r", file = f)
+        cat("QTest.Results,quick test result", "\r", file = f)
+        cat("MineralN,Mineral Nitrogen Test", "\r", file = f)
+        cat("AMN,Anaerobic Mineralisable N Test", "\r", file = f)
+        cat("SubTotal,Total N (MineralN + AMN) in each sampled layer.", "\r", file = f)
+        cat("Paddock,Paddock name if have multiple tests.", "\r\n", file = f)
+
         cat(format(unitLine), "\r",file = f)
         write.table(df, file = f, append = TRUE, quote = FALSE, sep = ",", eol = "\r", row.names=F)
         close(f)
