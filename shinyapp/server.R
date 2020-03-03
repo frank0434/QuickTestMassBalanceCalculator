@@ -659,35 +659,57 @@ shinyServer(function(input, output,session) {
     },
 
     content = function(file) {
-      params <- list(crop_info = crop_info_reactive(),
-                     Soil_N_supply = table_soil_N(),
-                     p_N_uptake = N_uptake_reactive(),
-                     p_N_supply = N_supply_depth(),
-                     tab_NCrop = N_crop())
 
-      src <- normalizePath('report.Rmd')
-      # Copy the report file to a temporary directory before processing it, in
-      # case we don't have write permissions to the current working dir (which
-      # can happen when deployed).
-      owd <- setwd(tempdir())
-      on.exit(setwd(owd))
-      file.copy(src, 'report.Rmd', overwrite = TRUE)
+      if(paddock.status() == "Cropping"){
+        params <- list(crop_info = crop_info_reactive(),
+                       Soil_N_supply = table_soil_N(),
+                       p_N_uptake = N_uptake_reactive(),
+                       p_N_supply = N_supply_depth(),
+                       tab_NCrop = N_crop())
 
-      # Set up parameters to pass to Rmd document
-      # params <- list(n = input$slider)
+        src <- normalizePath('report.Rmd')
+        # Copy the report file to a temporary directory before processing it, in
+        # case we don't have write permissions to the current working dir (which
+        # can happen when deployed).
+        owd <- setwd(tempdir())
+        on.exit(setwd(owd))
+        file.copy(src, 'report.Rmd', overwrite = TRUE)
 
-      # Knit the document, passing in the `params` list, and eval it in a
-      # child of the global environment (this isolates the code in the document
-      # from the code in this app).
-      out <- rmarkdown::render('report.Rmd',output_format = pdf_document(),
-                        # switch(
-                        #   input$format,
-                        #   PDF = pdf_document(), HTML = html_document(), Word = word_document()
-                        # ),
-                        params = params,
-                        envir = new.env(parent = globalenv())
-                        )
-      file.rename(out, file)
+        # Set up parameters to pass to Rmd document
+        # params <- list(n = input$slider)
+
+        # Knit the document, passing in the `params` list, and eval it in a
+        # child of the global environment (this isolates the code in the document
+        # from the code in this app).
+        out <- rmarkdown::render('report.Rmd',output_format = pdf_document(),
+                                 # switch(
+                                 #   input$format,
+                                 #   PDF = pdf_document(), HTML = html_document(), Word = word_document()
+                                 # ),
+                                 params = params,
+                                 envir = new.env(parent = globalenv())
+        )
+        file.rename(out, file)
+      } else{
+        params <- list(Soil_N_supply = table_soil_N(),
+                       p_N_supply = N_supply_depth())
+
+        src <- normalizePath('report_fallow.Rmd')
+        owd <- setwd(tempdir())
+        on.exit(setwd(owd))
+        file.copy(src, 'report_fallow.Rmd', overwrite = TRUE)
+
+        out <- rmarkdown::render('report_fallow.Rmd',output_format = pdf_document(),
+                                 # switch(
+                                 #   input$format,
+                                 #   PDF = pdf_document(), HTML = html_document(), Word = word_document()
+                                 # ),
+                                 params = params,
+                                 envir = new.env(parent = globalenv())
+        )
+        file.rename(out, file)
+        }
+
     }
   )
 
