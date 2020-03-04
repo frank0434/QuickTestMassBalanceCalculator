@@ -14,6 +14,7 @@ library(rmarkdown)
 library(knitr)
 library(openxlsx)
 library(DT)
+source("R/my_helper.R")
 
 # selectInput -------------------------------------------------------------
 
