@@ -130,7 +130,7 @@ shinyUI(fluidPage(
                                           column(width = 12,
                                                  numericInput(inputId = "samplingDepth1.2",
                                                                 label = p("Sampling depth end (cm)"),
-                                                                value = 10, min = 10, max = 100, step = 5
+                                                                value = "", min = 10, max = 100, step = 5
                                                               )),
                                           column(width = 12,
                                                  selectInput.soilProperty(id = "Texture.1",
@@ -191,7 +191,7 @@ shinyUI(fluidPage(
                                           column(width = 12,
                                                  numericInput(inputId = "samplingDepth3.2",
                                                               label = p("Sampling depth end (cm)"),
-                                                              value = "", min = 30, max = 100, step = 10
+                                                              value = "", min = 31, max = 100, step = 10
                                                  )),
                                           column(width = 12,
                                                  selectInput.soilProperty(id = "Texture.3",

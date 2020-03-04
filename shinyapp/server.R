@@ -121,10 +121,17 @@ shinyServer(function(input, output,session) {
 # Soil tab ----
   # process sampling depth ----
   #take the radiobutton inputs as the key
-  top_layer <- reactive({input$samplingDepth1.2})
+  top_layer <- reactive({
+    # only need to end of sampling for each layer
+    evaluate_inputDepth(input$samplingDepth1.2)
+    })
+  middle_layer <- reactive({
+    evaluate_inputDepth(input$samplingDepth2.2)
+    })
 
-  middle_layer <- reactive({input$samplingDepth2})
-  deep_layer <- reactive({input$samplingDepth3})
+  deep_layer <- reactive({
+    evaluate_inputDepth(input$samplingDepth3.2)
+    })
 
   # process the first sample depth to have the soil sample length
   sample.length1 <- reactive({
@@ -136,18 +143,17 @@ shinyServer(function(input, output,session) {
   })
 
   sample.length2 <-  reactive({
-    if(!is.na(middle_layer())){
+    if(!is.na(middle_layer())& middle_layer () > top_layer()){
       validate(
         need(is.numeric(middle_layer()), "Sampling depth must be a number."),
-        need(middle_layer() > top_layer(), "The second sampling depth must be greater than the first one."),
-        need(middle_layer() < deep_layer(), "The second sampling depth must be smaller than the third one.")
+        need(middle_layer() > top_layer(), "The second sampling depth must be greater than the first one.")
       )
       as.integer(middle_layer() - top_layer())}
   })
 
   sample.length3 <- reactive({
 
-    if(!is.na(deep_layer())){
+    if(!is.na(deep_layer()) & deep_layer() > middle_layer()){
       validate(
         need(is.numeric(deep_layer()), "Sampling depth must be a number."),
         need(deep_layer() > top_layer(), "The third sampling depth must be greater than the first one."),
@@ -156,35 +162,6 @@ shinyServer(function(input, output,session) {
       as.integer(deep_layer() - middle_layer())
       }
     })
-
-# conditional panel selection plan------
-  # if the user chose 0-15 then only process and show the appropriate sampling depth
-  # depth.15.1 <- reactive({
-  #   if(top_layer() == layer.1.1){
-  #         as.integer(15) # constrain the type
-  #   }
-  # })
-  #
-  # depth.15.2 <- reactive({
-  #   if(top_layer() == layer.1.1){
-  #     as.integer(15)
-  #   }
-  # })
-  #
-  # depth.30.2 <- reactive({
-  #   if(top_layer() == layer.1.1){
-  #     as.integer(30)
-  #   } else if(top_layer == layer.1){
-  #     as.integer(30)
-  #   }
-  # })
-  #
-  # depth.30.1 <- reactive({
-  #   if(top_layer() == layer.1){
-  #     as.integer(30)
-  #   }
-  # })
-
 
   # quick test results ----
 
@@ -211,66 +188,6 @@ shinyServer(function(input, output,session) {
     )
     val_layer3
   })
-  # Qtest.15.1 <- reactive({
-  #   # if user choose one of the top layer, proceed.
-  #   # otherwise, pass the message to the report tab in the UI via Qtest.15.1 or other objects
-  #   validate(
-  #     need(top_layer() == layer.1.1, "Please chose the sampling method.")
-  #   )
-  #   val0_15 <- as.integer(input$Qtest1.1)
-  #   validate(
-  #     need(val0_15 >= 0, warning_soil.tab)
-  #   )
-  #   val0_15
-  #   })
-  #
-  # Qtest.15.2 <- reactive({
-  #
-  #   validate(
-  #     need(top_layer() == layer.1.1, "Please chose the sampling method.")
-  #   )
-  #   val15_30 <- as.integer(input$Qtest1.2)
-  #   validate(
-  #     need(val15_30 >= 0, warning_soil.tab)
-  #   )
-  #   val15_30
-  # })
-  #
-  # Qtest.30.2 <- reactive({
-  #   # two conditionalPanle both have the 30-60 layer - need to provide twice
-  #   if(top_layer() == layer.1.1){
-  #       val30_60 <- as.integer(input$Qtest2)
-  #
-  #       if(val30_60 < 0){
-  #         print("Quick test resutls must be 0 or positive numbers.")
-  #       } else if (is.na(val30_60)){
-  #         val30_60 = 0
-  #       } else{
-  #         val30_60
-  #       }
-  #   } else if(top_layer() == layer.1){
-  #     val30_60 <- as.integer(input$Qtest2.1)
-  #     if(val30_60 < 0){
-  #       print("Quick test resutls must be 0 or positive numbers.")
-  #     } else if (is.na(val30_60)){
-  #       val30_60 = 0
-  #     } else{
-  #       val30_60
-  #     }
-  #   }
-  # })
-  # Qtest.30.1 <- reactive({
-  #   validate(
-  #     need(top_layer() == layer.1, "Please chose the sampling method.")
-  #   )
-  #   val0_30 <- as.integer(input$Qtest1)
-  #   validate(
-  #     need(val0_30 >= 0, warning_soil.tab)
-  #   )
-  #   val0_30
-  # })
-  #
-  ## 60-90 is disabled
 
   # quick test nitrate-N (mg/kg DM) calculation----
   ## Quick test nitrate-N (mg/kg DM) = Quick test nitrate (mg/L) (user input)/CF
@@ -377,6 +294,12 @@ shinyServer(function(input, output,session) {
                       "input_componentYield",
                       label = crop.para_filtered()$Harvested.parameter,
                       choices = crop_filtered()$Harvested.value)
+  })
+  observeEvent(input$samplingDepth1.2, {
+    updateNumericInput(session, inputId = "samplingDepth2.1", value = input$samplingDepth1.2)
+  })
+  observeEvent(input$samplingDepth2.2, {
+    updateNumericInput(session, inputId = "samplingDepth3.1", value = input$samplingDepth2.2)
   })
 
   # back and forward for main tabs: crop, soil and report -----
@@ -583,8 +506,7 @@ shinyServer(function(input, output,session) {
            "Sampling date must be smaller than the next sampling date.")
     )
     depths <- soil_filter() %>%
-      select(MineralN, Sampling.Depth) %>%
-      mutate(Depth = paste0(Sampling.Depth, " cm"))
+      select(MineralN, Sampling.Depth)
 
     # profile sampling depth
     profile.depth <-  gsub("-.+-", "-", x = paste(depths$Depth, collapse = "-"))

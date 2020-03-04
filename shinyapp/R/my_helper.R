@@ -37,8 +37,8 @@ selectInput.soilProperty <- function(id, label = id, choices = soil.texture){
 #'
 #' @examples
 soil.para.filters <- function(soil = soil, start, end, inputTexture, inputMoisture, inputQtest, sampleLength){
-  if(!is.null(start) & !is.null(end)){
-    if(end <= 30L){
+  if(end > 0){
+    if(end <= 30L ){
       df <- soil %>%
         filter(Texture == inputTexture,
                Moisture == inputMoisture,
@@ -64,4 +64,14 @@ soil.para.filters <- function(soil = soil, start, end, inputTexture, inputMoistu
                Sampling.Depth = paste0(start, "-", end, "cm"))
     }
   }
-  }
+}
+
+
+
+
+evaluate_inputDepth <- function(inputDepth){
+  depth <- as.integer(inputDepth)
+  depth <- ifelse(is.na(depth) | is.null(depth), 0, depth)
+
+}
+
