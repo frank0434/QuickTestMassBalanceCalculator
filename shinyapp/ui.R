@@ -106,7 +106,7 @@ shinyUI(fluidPage(
                     br(),
                     #two top layer options for user to choose the sampling method
                     fluidRow(
-                      column(width = 4,
+                      column(width = 6,
                              radioButtons(inputId = "samplingDepth",
                                           label = "The Top Layer Sampling Depth",
                                           choices = c(layer.1.1, layer.1), selected = ""))
@@ -133,7 +133,7 @@ shinyUI(fluidPage(
                                                                   onInitialize = I('function() { this.setValue(""); }')))),
                                           column(width = 12,
                                                  selectizeInput(inputId = "Moisture.1.1",
-                                                                label = p("Soil Texture",
+                                                                label = p("Soil Moisture",
                                                                           a('(Help Document)', href = 'https://www.far.org.nz/assets/files/blog/files//e7b9c43f-c4f6-52cb-b0f9-1e9e6539bb91.pdf', target = "_blank"
                                                                           )),
                                                                 choices = soil.moisture,
@@ -143,7 +143,12 @@ shinyUI(fluidPage(
                                           column(width = 12,
                                                  numericInput(inputId = "Qtest1.1", label = "Quick test result in Nitrate-N (mg/L)", min = 0, value = 0)),
                                           column(width = 12,
-                                                 numericInput(inputId = "AMN1.1", label = "AMN kg/ha @ 0 - 15 cm (if applicable)", min = 0, value = 0)),
+                                                 numericInput(inputId = "AMN1.1",
+                                                              label = p("AMN kg/ha @ 0 - 15 cm (if applicable)\r",
+                                                                        em('Anaerobic Mineralisable N',
+                                                                           a('(More details)', href = 'https://www.far.org.nz/assets/files/blog/files//e7b9c43f-c4f6-52cb-b0f9-1e9e6539bb91.pdf', target = "_blank"
+                                                                           ))),
+                                                              min = 0, value = 0)),
                                           column(12,
                                                  actionButton("nextLayer.1.1", "Next Layer >"))
                                           ),
@@ -229,7 +234,12 @@ shinyUI(fluidPage(
                                           column(width = 12,
                                                  numericInput(inputId = "Qtest1", label = "Quick test result in Nitrate-N (mg/L)",min = 0, value = 0)),
                                           column(width = 12,
-                                                 numericInput(inputId = "AMN1", label = "AMN kg/ha @ 0 - 15 cm (if applicable)", min = 0, value = 0)),
+                                                 numericInput(inputId = "AMN1",
+                                                              label = p("AMN kg/ha @ 0 - 30 cm (if applicable)\r",
+                                                                        em('Anaerobic Mineralisable N',
+                                                                           a('(More details)', href = 'https://www.far.org.nz/assets/files/blog/files//e7b9c43f-c4f6-52cb-b0f9-1e9e6539bb91.pdf', target = "_blank"
+                                                                           ))),
+                                                              min = 0, value = 0)),
                                           column(12,
                                                  actionButton("nextLayer.1", "Next Layer >"))
                                           ),
