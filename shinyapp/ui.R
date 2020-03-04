@@ -134,14 +134,19 @@ shinyUI(fluidPage(
                                           column(width = 12,
                                                  selectizeInput(inputId = "Moisture.1.1",
                                                                 label = p("Soil Moisture",
-                                                                          a('(Help Document)', href = 'https://www.far.org.nz/assets/files/blog/files//e7b9c43f-c4f6-52cb-b0f9-1e9e6539bb91.pdf', target = "_blank"
+                                                                          a('(Help Document)', href = 'https://www.far.org.nz/assets/files/blog/files//e7b9c43f-c4f6-52cb-b0f9-1e9e6539bb91.pdf'
                                                                           )),
                                                                 choices = soil.moisture,
                                                                 options = list(
                                                                   placeholder = 'Please select an option below',
                                                                   onInitialize = I('function() { this.setValue(""); }')))),
                                           column(width = 12,
-                                                 numericInput(inputId = "Qtest1.1", label = "Quick test result in Nitrate-N (mg/L)", min = 0, value = 0)),
+                                                 div(style='display: inline-block;',
+                                                     numericInput(inputId = "Qtest1.1", label = "Quick test result in Nitrate-N (mg/L)", min = 0, value = 0),
+                                                     img(src=b64,style='display: inline-block;')
+                                                     )),
+                                          br(),
+                                          br(),
                                           column(width = 12,
                                                  numericInput(inputId = "AMN1.1",
                                                               label = p("AMN kg/ha @ 0 - 15 cm (if applicable)\r",
