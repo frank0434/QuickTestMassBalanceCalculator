@@ -15,7 +15,6 @@
 # 4. `validate` with `need` call provide the neat way to pass feedback message to the UI
 # 5. `trycatch` only report messages in the log not in the front end
 
-source("functions.R")
 
 # Define server logic required to draw a histogram
 shinyServer(function(input, output,session) {
@@ -415,8 +414,12 @@ shinyServer(function(input, output,session) {
       updateTabsetPanel(session, inputId = "soil.tabset.layer.1.1",
                         selected = "Panel.1.2")
     })
-  # refresh button ----
+  # refresh button in crop and soil tabs----
+
   observeEvent(input$refresh, {
+    shinyjs::js$refresh()
+  })
+  observeEvent(input$refresh.soil, {
     shinyjs::js$refresh()
   })
 
@@ -512,9 +515,11 @@ shinyServer(function(input, output,session) {
 
       #expand the model paras and calculate the curve
       df <- unnest(df,cols = c(`list(crop_filtered_1row())`)) %>%
+        # calculate the curve
         mutate(Predicted.N.Uptake = A+C/(1+exp(-B*(DAP_annual - M))),
                Predicted.N.Uptake = ifelse(Predicted.N.Uptake <0, 0, Predicted.N.Uptake),
                Remaining.N.Requirement = crop_filtered_1row()$Seasonal.N.uptake - Predicted.N.Uptake) %>%
+        # add the sampling dates
         mutate(Remaining.N.Requirement = ifelse(Remaining.N.Requirement >  0 , Remaining.N.Requirement, 0),
                N_SD = ifelse(DAP_annual == DAP_SD(), Predicted.N.Uptake, NA),
                N_nextSD = ifelse(DAP_annual == DAP_nextSD(), Predicted.N.Uptake, NA))
@@ -527,8 +532,14 @@ shinyServer(function(input, output,session) {
     ## graphy customisation
     size = 5
 
+    # filter the x axis to bring the resolution up
+    nrows.non0 <- nrow(filter(Crop_N_graphing(), Remaining.N.Requirement != 0))
+    # slice 50 days more to see the palateu
+    df <- Crop_N_graphing() %>%
+      slice(1:(nrows.non0 + 50))
 
-    P <- Crop_N_graphing() %>%
+
+    P <-  df %>%
       ggplot(aes(x = DAP_annual)) +
       # geom_point(aes(y = Predicted.N.Uptake)) +
       geom_line(aes(y = Predicted.N.Uptake, color = "Predicted.N.Uptake"))+
@@ -538,15 +549,15 @@ shinyServer(function(input, output,session) {
       scale_color_manual(name = "", values = "red") +
       labs(title = "Estimated whole crop N uptake",
            x = "Days after planting",
-           y  = "Whole crop N uptake (kg/ha)")+
+           y  = "Whole crop N uptake (kg/ha)",
+           caption = "More accurate results could be obtained from Lab tests or more sophisticated biophysical model (e.g.APSIM).")+
       theme_qtmb() +
       annotate("text",
-               x = median(Crop_N_graphing()$DAP_annual),
-               y = max(Crop_N_graphing()$Predicted.N.Uptake)/2 - 3,
+               x = median(df$DAP_annual),
+               y = max(df$Predicted.N.Uptake)/2 - 3,
                # vjust = 0.3,
-               alpha = 0.5, size = 5.5, angle = -30,
-               label = "bold(\"This graph is only an indicator.
-               \nNot necessary represent \nthe actual situtation for the tested paddock!\")",
+               alpha = 0.5, size = 5.5,
+               label = "bold(\"This graph is only an indicator\")",
                parse = TRUE)
     P
   })
@@ -746,17 +757,25 @@ shinyServer(function(input, output,session) {
           mutate(Paddock = paddock(),
                  SamplingDate = samplingDate(),
                  NextSamplingDate = nextSamplingDate(),
-                 PlantingDate = plantingDate())
+                 PlantingDate = plantingDate()) %>%
+          select(PlantingDate, SamplingDate, NextSamplingDate, Sampling.Depth, everything())
+
+        #unit
+
+        unitLine <- ",,,(cm),(),(),(mg/L),(kg/ha),(kg/ha),(kg/ha),()"
+
       } else{
         df <- table_soil_N() %>%
           mutate(Paddock = paddock(),
                  SamplingDate = samplingDate(),
-                 NextSamplingDate = nextSamplingDate())
+                 NextSamplingDate = nextSamplingDate()) %>%
+          select(SamplingDate, NextSamplingDate, Sampling.Depth, everything())
+        #unit
+
+        unitLine <- ",,(cm),(),(),(mg/L),(kg/ha),(kg/ha),(kg/ha),()"
+
       }
 
-      #unit
-
-      unitLine <- "(),(),(cm),(mg/L),(kg/ha),(kg/ha),(kg/ha),()"
 
       # if(input$format_data == "Excel"){
       #   openxlsx::write.xlsx(x = df, file = file)

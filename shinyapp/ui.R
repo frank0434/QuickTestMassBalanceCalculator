@@ -107,6 +107,8 @@ shinyUI(fluidPage(
 
                     navbarPage(title = "Sampling Depth",
                                id = "soil.tabset.layer.1.1",
+                               collapsible = TRUE,
+                               # theme = "www/bootstrap.min.css",
                                tabPanel("TOP", # 0-15 cm layer ----
                                         value = "Panel.1.1", # the value is link back to the server
                                         column(width = 12,
@@ -166,7 +168,7 @@ shinyUI(fluidPage(
                                                                           label = "Soil Moisture",
                                                                           choices = soil.moisture)),
                                           column(width = 12,
-                                                 div(style='display: inline-block;',
+                                                 div(qstyle='display: inline-block;',
                                                      numericInput(inputId = "Qtest2",
                                                                   label = "Quick test result in Nitrate-N (mg/L)",
                                                                   min = 0, value = 0),
@@ -212,12 +214,12 @@ shinyUI(fluidPage(
                                                  br()),
                                           column(12,
                                                  actionButton("nextLayer.1.4", "< Previous Layer"))
-                                 )
-                               # tabPanel(p(strong("Restart")),
-                               #          value = "Restartpanel",
-                               #          column(width = 12,
-                               #                 actionButton("refresh.soil", "Restart?"))
-                               # )
+                                 ),
+                               tabPanel(p(strong("Restart")),
+                                        value = "Restartpanel",
+                                        column(width = 12,
+                                               actionButton("refresh.soil", "Restart?"))
+                               )
                       ),
                     br(),
                     br(),
@@ -251,6 +253,8 @@ shinyUI(fluidPage(
                                  DT::dataTableOutput("report.table2")
                                  )),
                         column(5,offset = 2,
+                               br(),
+
                                verticalLayout(column(5,
                                                      br(),
                                                      # radioButtons('format_data', 'File format', c('csv', 'Excel'), inline = TRUE),
