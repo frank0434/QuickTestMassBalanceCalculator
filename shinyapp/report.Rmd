@@ -28,16 +28,18 @@ knitr::kable(params$crop_info, caption = "Information about the crop")
 df <- params$Soil_N_supply
 profile.depth <-  gsub("-.+-", "-", x = paste(df$Sampling.Depth, collapse = "-"))
 
-# add units into the table
-df <- params$Soil_N_supply %>% 
-  rename('Depth (cm)' = Sampling.Depth,
-         'QTest.Results (mg/L)' = QTest.Results,
-         'Mineral N (kg/ha)' = MineralN,
-         'AMN (kg/ha)' = AMN,
-         'SubTotal (kg/ha)' = SubTotal)
 
 # add a total amount
 df <- rbind(df, c("Total", "",profile.depth, "","","", sum(df$SubTotal)))
+# add units into the table
+df <-df %>% 
+  rename('Depth (cm)' = Sampling.Depth,
+         # 'QTest.Results (mg/L)' = QTest.Results,
+         'Mineral N (kg/ha)' = MineralN,
+         'AMN (kg/ha)' = AMN,
+         'SubTotal (kg/ha)' = SubTotal) %>% 
+  select(-QTest.Results)
+
 knitr::kable(df, caption = "Soil nitrogen supply in sampling layers.")
 ```
 

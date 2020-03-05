@@ -15,15 +15,24 @@ knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
 ## Nitrogen staus in soil
 
 ```{r N in soil tab}
-df <- params$Soil_N_supply %>% 
-  rename('Depth (cm)' = Sampling.Depth,
-         'QTest.Results (mg/L)' = QTest.Results,
-         'Mineral N (kg/ha)' = MineralN,
-         'AMN (kg/ha)' = AMN,
-         'SubTotal (kg/ha)' = SubTotal)
+df <- params$Soil_N_supply 
+
+# Grab the total sampling depth 
+profile.depth <-  gsub("-.+-", "-", x = paste(df$Sampling.Depth, collapse = "-"))
 
 # add a total amount
+
 df <- rbind(df, c("Total", "",profile.depth, "","","", sum(df$SubTotal)))
+
+
+
+df <- df %>% 
+  rename('Depth (cm)' = Sampling.Depth,
+         'Mineral N (kg/ha)' = MineralN,
+         'AMN (kg/ha)' = AMN,
+         'SubTotal (kg/ha)' = SubTotal) %>% 
+  select(-QTest.Results)
+
 knitr::kable(df, caption = "Soil nitrogen supply.")
 ```
 
