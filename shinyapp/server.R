@@ -63,6 +63,10 @@ shinyServer(function(input, output,session) {
     as.character(input$input_paddock.id)
   })
 
+  samplingDate <- reactive({input$Sampling.Date})
+  nextSamplingDate <- reactive({input$input_nextsamplingDate})
+  plantingDate <- reactive({input$input_PlantingDate})
+
   ## make a data frame to feed into the downloadable report
   crop_info_reactive <- reactive({
     tab <- tibble(" " = c("Crop Selected",
@@ -74,9 +78,9 @@ shinyServer(function(input, output,session) {
                   "  " = c(input$input_crop,
                            input$input_system,
                            input$input_componentYield,
-                           format(as.Date(input$input_PlantingDate, format = "%F"), "%d %B %Y"),
-                           format(as.Date(input$Sampling.Date, format = "%F"), "%d %B %Y"),
-                           format(as.Date(input$input_nextsamplingDate, format = "%F"), "%d %B %Y")))
+                           format(as.Date(plantingDate(), format = "%F"), "%d %B %Y"),
+                           format(as.Date(samplingDate(), format = "%F"), "%d %B %Y"),
+                           format(as.Date(nextSamplingDate(), format = "%F"), "%d %B %Y")))
   })
 
   ## the crop life time - it is calcuated from the consumption of estimated whole season N uptake
@@ -97,7 +101,7 @@ shinyServer(function(input, output,session) {
   # days after planting information ----
   DAP_SD <- reactive({
     if(paddock.status() == "Cropping"){
-      DAP <- as.Date(input$Sampling.Date) - as.Date(input$input_PlantingDate)
+      DAP <- as.Date(samplingDate()) - as.Date(plantingDate())
       DAP <- ifelse(DAP < 0, 0, DAP)
     } else{
       # fallow situation will be no planting date
@@ -108,7 +112,7 @@ shinyServer(function(input, output,session) {
   })
   DAP_nextSD <- reactive({
     if(paddock.status() == "Cropping"){
-      DAP <- as.Date(input$input_nextsamplingDate) - as.Date(input$Sampling.Date)
+      DAP <- as.Date(nextSamplingDate()) - as.Date(samplingDate())
       DAP <- ifelse(DAP < 0, 0, DAP)
     } else{
       DAP <- as.Date(input$input_nextsamplingDate_fallow) - as.Date(input$Sampling.Date_fallow)
@@ -182,7 +186,7 @@ shinyServer(function(input, output,session) {
   })
 
   Qtest3 <- reactive({
-    val_layer1 <- as.integer(input$Qtest3)
+    val_layer3 <- as.integer(input$Qtest3)
     validate(
       need(val_layer3 >= 0, warning_soil.tab)
     )
@@ -196,46 +200,89 @@ shinyServer(function(input, output,session) {
   # BD same rules as for CF, filtering by textture and mositure and depth
   # CF2  = 1/(CF/(BD * (depth/10)))
   soil_filter <- reactive({
+    validate(
+      need(!is.null(paddock.status()), warning_paddockstatus)
+    )
 
-    df.1 <- soil.para.filters(soil = soil, start = "0", end = top_layer(),
-                             inputTexture = input$Texture.1,
-                             inputMoisture = input$Moisture.1,
-                             inputQtest = Qtest1(),
-                             sampleLength = sample.length1())
-    df.2 <- soil.para.filters(soil = soil, start = top_layer(), end = middle_layer(),
-                             inputTexture = input$Texture.2,
-                             inputMoisture = input$Moisture.2,
-                             inputQtest = Qtest2(),
-                             sampleLength = sample.length2())
-    df.3 <- soil.para.filters(soil = soil, start = middle_layer(), end = deep_layer(),
-                             inputTexture = input$Texture.3,
-                             inputMoisture = input$Moisture.3,
-                             inputQtest = Qtest3(),
-                             sampleLength = sampleLength3())
-    # concatenate dfs if existing
+    Texture1 = input$Texture.1
+    Texture2 = input$Texture.2
+    Texture3 = input$Texture.3
 
-    if(exists("df.1") & exists("df.2") & exists("df.3")){
-        df <- bind_rows(df.1, df.2, df.3) %>%
-          mutate(qTestN.mg.kg = round(qtest_user.input/CF, digits = 0),
-                 CF2 = round(1/(CF/(Bulk.density*(Sample.length/10))), digits = 2),
-                 MineralN = round(qtest_user.input*CF2/0.95, digits = 0))
-      } else if (exists("df.1") & exists("df.2")){
-          df <- bind_rows(df.1, df.2) %>%
-            mutate(qTestN.mg.kg = round(qtest_user.input/CF, digits = 0),
-                   CF2 = round(1/(CF/(Bulk.density*(Sample.length/10))), digits = 2),
-                   MineralN = round(qtest_user.input*CF2/0.95, digits = 0))
-      } else if (exists("df.1")){
-        df <-  df.1 %>%
-          mutate(qTestN.mg.kg = round(qtest_user.input/CF, digits = 0),
-                 CF2 = round(1/(CF/(Bulk.density*(Sample.length/10))), digits = 2),
-                 MineralN = round(qtest_user.input*CF2/0.95, digits = 0))
-      } else {
-        df <-  tibble(Texture = " ",
-                      Mositure = " ",
-                      Sampling.Depth = " ",
-                      Description = "Please check the soil tab.")
-        }
+    Moisture1 = input$Moisture.1
+    Moisture2 = input$Moisture.2
+    Moisture3 = input$Moisture.3
 
+
+    if(top_layer() != 0 & middle_layer() != 0 & deep_layer() != 0){
+      obj <- c(Texture1, Texture2, Texture3, Moisture1, Moisture2, Moisture3)
+      validate(
+        need(sum(sapply(obj, is.null)) == 0, warning_soil.reminder ),
+        need(middle_layer() > top_layer() & deep_layer() > middle_layer(), warning_wronginput)
+      )
+      df.1 <- soil.para.filters(soil = soil, start = "0", end = top_layer(),
+                                inputTexture = Texture1,
+                                inputMoisture = Moisture1,
+                                inputQtest = Qtest1(),
+                                sampleLength = sample.length1())
+      df.2 <- soil.para.filters(soil = soil, start = top_layer(), end = middle_layer(),
+                                inputTexture = Texture2,
+                                inputMoisture = Moisture2,
+                                inputQtest = Qtest2(),
+                                sampleLength = sample.length2())
+      df.3 <- soil.para.filters(soil = soil, start = middle_layer(), end = deep_layer(),
+                                inputTexture = Texture3,
+                                inputMoisture = Moisture3,
+                                inputQtest = Qtest3(),
+                                sampleLength = sample.length3())
+      df <- bind_rows(df.1, df.2, df.3) %>%
+        mutate(qTestN.mg.kg = round(qtest_user.input/CF, digits = 0),
+               CF2 = round(1/(CF/(Bulk.density*(Sample.length/10))), digits = 2),
+               MineralN = round(qtest_user.input*CF2/0.95, digits = 0))
+    } else if (top_layer() != 0 & middle_layer() != 0){
+      obj <- c(Texture1, Texture2, Moisture1, Moisture2)
+      validate(
+        need(sum(sapply(obj, is.null)) == 0, warning_soil.reminder),
+        need(middle_layer() > top_layer(), warning_wronginput)
+        # need(sum(sapply(obj, is.null)) == 4, warning_soil.reminder)
+      )
+      df.1 <- soil.para.filters(soil = soil, start = "0", end = top_layer(),
+                                inputTexture = Texture1,
+                                inputMoisture = Moisture1,
+                                inputQtest = Qtest1(),
+                                sampleLength = sample.length1())
+      df.2 <- soil.para.filters(soil = soil, start = top_layer(), end = middle_layer(),
+                                inputTexture = Texture2,
+                                inputMoisture = Moisture2,
+                                inputQtest = Qtest2(),
+                                sampleLength = sample.length2())
+      df <- bind_rows(df.1, df.2) %>%
+        mutate(qTestN.mg.kg = round(qtest_user.input/CF, digits = 0),
+               CF2 = round(1/(CF/(Bulk.density*(Sample.length/10))), digits = 2),
+               MineralN = round(qtest_user.input*CF2/0.95, digits = 0))
+
+    } else if (top_layer() != 0){
+      obj <- c(Texture1,  Moisture1)
+      validate(
+        need(sum(sapply(obj, is.null)) == 0, "Please check if all soil information has been filled.")
+      )
+      df <- soil.para.filters(soil = soil, start = "0", end = top_layer(),
+                              inputTexture = Texture1,
+                              inputMoisture = Moisture1,
+                              inputQtest = Qtest1(),
+                              sampleLength = sample.length1()) %>%
+      mutate(qTestN.mg.kg = round(qtest_user.input/CF, digits = 0),
+               CF2 = round(1/(CF/(Bulk.density*(Sample.length/10))), digits = 2),
+               MineralN = round(qtest_user.input*CF2/0.95, digits = 0))
+    } else {
+      validate(
+        need(!is.null(Texture1), warning_report.tab)
+      )
+      # df <-  tibble(Texture = " ",
+      #               Mositure = " ",
+      #               Sampling.Depth = " ",
+      #               MineralN = "Please check the soil tab",
+      #               Description = "Please check the soil tab.")
+    }
 
     df
   })
@@ -251,6 +298,9 @@ shinyServer(function(input, output,session) {
   AMN_supply <- reactive({
     # the raw data is from the excel file. two small to keep in a tab in the sqlite file
     # crop system default AMN reserves
+    validate(
+      need(crop_period() > 0, "AMN release curve requirs that the next sampling date is greater than the sampling date.")
+    )
     AMN_default <- switch (input$input_system,
                            "Mixed cropping/arable" = as.integer(90),
                            "Intensive vegetable production" = as.integer(50),
@@ -282,6 +332,9 @@ shinyServer(function(input, output,session) {
 
   # total N supply from soil - minN + AMN
   Soil_N_supply <- reactive({
+    validate(
+      need(is.data.frame(soil_filter()), warning_report.tab)
+    )
     sn <- sum(soil_filter()$MineralN, na.rm = TRUE) + AMN_supply() # AMN_supply has 3 element.
     sn
   })
@@ -384,7 +437,7 @@ shinyServer(function(input, output,session) {
 
   # crop n requirement unitl next sampling date, a value -----
   crop.N.req.until.next.SD <- reactive({
-    if(input$Sampling.Date >= input$input_nextsamplingDate){
+    if(samplingDate() >= nextSamplingDate()){
       val <- "NA. Sampling date must be smaller than the next sampling date."
     } else {
       na.omit(Crop_N_graphing()$N_nextSD) - na.omit(Crop_N_graphing()$N_SD)
@@ -405,7 +458,7 @@ shinyServer(function(input, output,session) {
   # Crop N requirement table ----
   N_crop <- reactive({
     validate(
-      need(input$input_nextsamplingDate > input$Sampling.Date,
+      need(nextSamplingDate() > samplingDate(),
            "Sampling date must be smaller than the next sampling date."),
       need(!is.na(Seasonal.N.uptake()) &&!is.null(remaining.crop.N.requirement()),
            "Sampling date is out of range!")
@@ -424,7 +477,7 @@ shinyServer(function(input, output,session) {
     })
   report.tab_2 <- reactive({
     validate(
-      need(input$input_nextsamplingDate > input$Sampling.Date, ""),
+      need(nextSamplingDate() > samplingDate(), ""),
       need(!is.null(remaining.crop.N.requirement), "Next sampling date is out of growing period.")
     )
 
@@ -440,6 +493,7 @@ shinyServer(function(input, output,session) {
   # Quick test result + AMN supply table
   table_soil_N <- reactive({
     validate(
+      need(is.data.frame(soil_filter()), warning_report.tab),
       need(nrow(soil_filter()) > 0, "Please provide quick test information.")
     )
     no.ofRows <- nrow(soil_filter())-1
@@ -499,14 +553,16 @@ shinyServer(function(input, output,session) {
   N_supply_depth <- reactive({
     # maybe we can cut this plot down to make the app mobile friendly !!!
     validate(
+      need(is.data.frame(soil_filter()), warning_report.tab),
       need(!is.null(top_layer()), warning_report.tab)
     )
     validate(
-      need(input$input_nextsamplingDate > input$Sampling.Date | input$input_nextsamplingDate_fallow > input$Sampling.Date_fallow,
+      need(nextSamplingDate() > samplingDate() | input$input_nextsamplingDate_fallow > input$Sampling.Date_fallow,
            "Sampling date must be smaller than the next sampling date.")
     )
     depths <- soil_filter() %>%
-      select(MineralN, Sampling.Depth)
+      select(MineralN, Sampling.Depth) %>%
+      mutate(Depth = paste(Sampling.Depth, "cm"))
 
     # profile sampling depth
     profile.depth <-  gsub("-.+-", "-", x = paste(depths$Depth, collapse = "-"))
@@ -684,7 +740,10 @@ shinyServer(function(input, output,session) {
     content = function(file) {
       # the content
       df <- table_soil_N() %>%
-        mutate(Paddock = paddock())
+        mutate(Paddock = paddock(),
+               SamplingDate = samplingDate(),
+               NextSamplingDate = nNextSamplingDate(),
+               PlantingDate = ifelse(is.na(plantingDate()| is.null(plantingDate), NA, plantingDate)))
       #unit
 
       unitLine <- "(),(),(cm),(mg/L),(kg/ha),(kg/ha),(kg/ha),()"

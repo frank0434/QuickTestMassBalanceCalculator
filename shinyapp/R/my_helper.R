@@ -45,7 +45,7 @@ soil.para.filters <- function(soil = soil, start, end, inputTexture, inputMoistu
                Sampling.Depth == "0-30") %>%
         mutate(qtest_user.input = inputQtest,
                Sample.length = sampleLength,
-               Sampling.Depth = paste0(start, "-", end,"cm"))
+               Sampling.Depth = paste0(start, "-", end))
     } else if(end > 30L & end <= 60L){
       df <- soil %>%
         filter(Texture == inputTexture,
@@ -53,7 +53,7 @@ soil.para.filters <- function(soil = soil, start, end, inputTexture, inputMoistu
                Sampling.Depth == "30-60") %>%
         mutate(qtest_user.input = inputQtest,
                Sample.length = sampleLength,
-               Sampling.Depth = paste0(start, "-", end, "cm"))
+               Sampling.Depth = paste0(start, "-", end))
     } else {
       df <- soil %>%
         filter(Texture == inputTexture,
@@ -61,7 +61,7 @@ soil.para.filters <- function(soil = soil, start, end, inputTexture, inputMoistu
                Sampling.Depth == "60-90") %>%
         mutate(qtest_user.input = inputQtest,
                Sample.length = sampleLength,
-               Sampling.Depth = paste0(start, "-", end, "cm"))
+               Sampling.Depth = paste0(start, "-", end))
     }
   }
 }
