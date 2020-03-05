@@ -739,11 +739,20 @@ shinyServer(function(input, output,session) {
 
     content = function(file) {
       # the content
-      df <- table_soil_N() %>%
-        mutate(Paddock = paddock(),
-               SamplingDate = samplingDate(),
-               NextSamplingDate = nNextSamplingDate(),
-               PlantingDate = ifelse(is.na(plantingDate()| is.null(plantingDate), NA, plantingDate)))
+
+      if(paddock.status()=="Cropping"){
+        df <- table_soil_N() %>%
+          mutate(Paddock = paddock(),
+                 SamplingDate = samplingDate(),
+                 NextSamplingDate = nextSamplingDate(),
+                 PlantingDate = plantingDate())
+      } else{
+        df <- table_soil_N() %>%
+          mutate(Paddock = paddock(),
+                 SamplingDate = samplingDate(),
+                 NextSamplingDate = nextSamplingDate())
+      }
+
       #unit
 
       unitLine <- "(),(),(cm),(mg/L),(kg/ha),(kg/ha),(kg/ha),()"

@@ -104,23 +104,10 @@ shinyUI(fluidPage(
            tabPanel(h3("2. Soil info"),
                     value = "soil.info",
                     br(),
-                    #two top layer options for user to choose the sampling method
-                    # fluidRow(
-                    #   column(width = 6,
-                    #          radioButtons(inputId = "samplingDepth",
-                    #                       label = "The Top Layer Sampling Depth",
-                    #                       choices = c(layer.1.1, layer.1), selected = ""))
-                    #   # the refresh page button ----
-                    #   # column(width = 4,
-                    #   #        br(),
-                    #   #        actionButton("refresh.soil", "Start a New Session?"))
-                    #   ),
-                    #the conditionalPanel will show the desired sampling depth after user's selection
-                    # conditionalPanel( # 0-15cm conditional panel----
-                    # condition = "input.samplingDepth == '0-15 cm'",
-                      navbarPage(title = "Sampling Depth",
-                                 id = "soil.tabset.layer.1.1",
-                                 tabPanel("TOP", # 0-15 cm layer ----
+
+                    navbarPage(title = "Sampling Depth",
+                               id = "soil.tabset.layer.1.1",
+                               tabPanel("TOP", # 0-15 cm layer ----
                                           value = "Panel.1.1", # the value is link back to the server
                                           column(width = 12,
                                                  numericInput(inputId = "samplingDepth1.1",
@@ -140,8 +127,12 @@ shinyUI(fluidPage(
                                                  selectInput.soilProperty(id = "Moisture.1",
                                                                           label = "Soil Moisture",
                                                                           choices = soil.moisture)),
-                                          column(width = 12,
-                                                 numericInput(inputId = "Qtest1", label = "Quick test result in Nitrate-N (mg/L)", min = 0, value = 0)),
+                                          column(width = 6,
+                                                 numericInput(inputId = "Qtest1",
+                                                              label = "Quick test result in Nitrate-N (mg/L)",
+                                                              min = 0, value = 0)),
+                                        column(width = 6,
+                                               img = 'colour_scale.png'),
                                           column(width = 12,
                                                  numericInput(inputId = "AMN1.1",
                                                               label = p("AMN kg/ha @ 0 - 15 cm (if applicable)\r",
@@ -207,71 +198,6 @@ shinyUI(fluidPage(
                                                  actionButton("nextLayer.1.4", "< Previous Layer"))
                                  )
                       ),
-                    # ),  # the end of first condtional panel ----
-                    # conditionalPanel( # 0-30 cm conditional ------
-                    #   condition = "input.samplingDepth == '0-30 cm'",
-                    #   navbarPage(title = "Sampling Depth",
-                    #              id = "soil.tabset.layer.1",
-                    #              tabPanel("0 - 30 cm", # 0-30 cm layer -----
-                    #                       value = "Panel.1",
-                    #                       column(width = 12,
-                    #                              selectizeInput(inputId = "Texture.1",
-                    #                                             label = p("Soil Texture",
-                    #                                                       a('(Help Document)', href = 'https://www.far.org.nz/assets/files/blog/files//e7b9c43f-c4f6-52cb-b0f9-1e9e6539bb91.pdf', target = "_blank"
-                    #                                                         )),
-                    #                                             choices = soil.texture,
-                    #                                             options = list(
-                    #                                               placeholder = 'Please select an option below',
-                    #                                               onInitialize = I('function() { this.setValue(""); }')))),
-                    #                       column(width = 12,
-                    #                              selectizeInput(inputId = "Moisture.1",
-                    #                                             label = p("Soil Moisture",
-                    #                                                       a('(Help Document)', href = 'https://www.far.org.nz/assets/files/blog/files//e7b9c43f-c4f6-52cb-b0f9-1e9e6539bb91.pdf', target = "_blank"
-                    #                                                         )),
-                    #                                             choices = soil.moisture,
-                    #                                             options = list(
-                    #                                               placeholder = 'Please select an option below',
-                    #                                               onInitialize = I('function() { this.setValue(""); }')))),
-                    #                       column(width = 12,
-                    #                              numericInput(inputId = "Qtest1", label = "Quick test result in Nitrate-N (mg/L)",min = 0, value = 0)),
-                    #                       column(width = 12,
-                    #                              numericInput(inputId = "AMN1",
-                    #                                           label = p("AMN kg/ha @ 0 - 30 cm (if applicable)\r",
-                    #                                                     em('Anaerobic Mineralisable N',
-                    #                                                        a('(More details)', href = 'https://www.far.org.nz/assets/files/blog/files//e7b9c43f-c4f6-52cb-b0f9-1e9e6539bb91.pdf', target = "_blank"
-                    #                                                        ))),
-                    #                                           min = 0, value = 0)),
-                    #                       column(12,
-                    #                              actionButton("nextLayer.1", "Next Layer >"))
-                    #                       ),
-                    #              tabPanel("30 - 60 cm", # 30 - 60 layer ----
-                    #                       value = "Panel.2.1",
-                    #                       column(width = 12,
-                    #                              selectizeInput(inputId = "Texture.2.1",
-                    #                                             label = p("Soil Texture",
-                    #                                                       a('(Help Document)', href = 'https://www.far.org.nz/assets/files/blog/files//e7b9c43f-c4f6-52cb-b0f9-1e9e6539bb91.pdf', target = "_blank"
-                    #                                                       )),
-                    #                                             choices = soil.texture,
-                    #                                             options = list(
-                    #                                               placeholder = 'Please select an option below',
-                    #                                               onInitialize = I('function() { this.setValue(""); }')))),
-                    #                       column(width = 12,
-                    #                              selectizeInput(inputId = "Moisture.2.1",
-                    #                                             label = p("Soil Texture",
-                    #                                                       a('(Help Document)', href = 'https://www.far.org.nz/assets/files/blog/files//e7b9c43f-c4f6-52cb-b0f9-1e9e6539bb91.pdf', target = "_blank"
-                    #                                                       )),
-                    #                                             choices = soil.moisture,
-                    #                                             options = list(
-                    #                                               placeholder = 'Please select an option below',
-                    #                                               onInitialize = I('function() { this.setValue(""); }')))),
-                    #                       column(width = 12,
-                    #                              numericInput(inputId = "Qtest2.1", label = "Quick test result in Nitrate-N (mg/L)", min = 0, value = 0)),
-                    #                       column(12,
-                    #                              actionButton("nextLayer.2", "< Previous Layer"))
-                    #                       )
-                    #              )
-                    #   ), # the end of 0-30 conditional page ----
-
                     br(),
                     br(),
                     br(),
