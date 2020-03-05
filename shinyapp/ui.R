@@ -108,12 +108,12 @@ shinyUI(fluidPage(
                     navbarPage(title = "Sampling Depth",
                                id = "soil.tabset.layer.1.1",
                                tabPanel("TOP", # 0-15 cm layer ----
-                                          value = "Panel.1.1", # the value is link back to the server
-                                          column(width = 12,
-                                                 numericInput(inputId = "samplingDepth1.1",
-                                                              label = p("Sampling depth start (cm)"),
-                                                              value = 0, min = 0, max = 0
-                                                 )),
+                                        value = "Panel.1.1", # the value is link back to the server
+                                        column(width = 12,
+                                               numericInput(inputId = "samplingDepth1.1",
+                                                            label = p("Sampling depth start (cm)"),
+                                                            value = 0, min = 0, max = 0
+                                                            )),
                                           column(width = 12,
                                                  numericInput(inputId = "samplingDepth1.2",
                                                                 label = p("Sampling depth end (cm)"),
@@ -127,21 +127,24 @@ shinyUI(fluidPage(
                                                  selectInput.soilProperty(id = "Moisture.1",
                                                                           label = "Soil Moisture",
                                                                           choices = soil.moisture)),
-                                          column(width = 6,
-                                                 numericInput(inputId = "Qtest1",
-                                                              label = "Quick test result in Nitrate-N (mg/L)",
-                                                              min = 0, value = 0)),
-                                        column(width = 6,
-                                               img = 'colour_scale.png'),
                                           column(width = 12,
-                                                 numericInput(inputId = "AMN1.1",
-                                                              label = p("AMN kg/ha @ 0 - 15 cm (if applicable)\r",
-                                                                        em('Anaerobic Mineralisable N',
-                                                                           a('(More details)', href = 'https://www.far.org.nz/assets/files/blog/files//e7b9c43f-c4f6-52cb-b0f9-1e9e6539bb91.pdf', target = "_blank"
+                                                 div(style='display: inline-block;',
+                                                     numericInput(inputId = "Qtest1",
+                                                                  label = "Quick test result in Nitrate-N (mg/L)",
+                                                                  min = 0, value = 0),
+                                                     img(src=b64,style='display: inline-block;')
+                                                     )),
+                                        column(width = 12,
+                                               br()),
+                                        column(width = 12,
+                                               numericInput(inputId = "AMN1.1",
+                                                            label = p("AMN kg/ha @ 0 - 15 cm (if applicable)\r",
+                                                                      em('Anaerobic Mineralisable N',
+                                                                         a('(More details)', href = 'https://www.far.org.nz/assets/files/blog/files//e7b9c43f-c4f6-52cb-b0f9-1e9e6539bb91.pdf', target = "_blank"
                                                                            ))),
-                                                              min = 0, value = 0)),
-                                          column(12,
-                                                 actionButton("nextLayer.1.1", "Next Layer >"))
+                                                            min = 0, value = 0)),
+                                        column(12,
+                                               actionButton("nextLayer.1.1", "Next Layer >"))
                                           ),
                                  tabPanel("MIDDLE", # 15 -30 cm -------
                                           value = "Panel.1.2",
@@ -163,8 +166,14 @@ shinyUI(fluidPage(
                                                                           label = "Soil Moisture",
                                                                           choices = soil.moisture)),
                                           column(width = 12,
-                                                 numericInput(inputId = "Qtest2", label = "Quick test result in Nitrate-N (mg/L)", min = 0, value = 0)),
-
+                                                 div(style='display: inline-block;',
+                                                     numericInput(inputId = "Qtest2",
+                                                                  label = "Quick test result in Nitrate-N (mg/L)",
+                                                                  min = 0, value = 0),
+                                                     img(src=b64,style='display: inline-block;')
+                                                 )),
+                                          column(width = 12,
+                                                 br()),
                                           column(12,
                                                  actionButton("nextLayer.1.3", "Next Layer >")),
 
@@ -193,10 +202,22 @@ shinyUI(fluidPage(
                                                                           label = "Soil Moisture",
                                                                           choices = soil.moisture)),
                                           column(width = 12,
-                                                 numericInput(inputId = "Qtest3", label = "Quick test result in Nitrate-N (mg/L)", min = 0, value = 0)),
+                                                 div(style='display: inline-block;',
+                                                     numericInput(inputId = "Qtest3",
+                                                                  label = "Quick test result in Nitrate-N (mg/L)",
+                                                                  min = 0, value = 0),
+                                                     img(src=b64,style='display: inline-block;')
+                                                 )),
+                                          column(width = 12,
+                                                 br()),
                                           column(12,
                                                  actionButton("nextLayer.1.4", "< Previous Layer"))
                                  )
+                               # tabPanel(p(strong("Restart")),
+                               #          value = "Restartpanel",
+                               #          column(width = 12,
+                               #                 actionButton("refresh.soil", "Restart?"))
+                               # )
                       ),
                     br(),
                     br(),

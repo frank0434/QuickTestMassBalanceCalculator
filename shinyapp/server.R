@@ -420,6 +420,7 @@ shinyServer(function(input, output,session) {
     shinyjs::js$refresh()
   })
 
+
   # Crop alone remaining N required (critical calculation) ----
   remaining.crop.N.requirement <- reactive({
     # Remaining.CropN.requirement = estimated.seasonal.Nuptake - C+A/(1 + exp(-B*(DAP - M)))

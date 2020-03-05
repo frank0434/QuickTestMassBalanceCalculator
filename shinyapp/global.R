@@ -79,4 +79,5 @@ btn_style <- ".btn {
 
 # plotting -----
 
+b64 <- base64enc::dataURI(file="colour_scale.png", mime="image/png")
 
