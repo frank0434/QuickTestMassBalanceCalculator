@@ -14,8 +14,17 @@ knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
 
 ## Nitrogen staus in soil
 
-```{r}
-knitr::kable(params$Soil_N_supply, caption = "Soil nitrogen supply.")
+```{r N in soil tab}
+df <- params$Soil_N_supply %>% 
+  rename('Depth (cm)' = Sampling.Depth,
+         'QTest.Results (mg/L)' = QTest.Results,
+         'Mineral N (kg/ha)' = MineralN,
+         'AMN (kg/ha)' = AMN,
+         'SubTotal (kg/ha)' = SubTotal)
+
+# add a total amount
+df <- rbind(df, c("Total", "",profile.depth, "","","", sum(df$SubTotal)))
+knitr::kable(df, caption = "Soil nitrogen supply.")
 ```
 
 
@@ -23,20 +32,38 @@ knitr::kable(params$Soil_N_supply, caption = "Soil nitrogen supply.")
 ## Graph
 
 
-```{r, fig.height=6, fig.width=10, dpi=300}
+```{r plotting, fig.height=6, fig.width=10, dpi=300}
 params$p_N_supply
 ```
 
 ## Acknowledgement 
 
-Funded by [FAR](https://www.far.org.nz/)
+The aim of the MPI SFF project Nitrogen – Measure it and Manage it was to develop a nitrate quick test management tool to assist with N fertiliser decisions for arable and vegetable crops.
 
-Projected was leaded by MATTHEW NORRIS.
+MPI’s Sustainable Farming Fund was the main funder for the three year programme of work, with co-funding and in-kind support from; FAR, HortNZ’s VR&I Board, Waikato Regional Council, Ravensdown, Ballance Agri-Nutrients, Hawke’s Bay Regional Council and Potatoes NZ.
 
-Matthew also developed the original excel tool which is free to download on the FAR website. 
+The collaborating research organisation delivering the science programme was   
+Plant & Food Research.
+
+Shiny application developer:  
+Jian Liu, Plant & Food Research  
+
+Contributors:   
+Diana Mathers, Foundation for Arable Research   
+Steven Dellow, Plant & Food Research   
+Hymmi Kong, Plant & Food Research   
+Matthew Norris, Waikato Regional Council   
+Adrian Hunt, Hort Innovation   
+
+Source code is avaiable on GitHub <https://github.com/frank0434/QuickTestMassBalanceCalculator>
 
 
-The app is a remake by [Jian Liu](https://www.linkedin.com/in/jian-aka-frank-liu-9623379a/) from [Plant and Food Research](https://www.plantandfood.co.nz/)
+<p>Disclaimer</p>
 
-Code is avaiable on [GitHub](https://github.com/PlantandFoodResearch/QuickTestMassBalanceCalculator)
-
+This report is copyright to the Foundation for Arable Research (FAR) and may not be reproduced or copied
+in any form whatsoever without FAR’s written permission. The report is intended to provide accurate and
+adequate information relating to the subject matters contained in it and is based on information current at the time of
+report. Information contained in this report is general in nature and not intended as a substitute for specific
+professional advice on any matter and should not be relied upon for that purpose. It has been prepared and made
+available to all persons and entities strictly on the basis that FAR, its researchers and authors are fully excluded from
+any liability for damages arising out of any reliance in part or in full upon any of the information for any purpose.

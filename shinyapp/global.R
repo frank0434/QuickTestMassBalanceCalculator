@@ -14,6 +14,7 @@ library(rmarkdown)
 library(knitr)
 library(openxlsx)
 library(DT)
+source("functions.R")
 
 # selectInput -------------------------------------------------------------
 
@@ -55,10 +56,12 @@ width_box <- 400
 layer.1 <- "0-30 cm"
 layer.1.1 <- "0-15 cm"
 #message to show in the UI
-warning_report.tab  <- as.character("WARNING! Please fill in the soil tab first.")
+warning_report.tab  <- as.character("Please fill the soil tab first.")
 warning_soil.tab <- as.character("Quick test result must be between 0 and 2147483647.")
 warning_samplingdate <- as.character("WARNING! \r\nSampling date must be smaller than the next sampling date.")
-
+warning_paddockstatus <- as.character("Please choose your paddock status in the Crop info Tab.")
+warning_wronginput <- as.character("Incorrect information in the soil tab.")
+warning_soil.reminder <- as.character("Please check if all soil information has been filled.")
 # action button style text ----
 btn_style <- ".btn {
               display:block;

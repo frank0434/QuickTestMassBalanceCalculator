@@ -17,39 +17,40 @@ knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
 
 ## Crop information
 
-
-
-```{r}
+```{r crop info tab}
 knitr::kable(params$crop_info, caption = "Information about the crop")
 ```
 
 ## Nitrogen staus in soil
 
-```{r}
-
+```{r N in soil tab}
+# Grab the total sampling depth 
 df <- params$Soil_N_supply
 profile.depth <-  gsub("-.+-", "-", x = paste(df$Sampling.Depth, collapse = "-"))
 
-df <- params$Soil_N_supply
+# add units into the table
+df <- params$Soil_N_supply %>% 
+  rename('Depth (cm)' = Sampling.Depth,
+         'QTest.Results (mg/L)' = QTest.Results,
+         'Mineral N (kg/ha)' = MineralN,
+         'AMN (kg/ha)' = AMN,
+         'SubTotal (kg/ha)' = SubTotal)
+
+# add a total amount
 df <- rbind(df, c("Total", "",profile.depth, "","","", sum(df$SubTotal)))
 knitr::kable(df, caption = "Soil nitrogen supply in sampling layers.")
 ```
 
-## Estimated Crop Nitrogen Uptake with Remaining Crop Nitrogen Requirement
+## Estimated crop nitrogen uptake with remaining crop nitrogen requirement
 
-```{r}
+```{r crop n uptake tab}
 knitr::kable(params$tab_NCrop, caption = "Crop nitrogen requirements.")
 ```
 
 
-## Nitrogen requirement to Next Sampling Date 
+## Nitrogen requirement to next sampling date 
 
-```{r}
-# string1 <- c("0-15", "15-30")
-# string2 <- c("0-15", "15-30","30-60")
-# 
-# gsub("-.+-", "-", x = paste(string1, collapse = "-"))
-# gsub("-.+-", "-", x = paste(string2, collapse = "-"))
+```{r N application tab}
 
 df4 <- params$tab_N_requirements
 caption <- paste0("Nitrogen application information (", profile.depth, "cm).")
@@ -59,7 +60,7 @@ knitr::kable(df4, caption = caption)
 
 ## Graph
 
-```{r, fig.height=12, fig.width=10, dpi=300}
+```{r plotting, fig.height=12, fig.width=10, dpi=300}
 library(cowplot)
 
 plot_grid(params$p_N_supply, params$p_N_uptake,  align = "v", ncol = 1)
