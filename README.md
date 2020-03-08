@@ -1,7 +1,6 @@
 # Qtest_shinyApp
 
 
-
 The goal of Qtest_shinyApp is to implementate shiny application to QTMB as developed in N messure it mange it SFF project
 
 # Basic information
@@ -20,7 +19,6 @@ Repeat the steps to unhidden other sheets.
 The sheet `Quick Test Mass Balance Tool` has some hidden info
 [Click] `VIEW` tag on the meum
 [Tick] `Gridlines` and `Headings`)
-
 
 [//]: <> (**Where is the dropdown list from** 
 `Crop` Panel
@@ -65,6 +63,7 @@ over 100 days = AMN default * 0.9 / crop period
 under 40 days = AMN default * 0.3 / crop period
 in between = AMN default * 0.5 / crop period
 )
+
 # Steps
 
 1. change the format of the data. From excel to a sqlite db

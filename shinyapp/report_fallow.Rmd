@@ -1,74 +1,49 @@
 ---
 title: "Quick test mass calculator report"
-date: "`r format(Sys.time(), ' %a %X, %d %B %Y', tz = 'Pacific/Auckland')`"
+date: "`r format(Sys.time(), ' %a %X, %d %B %Y')`"
 output: pdf_document
 params:
-  crop_info: NA
   Soil_N_supply: NA
-  p_N_uptake: NA
   p_N_supply: NA
-  tab_NCrop: NA
-  tab_N_requirements: NA
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
 ```
 
-## Crop information
-
-```{r crop info tab}
-knitr::kable(params$crop_info, caption = "Information about the crop")
-```
 
 ## Nitrogen staus in soil
 
 ```{r N in soil tab}
+df <- params$Soil_N_supply 
+
 # Grab the total sampling depth 
-df <- params$Soil_N_supply
 profile.depth <-  gsub("-.+-", "-", x = paste(df$Sampling.Depth, collapse = "-"))
 
-
 # add a total amount
+
 df <- rbind(df, c("Total", "",profile.depth, "","","", sum(df$SubTotal)))
-# add units into the table
-df <-df %>% 
+
+
+
+df <- df %>% 
   rename('Depth (cm)' = Sampling.Depth,
-         # 'QTest.Results (mg/L)' = QTest.Results,
          'Mineral N (kg/ha)' = MineralN,
          'AMN (kg/ha)' = AMN,
          'SubTotal (kg/ha)' = SubTotal) %>% 
   select(-QTest.Results)
 
-knitr::kable(df, caption = "Soil nitrogen supply in sampling layers.")
+knitr::kable(df, caption = "Soil nitrogen supply.")
 ```
 
-## Estimated crop nitrogen uptake with remaining crop nitrogen requirement
-
-```{r crop n uptake tab}
-knitr::kable(params$tab_NCrop, caption = "Crop nitrogen requirements.")
-```
-
-
-## Nitrogen requirement to next sampling date 
-
-```{r N application tab}
-
-df4 <- params$tab_N_requirements
-caption <- paste0("Nitrogen application information (", profile.depth, "cm).")
-knitr::kable(df4, caption = caption)
-```
 
 
 ## Graph
 
-```{r plotting, fig.height=12, fig.width=10, dpi=300}
-library(cowplot)
 
-plot_grid(params$p_N_supply, params$p_N_uptake,  align = "v", ncol = 1)
-# +  theme(legend.position = c(0.15, 0.8))
+```{r plotting, fig.height=6, fig.width=10, dpi=300}
+params$p_N_supply
 ```
-
 
 ## Acknowledgement 
 
@@ -92,8 +67,8 @@ Adrian Hunt, Hort Innovation
 Source code is avaiable on GitHub <https://github.com/frank0434/QuickTestMassBalanceCalculator>
 
 
-<span style="font-size:smaller;">Disclaimer</span>
-<span style="font-size:smaller;">
+<p>Disclaimer</p>
+
 This report is copyright to the Foundation for Arable Research (FAR) and may not be reproduced or copied
 in any form whatsoever without FAR’s written permission. The report is intended to provide accurate and
 adequate information relating to the subject matters contained in it and is based on information current at the time of
@@ -101,4 +76,3 @@ report. Information contained in this report is general in nature and not intend
 professional advice on any matter and should not be relied upon for that purpose. It has been prepared and made
 available to all persons and entities strictly on the basis that FAR, its researchers and authors are fully excluded from
 any liability for damages arising out of any reliance in part or in full upon any of the information for any purpose.
-</span>

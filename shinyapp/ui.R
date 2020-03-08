@@ -29,90 +29,153 @@ shinyUI(fluidPage(
            id = "app.tabs",
            #beginning of the tabs
            # crop tab ----
-           tabPanel(h3("Crop info"),
+           tabPanel(h3("1. Crop info"),
                     value = "crop.info",
-
-                    #the internal layout of the first tab
-             fluidRow(
-               br(),
-               #define the style of the action button - this affects all the buttons
-               tags$head(
-                 tags$style(HTML(btn_style))),
-               #the selectInput layout
-               column(12,
-                      selectInput(inputId = "input_system", label = "Farm System", choices = input_systems, width = width_box)),
-               column(12,
-                      selectInput(inputId = "input_crop", label = "Crop Type", choices = crops, width = width_box)),
-               column(12,
-                      dateInput("input_PlantingDate", label = "Planting Date", width = width_box, format = "d MM yyyy")),
-               column(12,
-                      dateInput("Sampling.Date", label = "Sampling Date", width = width_box, format = "d MM yyyy")),
-               column(12,
-                      dateInput(inputId = "input_nextsamplingDate", label = "Next Sampling Date/Side Dressing", width = width_box, format = "d MM yyyy")),
-               column(12,
-                      selectInput("input_componentYield", label = "Harvested component (t FW/ha)", choices =  c(""), width = width_box)
-                      ),
-               column(12,
-                      textInput(inputId = "input_paddock.id", label = "Paddock Name/Number (Optional)", width = width_box)),
-               column(12,
-                      actionButton("JumpToSoil", "Next >")
-                      )
-               )
-             ),
-           # soil tab ----
-           tabPanel(h3("Soil info"),
-                    value = "soil.info",
                     br(),
-                    #two top layer options for user to choose the sampling method
+
                     fluidRow(
                       column(width = 4,
-                             radioButtons(inputId = "samplingDepth",
-                                          label = "The Top Layer Sampling Depth",
-                                          choices = c(layer.1.1, layer.1), selected = "")),
+                             radioButtons(inputId = "FallowOrCropping",
+                                          label = "Paddock Status",
+                                          choices = c("Fallow", "Cropping"), selected = " ")),
                       # the refresh page button ----
                       column(width = 4,
                              br(),
                              actionButton("refresh", "Start a New Session?"))
-                      ),
-                    #the conditionalPanel will show the desired sampling depth after user's selection
+                    ),
                     conditionalPanel(
-                      condition = "input.samplingDepth == '0-15 cm'",
-                      navbarPage(title = "Sampling Depth",
-                                 id = "soil.tabset.layer.1.1",
-                                 tabPanel("0 - 15 cm",
-                                          value = "Panel.1.1", # the value is link back to the server
+                      condition = "input.FallowOrCropping == 'Fallow'",
+
+                      #the internal layout for fallow
+                        fluidRow(
+                          br(),
+                          #define the style of the action button - this affects all the buttons
+                          tags$head(
+                            tags$style(HTML(btn_style))),
+                          #the selectInput layout
+                          column(12,
+                                 selectInput(inputId = "input_system_fallow", label = "Farm System", choices = input_systems, width = width_box)),
+                          column(12,
+                                 dateInput("Sampling.Date_fallow", label = "Sampling Date", width = width_box, format = "d MM yyyy")),
+                          column(12,
+                                 dateInput(inputId = "input_nextsamplingDate_fallow", label = "Next Sampling Date", width = width_box, format = "d MM yyyy")),
+                          column(12,
+                                 textInput(inputId = "input_paddock.id_fallow", label = "Paddock Name/Number (Optional)", width = width_box)),
+                          column(12,
+                                 actionButton("JumpToSoil_fallow", "Next >")
+                          )
+                        )
+                      ),
+                    conditionalPanel(
+                      condition = "input.FallowOrCropping == 'Cropping'",
+
+                      #the internal layout of the first tab
+                      fluidRow(
+                        br(),
+                        #define the style of the action button - this affects all the buttons
+                        tags$head(
+                          tags$style(HTML(btn_style))),
+                        #the selectInput layout
+                        column(12,
+                               selectInput(inputId = "input_system", label = "Farm System", choices = input_systems, width = width_box)),
+                        column(12,
+                               selectInput(inputId = "input_crop", label = "Crop Type", choices = crops, width = width_box)),
+                        column(12,
+                               dateInput("input_PlantingDate", label = "Planting Date", width = width_box, format = "d MM yyyy")),
+                        column(12,
+                               dateInput("Sampling.Date", label = "Sampling Date", width = width_box, format = "d MM yyyy")),
+                        column(12,
+                               dateInput(inputId = "input_nextsamplingDate", label = "Next Sampling Date/Side Dressing", width = width_box, format = "d MM yyyy")),
+                        column(12,
+                               selectInput("input_componentYield", label = "Harvested component (t FW/ha)", choices =  c(""), width = width_box)
+                        ),
+                        column(12,
+                               textInput(inputId = "input_paddock.id", label = "Paddock Name/Number (Optional)", width = width_box)),
+                        column(12,
+                               actionButton("JumpToSoil", "Next >")
+                        )
+                      )
+
+
+                    )
+
+             ),
+           # soil tab ----
+           tabPanel(h3("2. Soil info"),
+                    value = "soil.info",
+                    br(),
+
+                    navbarPage(title = "Sampling Depth",
+                               id = "soil.tabset.layer.1.1",
+                               collapsible = TRUE,
+                               # theme = "www/bootstrap.min.css",
+                               tabPanel("TOP", # 0-15 cm layer ----
+                                        value = "Panel.1.1", # the value is link back to the server
+                                        column(width = 12,
+                                               numericInput(inputId = "samplingDepth1.1",
+                                                            label = p("Sampling depth start (cm)"),
+                                                            value = 0, min = 0, max = 0
+                                                            )),
                                           column(width = 12,
-                                                 selectizeInput(inputId = "Texture.1.1", label = "Soil Texture", choices = soil.texture,
-                                                                options = list(
-                                                                  placeholder = 'Please select an option below',
-                                                                  onInitialize = I('function() { this.setValue(""); }')))),
+                                                 numericInput(inputId = "samplingDepth1.2",
+                                                                label = p("Sampling depth end (cm)"),
+                                                                value = "", min = 10, max = 100, step = 5
+                                                              )),
                                           column(width = 12,
-                                                 selectizeInput(inputId = "Moisture.1.1", label = "Soil Moisture", choices = soil.moisture,
-                                                                options = list(
-                                                                  placeholder = 'Please select an option below',
-                                                                  onInitialize = I('function() { this.setValue(""); }')))),
+                                                 selectInput.soilProperty(id = "Texture.1",
+                                                                          label = "Soil Texture",
+                                                                          choices = soil.texture)),
                                           column(width = 12,
-                                                 numericInput(inputId = "Qtest1.1", label = "Quick test Nitrate result (mg/L)", min = 0, value = 0)),
+                                                 selectInput.soilProperty(id = "Moisture.1",
+                                                                          label = "Soil Moisture",
+                                                                          choices = soil.moisture)),
                                           column(width = 12,
-                                                 numericInput(inputId = "AMN1.1", label = "AMN kg/ha @ 0 - 15 cm (if applicable)", min = 0, value = 0)),
-                                          column(12,
-                                                 actionButton("nextLayer.1.1", "Next Layer >"))
+                                                 div(style='display: inline-block;',
+                                                     numericInput(inputId = "Qtest1",
+                                                                  label = "Quick test result in Nitrate-N (mg/L)",
+                                                                  min = 0, value = 0),
+                                                     img(src=b64,style='display: inline-block;')
+                                                     )),
+                                        column(width = 12,
+                                               br()),
+                                        column(width = 12,
+                                               numericInput(inputId = "AMN1.1",
+                                                            label = p("AMN kg/ha @ 0 - 15 cm (if applicable)\r",
+                                                                      em('Anaerobic Mineralisable N',
+                                                                         a('(More details)', href = 'https://www.far.org.nz/assets/files/blog/files//e7b9c43f-c4f6-52cb-b0f9-1e9e6539bb91.pdf', target = "_blank"
+                                                                           ))),
+                                                            min = 0, value = 0)),
+                                        column(12,
+                                               actionButton("nextLayer.1.1", "Next Layer >"))
                                           ),
-                                 tabPanel("15 - 30 cm",
+                                 tabPanel("MIDDLE", # 15 -30 cm -------
                                           value = "Panel.1.2",
                                           column(width = 12,
-                                                 selectizeInput(inputId = "Texture.1.2", label = "Soil Texture", choices = soil.texture,
-                                                                options = list(
-                                                                  placeholder = 'Please select an option below',
-                                                                  onInitialize = I('function() { this.setValue(""); }')))),
+                                                 numericInput(inputId = "samplingDepth2.1",
+                                                              label = p("Sampling depth start (cm)"),
+                                                              value = "", min = 10, max = 60, step = 10
+                                                 )),
                                           column(width = 12,
-                                                 selectizeInput(inputId = "Moisture.1.2", label = "Soil Moisture", choices = soil.moisture,
-                                                                options = list(
-                                                                  placeholder = 'Please select an option below',
-                                                                  onInitialize = I('function() { this.setValue(""); }')))),
+                                                 numericInput(inputId = "samplingDepth2.2",
+                                                              label = p("Sampling depth end (cm)"),
+                                                              value = "", min = 20, max = 100, step = 10
+                                                 )),
                                           column(width = 12,
-                                                 numericInput(inputId = "Qtest1.2", label = "Quick test Nitrate result (mg/L)", min = 0, value = 0)),
-
+                                                 selectInput.soilProperty(id = "Texture.2",
+                                                                          label = "Soil Texture")),
+                                          column(width = 12,
+                                                 selectInput.soilProperty(id = "Moisture.2",
+                                                                          label = "Soil Moisture",
+                                                                          choices = soil.moisture)),
+                                          column(width = 12,
+                                                 div(qstyle='display: inline-block;',
+                                                     numericInput(inputId = "Qtest2",
+                                                                  label = "Quick test result in Nitrate-N (mg/L)",
+                                                                  min = 0, value = 0),
+                                                     img(src=b64,style='display: inline-block;')
+                                                 )),
+                                          column(width = 12,
+                                                 br()),
                                           column(12,
                                                  actionButton("nextLayer.1.3", "Next Layer >")),
 
@@ -120,65 +183,44 @@ shinyUI(fluidPage(
                                                  actionButton("nextLayer.1.2", "< Previous Layer"))
 
                                           ),
-                                 tabPanel("30 - 60 cm",value = "Panel.2",
+                                 tabPanel("DEEP (optional)", # 30-60 cm layer -------
+                                          value = "Panel.2",
                                           column(width = 12,
-                                                 selectizeInput(inputId = "Texture.2", label = "Soil Texture", choices = soil.texture,
-                                                                options = list(
-                                                                  placeholder = 'Please select an option below',
-                                                                  onInitialize = I('function() { this.setValue(""); }')))),
+                                                 numericInput(inputId = "samplingDepth3.1",
+                                                              label = p("Sampling depth start (cm)"),
+                                                              value = "", min = 20, max = 100, step = 10
+                                                 )),
                                           column(width = 12,
-                                                 selectizeInput(inputId = "Moisture.2", label = "Soil Moisture", choices = soil.moisture,
-                                                                options = list(
-                                                                  placeholder = 'Please select an option below',
-                                                                  onInitialize = I('function() { this.setValue(""); }')))),
+                                                 numericInput(inputId = "samplingDepth3.2",
+                                                              label = p("Sampling depth end (cm)"),
+                                                              value = "", min = 31, max = 100, step = 10
+                                                 )),
                                           column(width = 12,
-                                                 numericInput(inputId = "Qtest2", label = "Quick test Nitrate result (mg/L)", min = 0, value = 0)),
+                                                 selectInput.soilProperty(id = "Texture.3",
+                                                                          label = "Soil Texture",
+                                                                          choices = soil.texture)),
+                                          column(width = 12,
+                                                 selectInput.soilProperty(id = "Moisture.3",
+                                                                          label = "Soil Moisture",
+                                                                          choices = soil.moisture)),
+                                          column(width = 12,
+                                                 div(style='display: inline-block;',
+                                                     numericInput(inputId = "Qtest3",
+                                                                  label = "Quick test result in Nitrate-N (mg/L)",
+                                                                  min = 0, value = 0),
+                                                     img(src=b64,style='display: inline-block;')
+                                                 )),
+                                          column(width = 12,
+                                                 br()),
                                           column(12,
                                                  actionButton("nextLayer.1.4", "< Previous Layer"))
-                                 )
-                      )
-                    ),
-                    conditionalPanel(
-                      condition = "input.samplingDepth == '0-30 cm'",
-                      navbarPage(title = "Sampling Depth",
-                                 id = "soil.tabset.layer.1",
-                                 tabPanel("0 - 30 cm",value = "Panel.1",
-                                          column(width = 12,
-                                                 selectizeInput(inputId = "Texture.1", label = "Soil Texture", choices = soil.texture,
-                                                                options = list(
-                                                                  placeholder = 'Please select an option below',
-                                                                  onInitialize = I('function() { this.setValue(""); }')))),
-                                          column(width = 12,
-                                                 selectizeInput(inputId = "Moisture.1", label = "Soil Moisture", choices = soil.moisture,
-                                                                options = list(
-                                                                  placeholder = 'Please select an option below',
-                                                                  onInitialize = I('function() { this.setValue(""); }')))),
-                                          column(width = 12,
-                                                 numericInput(inputId = "Qtest1", label = "Quick test Nitrate result (mg/L)",min = 0, value = 0)),
-                                          column(width = 12,
-                                                 numericInput(inputId = "AMN1", label = "AMN kg/ha @ 0 - 15 cm (if applicable)", min = 0, value = 0)),
-                                          column(12,
-                                                 actionButton("nextLayer.1", "Next Layer >"))
-                                          ),
-                                 tabPanel("30 - 60 cm",value = "Panel.2.1",
-                                          column(width = 12,
-                                                 selectizeInput(inputId = "Texture.2.1", label = "Soil Texture", choices = soil.texture,
-                                                                options = list(
-                                                                  placeholder = 'Please select an option below',
-                                                                  onInitialize = I('function() { this.setValue(""); }')))),
-                                          column(width = 12,
-                                                 selectizeInput(inputId = "Moisture.2.1", label = "Soil Moisture", choices = soil.moisture,
-                                                                options = list(
-                                                                  placeholder = 'Please select an option below',
-                                                                  onInitialize = I('function() { this.setValue(""); }')))),
-                                          column(width = 12,
-                                                 numericInput(inputId = "Qtest2.1", label = "Quick test Nitrate result (mg/L)", min = 0, value = 0)),
-                                          column(12,
-                                                 actionButton("nextLayer.2", "< Previous Layer"))
-                                          )
-                                 )
-                      ), # the end of 0-30 conditional page
-
+                                 ),
+                               tabPanel(p(strong("Restart")),
+                                        value = "Restartpanel",
+                                        column(width = 12,
+                                               actionButton("refresh.soil", "Restart?"))
+                               )
+                      ),
                     br(),
                     br(),
                     br(),
@@ -189,7 +231,7 @@ shinyUI(fluidPage(
 
                     ),
            # report tab ----
-           tabPanel(h3("Report"),
+           tabPanel(h3("3. Report"),
                     value = "report.tab",
                     # define the style of feedback message
                     tags$head(
@@ -201,24 +243,27 @@ shinyUI(fluidPage(
                     } "))),
                     column(12,
                       fluidRow(
-                      column(5,
-                             br(),
-                             # p(strong(h4("Estimated nitrogen requirement"))),
-                             DT::dataTableOutput("N_inCrop"),
-                             br(),
-                             DT::dataTableOutput("report.table2")
-                             ),
-                    column(5,offset = 2,
-                      verticalLayout(column(5,
-                           br(),
-                           radioButtons('format_data', 'File format', c('csv', 'Excel'), inline = TRUE),
-                           downloadButton("qTestResults.csv", "Download Test Results")
-                           ),
-                    column(5,
-                           br(),
-                           radioButtons('format', 'Document format', c('PDF', 'Word'), inline = TRUE),
-                           downloadButton("report", "Download Report")
-                           ))))),
+                        conditionalPanel(
+                          condition = "input.FallowOrCropping == 'Cropping'",
+                          column(5,
+                                 br(),
+                                 # p(strong(h4("Estimated nitrogen requirement"))),
+                                 DT::dataTableOutput("N_inCrop"),
+                                 br(),
+                                 DT::dataTableOutput("report.table2")
+                                 )),
+                        column(5,offset = 2,
+                               br(),
+
+                               verticalLayout(column(5,
+                                                     br(),
+                                                     # radioButtons('format_data', 'File format', c('csv', 'Excel'), inline = TRUE),
+                                                     downloadButton("qTestResults.csv", "Download Test Results")),
+                                              column(5,
+                                                     br(),
+                                                     # radioButtons('format', 'Document format', c('PDF', 'Word'), inline = TRUE),
+                                                     downloadButton("report", "Download Report"))
+                                              )))),
                     column(12,
                            hr(),
                            # p(strong(h4("Supported information for the nitrogen requirement"))),
@@ -228,9 +273,13 @@ shinyUI(fluidPage(
                              ), # splitlayout
                            br(),
                            hr(),
-                           splitLayout(
-                             plotOutput('P_N.uptake'),
-                             plotOutput('distPlot2')
+                           fluidRow(
+                             column(width = 6,
+                                    plotOutput('distPlot2')),
+                             conditionalPanel(
+                               condition = "input.FallowOrCropping == 'Cropping'",
+                               column(width = 6,
+                                      plotOutput('P_N.uptake')))
                              ),
                            br(),
                            br(),
@@ -240,6 +289,7 @@ shinyUI(fluidPage(
            # tabPanel(h3("debugging tab"),
            #          textOutput("df_AMN"),
            #          textOutput("df_days"),
+           #          textOutput("crop_period"),
            #          DT::dataTableOutput("df_graph"),
            #          DT::dataTableOutput("df_graph2")
            #          ) # the end of report tab
