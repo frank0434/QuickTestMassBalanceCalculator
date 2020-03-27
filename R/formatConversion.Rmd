@@ -207,7 +207,13 @@ dbDisconnect(con)
 
 # Adding new crops or updating existing ones 
 
-**The easist way is copy and paste**
+**The easist way is copy and paste the value in `N uptake curve data` to the mother workbook**
+1. Copy the `B`, `M` and `C` parameters into the sheet `Crop parameters` in the mother workbook.  
+   Only `estimate` values needed.   
+2. Copy the last row in the `N uptake (kg/ha)` excluding the highlighten values. 
+
+![](../Capture.png)
+
 
 
 ## The Excels that have paras for new crops 
@@ -216,32 +222,32 @@ dbDisconnect(con)
 ### Fodder beet 
 
 ```{r read in excels}
-df <- read_excel("../Fodder beet.xlsx", sheet = "N uptake curve data",.name_repair = "universal")
-
-# Parameter values 
-
-df_paras <- df %>% 
-  filter(Yield..tDM.ha. %in% c("B","C","M")) %>% 
-  select( -...1, -...3) %>% 
-  t() %>% 
-  as_tibble()
-colnames(df_paras) <- df_paras[1, ]
-df_paras <- df_paras[-1,] %>% 
-  mutate_all(as.numeric)
-# Yield values
-
-df_values <- df %>% 
-  filter(Yield..tDM.ha. == "Max yield at grazing") %>% 
-  t() %>% 
-  as_tibble(.name_repair = "universal") %>% 
-  mutate(...1 = as.numeric(...1)) %>% 
-  filter(!is.na(...1), ...1!= 28.5)
-colnames(df_values) <- "Yield.value"
-df_fb <- cbind(df_values,df_paras) %>% 
-  mutate(Crop = "Fodder_Beet",
-         Harvested.value = Yield.value,
-         A = 0L)
-  
+# df <- read_excel("../Fodder beet.xlsx", sheet = "N uptake curve data",.name_repair = "universal")
+# 
+# # Parameter values 
+# 
+# df_paras <- df %>% 
+#   filter(Yield..tDM.ha. %in% c("B","C","M")) %>% 
+#   select( -...1, -...3) %>% 
+#   t() %>% 
+#   as_tibble()
+# colnames(df_paras) <- df_paras[1, ]
+# df_paras <- df_paras[-1,] %>% 
+#   mutate_all(as.numeric)
+# # Yield values
+# 
+# df_values <- df %>% 
+#   filter(Yield..tDM.ha. == "Max yield at grazing") %>% 
+#   t() %>% 
+#   as_tibble(.name_repair = "universal") %>% 
+#   mutate(...1 = as.numeric(...1)) %>% 
+#   filter(!is.na(...1), ...1!= 28.5)
+# colnames(df_values) <- "Yield.value"
+# df_fb <- cbind(df_values,df_paras) %>% 
+#   mutate(Crop = "Fodder_Beet",
+#          Harvested.value = Yield.value,
+#          A = 0L)
+#   
 ```
 
 ### Kale
@@ -253,80 +259,80 @@ We will stick with the original set up since Matt has force value to 0 before gr
 
 
 ```{r}
-df <- read_excel("../Kale.xlsx", sheet = "N uptake curve data",.name_repair = "universal")
-
-# Parameter values 
-
-df_paras <- df %>% 
-  filter(Yield..tDM.ha. %in% c("B","C","M")) %>% 
-  select( -...1, -...3) %>% 
-  t() %>% 
-  as_tibble()
-colnames(df_paras) <- df_paras[1, ]
-
-# Select only the needed ones 
-df_paras <- df_paras[-1,1:3] %>% 
-  mutate_all(as.numeric) %>% 
-  filter(!is.na(B))
-# Yield values
-
-df_values = df %>% 
-  filter(Yield..tDM.ha. == "Max yield at grazing") %>% 
-  t() %>% 
-  as_tibble(.name_repair = "universal") %>% 
-  mutate(...1 = as.numeric(...1)) %>% 
-  filter(!is.na(...1), ...1!= 35.4)
-colnames(df_values) <- "Yield.value"
-df_kale <- cbind(df_values,df_paras) %>% 
-  mutate(Crop = "Kale",
-         Harvested.value = Yield.value,
-         A = 0L)
+# df <- read_excel("../Kale.xlsx", sheet = "N uptake curve data",.name_repair = "universal")
+# 
+# # Parameter values 
+# 
+# df_paras <- df %>% 
+#   filter(Yield..tDM.ha. %in% c("B","C","M")) %>% 
+#   select( -...1, -...3) %>% 
+#   t() %>% 
+#   as_tibble()
+# colnames(df_paras) <- df_paras[1, ]
+# 
+# # Select only the needed ones 
+# df_paras <- df_paras[-1,1:3] %>% 
+#   mutate_all(as.numeric) %>% 
+#   filter(!is.na(B))
+# # Yield values
+# 
+# df_values = df %>% 
+#   filter(Yield..tDM.ha. == "Max yield at grazing") %>% 
+#   t() %>% 
+#   as_tibble(.name_repair = "universal") %>% 
+#   mutate(...1 = as.numeric(...1)) %>% 
+#   filter(!is.na(...1), ...1!= 35.4)
+# colnames(df_values) <- "Yield.value"
+# df_kale <- cbind(df_values,df_paras) %>% 
+#   mutate(Crop = "Kale",
+#          Harvested.value = Yield.value,
+#          A = 0L)
 ```
 ## Maize silage
 
 ```{r}
-df <- read_excel("../Maize Data.xlsx", sheet = "N Uptake curves",.name_repair = "universal")
-
-# Parameter values 
-
-df_paras <- df[1,] %>% 
-  filter(Yield..tDM.ha. %in% c("B","C","M")) %>% 
-  select( -...1, -...3) %>% 
-  t() %>% 
-  as_tibble()
-colnames(df_paras) <- df_paras[1, ]
-
-# Select only the needed ones 
-df_paras <- df_paras[-1,1:3] %>% 
-  mutate_all(as.numeric) %>% 
-  filter(!is.na(B))
-# Yield values
-
-df_values = df %>% 
-  filter(Yield..tDM.ha. == "Max yield at grazing") %>% 
-  t() %>% 
-  as_tibble(.name_repair = "universal") %>% 
-  mutate(...1 = as.numeric(...1)) %>% 
-  filter(!is.na(...1), ...1!= 35.4)
-colnames(df_values) <- "Yield.value"
-df_kale <- cbind(df_values,df_paras) %>% 
-  mutate(Crop = "Kale",
-         Harvested.value = Yield.value,
-         A = 0L)
+# df <- read_excel("../Maize Data.xlsx", sheet = "N Uptake curves",.name_repair = "universal")
+# 
+# # Parameter values 
+# 
+# df_paras <- df[1,] %>% 
+#   filter(Yield..tDM.ha. %in% c("B","C","M")) %>% 
+#   select( -...1, -...3) %>% 
+#   t() %>% 
+#   as_tibble()
+# colnames(df_paras) <- df_paras[1, ]
+# 
+# # Select only the needed ones 
+# df_paras <- df_paras[-1,1:3] %>% 
+#   mutate_all(as.numeric) %>% 
+#   filter(!is.na(B))
+# # Yield values
+# 
+# df_values = df %>% 
+#   filter(Yield..tDM.ha. == "Max yield at grazing") %>% 
+#   t() %>% 
+#   as_tibble(.name_repair = "universal") %>% 
+#   mutate(...1 = as.numeric(...1)) %>% 
+#   filter(!is.na(...1), ...1!= 35.4)
+# colnames(df_values) <- "Yield.value"
+# df_kale <- cbind(df_values,df_paras) %>% 
+#   mutate(Crop = "Kale",
+#          Harvested.value = Yield.value,
+#          A = 0L)
 ```
 
 ## Connect to the db and append
 
 ```{r}
-# Build the connection 
-con <- DBI::dbConnect(RSQLite::SQLite(),'../shinyapp/qtmb_data.sqlite3')
-# Look what's inside
-dbListTables(con)
-# Append the new crop para
-# bind_rows(list(df_kale, df_fb)) %>% 
-#   dbWriteTable(conn = con, name = "tab_crop",value = ., append = TRUE)
-# Disconnect 
-
-dbDisconnect(con)
+# # Build the connection 
+# con <- DBI::dbConnect(RSQLite::SQLite(),'../shinyapp/qtmb_data.sqlite3')
+# # Look what's inside
+# dbListTables(con)
+# # Append the new crop para
+# # bind_rows(list(df_kale, df_fb)) %>% 
+# #   dbWriteTable(conn = con, name = "tab_crop",value = ., append = TRUE)
+# # Disconnect 
+# 
+# dbDisconnect(con)
 ```
 
