@@ -3,6 +3,17 @@
 
 The goal of Qtest_shinyApp is to implementate shiny application to QTMB as developed in N messure it mange it SFF project
 
+
+# How to add a new crop 
+
+- New set of paras for A C B M in excel  
+  A should be 0 or positive values 
+- read in and organise   
+- connect to sqlite3  
+- insert new 
+
+
+
 # Basic information
 
 The previous tool is in Excel format coded by VB. 
