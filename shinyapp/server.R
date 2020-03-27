@@ -455,7 +455,7 @@ shinyServer(function(input, output,session) {
     )
       net <- Soil_N_supply() - crop.N.req.until.next.SD()
       net <- round(net, digits = 0)
-      net <- ifelse(net > 0, "No extra N needed to next sampling/side dressing date", as.numeric(-net))
+      net <- ifelse(net > 0, "No extra N needed until the next sampling/side dressing date", as.numeric(-net))
 
   })
 
