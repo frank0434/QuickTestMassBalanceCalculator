@@ -8,9 +8,8 @@ The goal of Qtest_shinyApp is to implementate shiny application to QTMB as devel
 
 - New set of paras for A C B M in excel  
   A should be 0 or positive values 
-- read in and organise   
-- connect to sqlite3  
-- insert new 
+- Copy and paste into `crop parameters` sheet in the mother workbook  
+- Rerun `formatConversion` to have an updated sqlite3  
 
 
 

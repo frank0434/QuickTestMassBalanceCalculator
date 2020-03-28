@@ -538,6 +538,14 @@ shinyServer(function(input, output,session) {
     df <- Crop_N_graphing() %>%
       slice(1:(nrows.non0 + 50))
 
+    # Add validation to make sure planting date is earlier than sampling dates
+    validate(
+      need(plantingDate() < samplingDate(),
+           "The sampling date needs to be greater than the planting date.
+Please check the dates in crop info tab.
+Please use the fallow option if you only want to know the nitrogen status in the soil.")
+    )
+
 
     P <-  df %>%
       ggplot(aes(x = DAP_annual)) +
@@ -557,7 +565,7 @@ shinyServer(function(input, output,session) {
                y = max(df$Predicted.N.Uptake)/2 - 3,
                # vjust = 0.3,
                alpha = 0.5, size = 5.5,
-               label = "bold(\"This graph is only an indicator\")",
+               label = "bold(\"This graph is only an indicator of current soil N status.\")",
                parse = TRUE)
     P
   })
