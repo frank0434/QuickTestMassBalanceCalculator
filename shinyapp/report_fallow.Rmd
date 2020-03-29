@@ -60,8 +60,9 @@ Jian Liu, Plant & Food Research
 Contributors:   
 Diana Mathers, Foundation for Arable Research   
 Steven Dellow, Plant & Food Research   
+Stephen Trolove, Plant & Food Research   
 Hymmi Kong, Plant & Food Research   
-Matthew Norris, Waikato Regional Council   
+Matthew Norris, Waikato Regional Council    
 Adrian Hunt, Hort Innovation   
 
 Source code is avaiable on GitHub <https://github.com/frank0434/QuickTestMassBalanceCalculator>
