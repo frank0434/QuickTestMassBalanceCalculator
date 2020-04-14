@@ -565,7 +565,7 @@ Please use the fallow option if you only want to know the nitrogen status in the
                y = max(df$Predicted.N.Uptake)/2 - 3,
                # vjust = 0.3,
                alpha = 0.5, size = 5.5,
-               label = "bold(\"This graph is only an indicator of current soil N status.\")",
+               label = "bold(\"This graph is only an indicator of crop N uptake.\")",
                parse = TRUE)
     P
   })
