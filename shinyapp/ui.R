@@ -21,7 +21,7 @@ shinyUI(fluidPage(
 
   column(width = 10,
          offset = 1,
-         headerPanel('Quick Test Mass Calculator'),
+         headerPanel('Quick Test Mass Balance Calculator'),
          br(),
          # navbarPage( title = "Page", # tabs on top
          # navlistPanel( # tabs on the right hand side

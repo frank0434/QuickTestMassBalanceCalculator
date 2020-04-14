@@ -14,6 +14,7 @@ library(rmarkdown)
 library(knitr)
 library(openxlsx)
 library(DT)
+library(tinytex)
 source("functions.R")
 
 # selectInput -------------------------------------------------------------

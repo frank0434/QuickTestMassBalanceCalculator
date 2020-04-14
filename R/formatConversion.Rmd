@@ -11,13 +11,15 @@ library(readxl)
 library(tidyverse)
 library(DBI)
 library(RSQLite)
+```
+_Note_
 
-sheets <- excel_sheets("C:/Data/QuickTestMassBalanceCalculator/QTMB Tool - V 2.1.xlsx")
+```{r main excel}
+sheets <- excel_sheets("../QTMB Tool - V 2.1.xlsx")
 sh <- grep("parameters| graphing|AMN input", sheets, value = T,ignore.case = T)
 # l <- lapply(sh, function(x) read_excel("../QTMB Tool - V 2.1.xlsx", sheet = x))
 path <- "../QTMB Tool - V 2.1.xlsx"
 ```
-_Note_
 
 
 crop relative sheets need to be read individually
@@ -124,6 +126,24 @@ names(crop_para) <- cols_new
 
 ##### Revise the crop parameter values
 ```{r recode the harvested parameter}
+# Add new logic for adding new crops 
+crop_name <- unique(crop_info$Crop)
+crop_display <- unique(crop_para$Crop)
+
+# If new crop names present, iterate the names and add into the crop_para df
+if(length(crop_name) > length(crop_display)){
+  
+  # Figure out what are new ones 
+  new_crop <- crop_name[!crop_name %in% crop_display]
+  # Append the new ones to the bottom
+  for(i in new_crop){
+    # Be careful about the Total Yield since it can be t FW/ha
+    crop_para[nrow(crop_para) + 1, ] <- c(i, "Total Yield (t DW/ha)", NA, NA)
+  }
+  
+}
+
+# Add new columns for displaying the crop names 
 crop_para <- crop_para %>% 
   mutate(Harvested.parameter = ifelse(is.na(Harvested.parameter),
                                       Yield.paramater, Harvested.parameter),
@@ -134,7 +154,8 @@ crop_para <- crop_para %>%
                                     "Wheat - Autumn planting" = "Wheat - Autumn sown", 
                                     "Wheat - Spring planting" = "Wheat - Spring sown",
                                     "Barley - Autumn planting" = "Barley - Autumn sown",
-                                    "Barley - Spring planting" = "Barley - Spring sown"))  
+                                    "Barley - Spring planting" = "Barley - Spring sown"),
+         Crop_name_display = gsub("_", " ", Crop_name_display))  
 ```
 
 # Crop N
@@ -180,3 +201,136 @@ dbWriteTable(con, "tab_soil", soil, overwrite = TRUE)
 # ")
 dbDisconnect(con)
 ```
+
+
+# Adding new crops or updating existing ones 
+
+**The easist way is copy and paste the value in `N uptake curve data` to the mother workbook**
+1. Copy the `B`, `M` and `C` parameters into the sheet `Crop parameters` in the mother workbook.  
+   Only `estimate` values needed.   
+2. Copy the last row in the `N uptake (kg/ha)` excluding the highlighten values. 
+
+![](../Capture.png)
+
+
+
+## The Excels that have paras for new crops 
+
+
+### Fodder beet 
+
+```{r read in excels}
+# df <- read_excel("../Fodder beet.xlsx", sheet = "N uptake curve data",.name_repair = "universal")
+# 
+# # Parameter values 
+# 
+# df_paras <- df %>% 
+#   filter(Yield..tDM.ha. %in% c("B","C","M")) %>% 
+#   select( -...1, -...3) %>% 
+#   t() %>% 
+#   as_tibble()
+# colnames(df_paras) <- df_paras[1, ]
+# df_paras <- df_paras[-1,] %>% 
+#   mutate_all(as.numeric)
+# # Yield values
+# 
+# df_values <- df %>% 
+#   filter(Yield..tDM.ha. == "Max yield at grazing") %>% 
+#   t() %>% 
+#   as_tibble(.name_repair = "universal") %>% 
+#   mutate(...1 = as.numeric(...1)) %>% 
+#   filter(!is.na(...1), ...1!= 28.5)
+# colnames(df_values) <- "Yield.value"
+# df_fb <- cbind(df_values,df_paras) %>% 
+#   mutate(Crop = "Fodder_Beet",
+#          Harvested.value = Yield.value,
+#          A = 0L)
+#   
+```
+
+### Kale
+
+the curve function for kale seems a bit different   
+Y= c* (1/(1 + EXP(-B*(DAS - M))))-(1/(1+exp(B*M)))  
+Checked with Stephen about the next move.   
+We will stick with the original set up since Matt has force value to 0 before graphing.   
+
+
+```{r}
+# df <- read_excel("../Kale.xlsx", sheet = "N uptake curve data",.name_repair = "universal")
+# 
+# # Parameter values 
+# 
+# df_paras <- df %>% 
+#   filter(Yield..tDM.ha. %in% c("B","C","M")) %>% 
+#   select( -...1, -...3) %>% 
+#   t() %>% 
+#   as_tibble()
+# colnames(df_paras) <- df_paras[1, ]
+# 
+# # Select only the needed ones 
+# df_paras <- df_paras[-1,1:3] %>% 
+#   mutate_all(as.numeric) %>% 
+#   filter(!is.na(B))
+# # Yield values
+# 
+# df_values = df %>% 
+#   filter(Yield..tDM.ha. == "Max yield at grazing") %>% 
+#   t() %>% 
+#   as_tibble(.name_repair = "universal") %>% 
+#   mutate(...1 = as.numeric(...1)) %>% 
+#   filter(!is.na(...1), ...1!= 35.4)
+# colnames(df_values) <- "Yield.value"
+# df_kale <- cbind(df_values,df_paras) %>% 
+#   mutate(Crop = "Kale",
+#          Harvested.value = Yield.value,
+#          A = 0L)
+```
+## Maize silage
+
+```{r}
+# df <- read_excel("../Maize Data.xlsx", sheet = "N Uptake curves",.name_repair = "universal")
+# 
+# # Parameter values 
+# 
+# df_paras <- df[1,] %>% 
+#   filter(Yield..tDM.ha. %in% c("B","C","M")) %>% 
+#   select( -...1, -...3) %>% 
+#   t() %>% 
+#   as_tibble()
+# colnames(df_paras) <- df_paras[1, ]
+# 
+# # Select only the needed ones 
+# df_paras <- df_paras[-1,1:3] %>% 
+#   mutate_all(as.numeric) %>% 
+#   filter(!is.na(B))
+# # Yield values
+# 
+# df_values = df %>% 
+#   filter(Yield..tDM.ha. == "Max yield at grazing") %>% 
+#   t() %>% 
+#   as_tibble(.name_repair = "universal") %>% 
+#   mutate(...1 = as.numeric(...1)) %>% 
+#   filter(!is.na(...1), ...1!= 35.4)
+# colnames(df_values) <- "Yield.value"
+# df_kale <- cbind(df_values,df_paras) %>% 
+#   mutate(Crop = "Kale",
+#          Harvested.value = Yield.value,
+#          A = 0L)
+```
+
+## Connect to the db and append
+
+```{r}
+# # Build the connection 
+# con <- DBI::dbConnect(RSQLite::SQLite(),'../shinyapp/qtmb_data.sqlite3')
+# # Look what's inside
+# dbListTables(con)
+# # Append the new crop para
+# # bind_rows(list(df_kale, df_fb)) %>% 
+# #   dbWriteTable(conn = con, name = "tab_crop",value = ., append = TRUE)
+# # Disconnect 
+# 
+# dbDisconnect(con)
+```
+
