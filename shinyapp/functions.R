@@ -25,11 +25,13 @@ theme_qtmb <- function(){
 #' @param label a string to name the input box
 #' @param choices options
 #'
+#' @param url the url to the help document
+#' @param name
 #'
-selectInput.soilProperty <- function(id, label = id, choices = soil.texture){
+selectInput.soilProperty <- function(id, label = id, choices = soil.texture, name = '(Help Document)',url = 'https://www.far.org.nz/assets/files/blog/files//e7b9c43f-c4f6-52cb-b0f9-1e9e6539bb91.pdf'){
   selectizeInput(inputId = id,
                  label = p(label,
-                           a('(Help Document)', href = 'https://www.far.org.nz/assets/files/blog/files//e7b9c43f-c4f6-52cb-b0f9-1e9e6539bb91.pdf', target = "_blank"
+                           a(name, href = url, target = "_blank"
                            )),
                  choices = choices,
                  options = list(
