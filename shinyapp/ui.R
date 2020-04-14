@@ -284,7 +284,9 @@ shinyUI(fluidPage(
                            br(),
                            br(),
                            column(width = 12,
-                             actionButton("JumpToSoil2", "< Back To Soil Information")))
+                             actionButton("JumpToSoil2", "< Back To Soil Information"),
+                             p("Source Code on ",
+                               a('Github Page.', href = 'https://github.com/frank0434/QuickTestMassBalanceCalculator', target = "_blank"))))
                     ) # the end of report tab
            # tabPanel(h3("debugging tab"),
            #          textOutput("df_AMN"),
