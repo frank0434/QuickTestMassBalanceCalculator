@@ -96,3 +96,21 @@ evaluate_inputDepth <- function(inputDepth){
 
 }
 
+#' add.questionMark
+#'
+#' @description add a question mark behind the variable to give further explaination.
+#' Question mark images must be inside the www folder.
+#'
+#' @param title the explaination content.
+#' @param name name of the variable that needs to be explained.
+#'
+
+
+add.questionMark <- function(name, title) {
+  paste0(name,
+         "<a target='_blank' href='#' title='",
+         title = title,
+         "'><img src='blue_question_mark.png' height='13px'/>
+         </a>")
+
+}

@@ -53,7 +53,7 @@ dbDisconnect(conn)
 width_box <- 400
 
 # constants----
-#two top layer options
+## Two top layer options
 layer.1 <- "0-30 cm"
 layer.1.1 <- "0-15 cm"
 #message to show in the UI
@@ -63,6 +63,16 @@ warning_samplingdate <- as.character("WARNING! \r\nSampling date must be smaller
 warning_paddockstatus <- as.character("Please choose your paddock status in the Crop info Tab.")
 warning_wronginput <- as.character("Incorrect information in the soil tab.")
 warning_soil.reminder <- as.character("Please check if all soil information has been filled.")
+
+## Tooltips
+report.tab1.tooltips <- c("N required by the crop from recent sampling date until crop harvested.")
+
+report.tab2.tooltips <- c("Total N required to reach target yield.",
+                          "If greater than 70 kg N/ha consider split applications.")
+
+soil.tab.tooltips <- c("Current plant available N",
+                       "Potentially available N over the growing season")
+
 # action button style text ----
 btn_style <- ".btn {
               display:block;
@@ -80,5 +90,5 @@ btn_style <- ".btn {
 
 # plotting -----
 
-b64 <- base64enc::dataURI(file="colour_scale.png", mime="image/png")
+b64 <- base64enc::dataURI(file="www/colour_scale.png", mime="image/png")
 

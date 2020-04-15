@@ -614,21 +614,30 @@ Please use the fallow option if you only want to know the nitrogen status in the
     validate(
       need(!is.null(top_layer()), warning_report.tab)
     )
+    tab <- table_soil_N()%>%
+      add_row(.,
+              Texture = "",
+              Moisture = "",
+              Sampling.Depth = "",
+              QTest.Results = "",
+              MineralN = "",
+              AMN = "",
+              SubTotal = paste0("Total plant available N: ",sum(.$SubTotal), "kg/ha"))%>%
+      rename('Sampling.Depth (cm)' = Sampling.Depth,
+             'QTest.Results (mg/L)' = QTest.Results,
+             'Mineral N (kg/ha)' = MineralN,
+             'AMN (kg/ha)' = AMN,
+             'SubTotal (kg/ha)' = SubTotal)
 
-    tab <- DT::datatable(table_soil_N()%>%
-                           add_row(.,
-                                   Texture = "",
-                                   Moisture = "",
-                                   Sampling.Depth = "",
-                                   QTest.Results = "",
-                                   MineralN = "",
-                                   AMN = "",
-                                   SubTotal = paste0("Total plant available N: ",sum(.$SubTotal), "kg/ha"))%>%
-                           rename('Sampling.Depth (cm)' = Sampling.Depth,
-                                  'QTest.Results (mg/L)' = QTest.Results,
-                                  'Mineral N (kg/ha)' = MineralN,
-                                  'AMN (kg/ha)' = AMN,
-                                  'SubTotal (kg/ha)' = SubTotal),
+
+
+    colnames(tab)[5] <- add.questionMark(colnames(tab)[5],
+                                         soil.tab.tooltips[1])
+    colnames(tab)[6] <-add.questionMark(colnames(tab)[6],
+                                        soil.tab.tooltips[2])
+
+    tab <- DT::datatable(tab,
+                         escape = FALSE,
                          options = list(dom = 't',
                                         columnDefs = list(list(className = 'dt-left', targets = '_all'))),
                          rownames = FALSE)
@@ -636,10 +645,22 @@ Please use the fallow option if you only want to know the nitrogen status in the
   })
 
   output$report.table2 <- DT::renderDataTable({
-    DT::datatable(report.tab_2(),
+
+    tab2 <- report.tab_2()
+
+    for(i in seq_len(length(report.tab2.tooltips))){
+
+      tab2[i, 1] <- paste0(tab2[i, 1],
+                           "<a target='_blank' href='#' title='",
+                           report.tab2.tooltips[i],
+                           "'><img src='blue_question_mark.png' height='13px'/>
+                           </a>")
+    }
+
+    DT::datatable(tab2,
                   options = list(dom = 't',
                                  columnDefs = list(list(className = 'dt-left', targets = '_all'))),
-                  rownames = FALSE,
+                  rownames = FALSE,escape = FALSE,
                   colnames = c("", colnames(N_crop())[ncol(N_crop())])) %>%
       DT::formatStyle(#https://rstudio.github.io/DT/010-style.html
         'Seasonal N Balance',
@@ -661,12 +682,7 @@ Please use the fallow option if you only want to know the nitrogen status in the
                          rownames = FALSE,
                          options = list(dom = 't', #https://datatables.net/reference/option/dom
                                         columnDefs = list(list(className = 'dt-left', targets = '_all'))),
-                         colnames = c("", colnames(N_crop())[ncol(N_crop())])) %>%
-      DT::formatStyle(#https://rstudio.github.io/DT/010-style.html
-        'Seasonal N Balance',
-        target = 'row',
-        backgroundColor = DT::styleEqual("N Required to Reach Target Yield", "yellow")
-      )
+                         colnames = c("", colnames(N_crop())[ncol(N_crop())]))
 
   })
 
