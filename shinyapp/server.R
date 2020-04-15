@@ -122,7 +122,7 @@ shinyServer(function(input, output,session) {
   })
   DAP_nextSD <- reactive({
     if(paddock.status() == "Cropping"){
-      DAP <- as.Date(nextSamplingDate()) - as.Date(samplingDate())
+      DAP <- as.Date(nextSamplingDate()) - as.Date(plantingDate())
       DAP <- ifelse(DAP < 0, 0, DAP)
     } else{
       DAP <- as.Date(input$input_nextsamplingDate_fallow) - as.Date(input$Sampling.Date_fallow)
@@ -334,11 +334,11 @@ shinyServer(function(input, output,session) {
   })
   # debugging AMN supply -----
   # output$df_AMN <-  renderText({AMN_supply()})
-  # output$df_days <-  renderText({DAP_SD()})
-  # output$crop_period <- renderText({crop_period()})
+  output$df_days <-  renderText({DAP_SD()})
+  output$crop_period <- renderText({crop_period()})
   # debugging the issue 14----
-  # output$df_graph <- DT::renderDataTable({Crop_N_graphing()})
-  # output$df_graph2 <- DT::renderDataTable({crop_filtered_1row()})
+  output$df_graph <- DT::renderDataTable({Crop_N_graphing()})
+  output$df_graph2 <- DT::renderDataTable({crop_filtered_1row()})
 
   # total N supply from soil - minN + AMN
   Soil_N_supply <- reactive({
@@ -533,10 +533,10 @@ shinyServer(function(input, output,session) {
       df <- unnest(df,cols = c(`list(crop_filtered_1row())`)) %>%
         # calculate the curve
         mutate(Predicted.N.Uptake = A+C/(1+exp(-B*(DAP_annual - M))),
-               Predicted.N.Uptake = ifelse(Predicted.N.Uptake <0, 0, Predicted.N.Uptake),
+               Predicted.N.Uptake = ifelse(Predicted.N.Uptake < 1, 0, Predicted.N.Uptake),
                Remaining.N.Requirement = crop_filtered_1row()$Seasonal.N.uptake - Predicted.N.Uptake) %>%
         # add the sampling dates
-        mutate(Remaining.N.Requirement = ifelse(Remaining.N.Requirement >  0 , Remaining.N.Requirement, 0),
+        mutate(Remaining.N.Requirement = ifelse(Remaining.N.Requirement > 1 , Remaining.N.Requirement, 0),
                N_SD = ifelse(DAP_annual == DAP_SD(), Predicted.N.Uptake, NA),
                N_nextSD = ifelse(DAP_annual == DAP_nextSD(), Predicted.N.Uptake, NA))
     }
@@ -575,6 +575,7 @@ Please use the fallow option if you only want to know the nitrogen status in the
            x = "Days after planting",
            y  = "Whole crop N uptake (kg/ha)",
            caption = "More accurate results could be obtained from Lab tests or more sophisticated biophysical model (e.g.APSIM).")+
+      scale_x_continuous(breaks = seq(0, max(df$DAP_annual), by = 20)) +
       theme_qtmb() +
       annotate("text",
                x = median(df$DAP_annual),
