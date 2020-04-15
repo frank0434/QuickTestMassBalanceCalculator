@@ -298,14 +298,14 @@ shinyUI(fluidPage(
                              actionButton("JumpToSoil2", "< Back To Soil Information"),
                              p("Source Code on ",
                                a('Github Page.', href = 'https://github.com/frank0434/QuickTestMassBalanceCalculator', target = "_blank"))))
-                    ), # the end of report tab
-           tabPanel(h3("debugging tab"),
-                    # textOutput("df_AMN"),
-                    textOutput("df_days"),
-                    textOutput("crop_period"),
-                    DT::dataTableOutput("df_graph"),
-                    DT::dataTableOutput("df_graph2")
                     ) # the end of report tab
+           # tabPanel(h3("debugging tab"),
+           #          # textOutput("df_AMN"),
+           #          textOutput("df_days"),
+           #          textOutput("crop_period"),
+           #          DT::dataTableOutput("df_graph"),
+           #          DT::dataTableOutput("df_graph2")
+                    # )
            )# the end of the main tabset
          ) # column control width end
   ) # fluidpage end

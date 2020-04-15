@@ -336,11 +336,11 @@ shinyServer(function(input, output,session) {
   })
   # debugging AMN supply -----
   # output$df_AMN <-  renderText({AMN_supply()})
-  output$df_days <-  renderText({DAP_SD()})
-  output$crop_period <- renderText({crop_period()})
+  # output$df_days <-  renderText({DAP_SD()})
+  # output$crop_period <- renderText({crop_period()})
   # debugging the issue 14----
-  output$df_graph <- DT::renderDataTable({Crop_N_graphing()})
-  output$df_graph2 <- DT::renderDataTable({crop_filtered_1row()})
+  # output$df_graph <- DT::renderDataTable({Crop_N_graphing()})
+  # output$df_graph2 <- DT::renderDataTable({crop_filtered_1row()})
 
   # total N supply from soil - minN + AMN
   Soil_N_supply <- reactive({
@@ -564,6 +564,7 @@ Please check the dates in crop info tab.
 Please use the fallow option if you only want to know the nitrogen status in the soil.")
     )
 
+    maxN <- max(df$Remaining.N.Requirement)
 
     P <-  df %>%
       ggplot(aes(x = DAP_annual)) +
@@ -579,6 +580,13 @@ Please use the fallow option if you only want to know the nitrogen status in the
            caption = "More accurate results could be obtained from Lab tests or more sophisticated biophysical model (e.g.APSIM).")+
       scale_x_continuous(breaks = seq(0, max(df$DAP_annual), by = 20)) +
       theme_qtmb() +
+      geom_hline(yintercept = maxN, colour = "#000000",size = 1) +
+      annotate("text",
+               x = median(df$DAP_annual)/2,
+               y = maxN,
+               size = 5.5,
+               label = "N required to reach target yield",
+               vjust = 1) +
       annotate("text",
                x = median(df$DAP_annual),
                y = max(df$Predicted.N.Uptake)/2 - 3,
