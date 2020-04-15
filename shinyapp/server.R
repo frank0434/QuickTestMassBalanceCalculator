@@ -61,7 +61,7 @@ shinyServer(function(input, output,session) {
   crop_filtered_1row <- reactive({
     ### filter by the crop type and the user seleted marketable yield
     df <- crop.yield %>%
-      filter(Crop == input_crop(), Harvested.value == input$input_componentYield)
+      filter(Crop == input_crop(), Yield.value == input$input_targetYield)
     df
   })
 
@@ -81,12 +81,14 @@ shinyServer(function(input, output,session) {
   crop_info_reactive <- reactive({
     tab <- tibble(" " = c("Crop Selected",
                           "Farm System",
-                          "Target Harvested Fresh Yield",
+                          "Target Total Yield",
+                          "Target Marketable Yield",
                           "Planting Date",
                           "Sampling Date",
                           "Next Sampling/Side dressing Date"),
                   "  " = c(input$input_crop,
                            input$input_system,
+                           input$input_targetYield,
                            input$input_componentYield,
                            format(as.Date(plantingDate(), format = "%F"), "%d %B %Y"),
                            format(as.Date(samplingDate(), format = "%F"), "%d %B %Y"),
@@ -305,12 +307,14 @@ shinyServer(function(input, output,session) {
   # Remaining ON supply (kg/ha) = (crop period - DAP_SD )* Default Supply Rate (kg N/day)
   # Data supply rate (kg N/day) = test result * converison coefficient/crop period
 
-  AMN_supply <- reactive({
+
+
+  AMN.supply.rate <- reactive({
     # the raw data is from the excel file. two small to keep in a tab in the sqlite file
     # crop system default AMN reserves
     validate(
       need(crop_period() > 0, "AMN release curve requirs that the next sampling date is greater than the sampling date.")
-      )
+    )
     AMN.result <- as.integer(input$AMN1.1)
     ture_period <- crop_period()
     converisonF <- ifelse(crop_period() >= 100, 0.9,
@@ -318,26 +322,34 @@ shinyServer(function(input, output,session) {
 
     if(AMN.result > 0){
       DataSupplyRate = AMN.result * converisonF / crop_period()
-      AMN_remaining = round(crop_period() * DataSupplyRate - DAP_SD() * DataSupplyRate, digits = 0)
-      return(AMN_remaining)
+      return(DataSupplyRate)
     } else {
       AMN_default <- switch(input$input_system,
                             "Mixed cropping/arable" = as.integer(90),
                             "Intensive vegetable production" = as.integer(50),
                             "Pasture conversion" = as.integer(180)
-                            )
+      )
 
       DefaultSupplyRate = AMN_default * converisonF / crop_period()
-      AMN_remaining = round(crop_period() * DefaultSupplyRate - DAP_SD() * DefaultSupplyRate, digits = 0)
-      return(AMN_remaining)
+      return(DefaultSupplyRate)
     }
+  })
 
+  AMN_supply <- reactive({
+    # the raw data is from the excel file. two small to keep in a tab in the sqlite file
+    # crop system default AMN reserves
+    validate(
+      need(crop_period() > 0, "AMN release curve requirs that the next sampling date is greater than the sampling date.")
+      )
+     AMN_remaining = round(crop_period() * AMN.supply.rate() - DAP_SD() * AMN.supply.rate() , digits = 0)
 
   })
+
   # debugging AMN supply -----
   # output$df_AMN <-  renderText({AMN_supply()})
   # output$df_days <-  renderText({DAP_SD()})
   # output$crop_period <- renderText({crop_period()})
+  # output$AMN.supply.rate <- renderText({AMN.supply.rate()})
   # debugging the issue 14----
   # output$df_graph <- DT::renderDataTable({Crop_N_graphing()})
   # output$df_graph2 <- DT::renderDataTable({crop_filtered_1row()})
@@ -535,7 +547,7 @@ shinyServer(function(input, output,session) {
       df <- unnest(df,cols = c(`list(crop_filtered_1row())`)) %>%
         # calculate the curve
         mutate(Predicted.N.Uptake = A+C/(1+exp(-B*(DAP_annual - M))),
-               Predicted.N.Uptake = ifelse(Predicted.N.Uptake < 1, 0, Predicted.N.Uptake),
+               Predicted.N.Uptake = ifelse(Predicted.N.Uptake < 0, 0, Predicted.N.Uptake),
                Remaining.N.Requirement = crop_filtered_1row()$Seasonal.N.uptake - Predicted.N.Uptake) %>%
         # add the sampling dates
         mutate(Remaining.N.Requirement = ifelse(Remaining.N.Requirement > 1 , Remaining.N.Requirement, 0),
@@ -565,28 +577,31 @@ Please use the fallow option if you only want to know the nitrogen status in the
     )
 
     maxN <- max(df$Remaining.N.Requirement)
+    ylim <- maxN + 20
 
     P <-  df %>%
       ggplot(aes(x = DAP_annual)) +
       # geom_point(aes(y = Predicted.N.Uptake)) +
       geom_line(aes(y = Predicted.N.Uptake, color = "Predicted.N.Uptake"))+
       geom_point(aes(y = N_SD, shape = "Sampling date"), size = size, na.rm=TRUE)+
-      geom_point(aes(y = N_nextSD, shape = "Next sampling date"),size = size,  na.rm=TRUE)+
-      scale_shape_manual(name = "",values =  c(`Sampling date` = 16, `Next sampling date` = 4))+
-      scale_color_manual(name = "", values = "red") +
+      geom_point(aes(y = N_nextSD, shape = "Next sampling date"),size = size, fill = "#FF0000",na.rm=TRUE)+
+      scale_shape_manual(name = "",values =  c(`Sampling date` = 16, `Next sampling date` = 24))+
+      scale_color_manual(name = "", values = "#FF0000") +
       labs(title = "Estimated whole crop N uptake",
            x = "Days after planting",
            y  = "Whole crop N uptake (kg/ha)",
            caption = "More accurate results could be obtained from Lab tests or more sophisticated biophysical model (e.g.APSIM).")+
       scale_x_continuous(breaks = seq(0, max(df$DAP_annual), by = 20)) +
+      scale_y_continuous(expand = c(0,0.5), limits = c(0, ylim), breaks = seq(0, ylim, by = 20)) +
       theme_qtmb() +
       geom_hline(yintercept = maxN, colour = "#000000",size = 1) +
       annotate("text",
-               x = median(df$DAP_annual)/2,
+               x = 0,
                y = maxN,
                size = 5.5,
-               label = "N required to reach target yield",
-               vjust = 1) +
+               label = paste("N required to reach target yield:", round(maxN, digits = 0)),
+               vjust = -1,
+               hjust = "inward") +
       annotate("text",
                x = median(df$DAP_annual),
                y = max(df$Predicted.N.Uptake)/2 - 3,

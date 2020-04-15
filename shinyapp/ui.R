@@ -173,11 +173,14 @@ shinyUI(fluidPage(
                                                  )),
                                           column(width = 12,
                                                  selectInput.soilProperty(id = "Texture.2",
-                                                                          label = "Soil Texture")),
+                                                                          label = "Soil Texture",
+                                                                          choices = soil.texture,
+                                                                          url = "https://soils.landcareresearch.co.nz/understanding-soils/get-dirty/#st")),
                                           column(width = 12,
                                                  selectInput.soilProperty(id = "Moisture.2",
                                                                           label = "Soil Moisture",
-                                                                          choices = soil.moisture)),
+                                                                          choices = soil.moisture,
+                                                                          name = '(Help Document – Page 11)')),
                                           column(width = 12,
                                                  div(qstyle='display: inline-block;',
                                                      numericInput(inputId = "Qtest2",
@@ -209,11 +212,13 @@ shinyUI(fluidPage(
                                           column(width = 12,
                                                  selectInput.soilProperty(id = "Texture.3",
                                                                           label = "Soil Texture",
-                                                                          choices = soil.texture)),
+                                                                          choices = soil.texture,
+                                                                          url = "https://soils.landcareresearch.co.nz/understanding-soils/get-dirty/#st")),
                                           column(width = 12,
                                                  selectInput.soilProperty(id = "Moisture.3",
                                                                           label = "Soil Moisture",
-                                                                          choices = soil.moisture)),
+                                                                          choices = soil.moisture,
+                                                                          name = '(Help Document – Page 11)')),
                                           column(width = 12,
                                                  div(style='display: inline-block;',
                                                      numericInput(inputId = "Qtest3",
@@ -303,9 +308,10 @@ shinyUI(fluidPage(
            #          # textOutput("df_AMN"),
            #          textOutput("df_days"),
            #          textOutput("crop_period"),
+           #          textOutput("AMN.supply.rate"),
            #          DT::dataTableOutput("df_graph"),
            #          DT::dataTableOutput("df_graph2")
-                    # )
+           # )
            )# the end of the main tabset
          ) # column control width end
   ) # fluidpage end
