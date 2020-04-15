@@ -310,26 +310,28 @@ shinyServer(function(input, output,session) {
     # crop system default AMN reserves
     validate(
       need(crop_period() > 0, "AMN release curve requirs that the next sampling date is greater than the sampling date.")
-    )
-    AMN_default <- switch (input$input_system,
-                           "Mixed cropping/arable" = as.integer(90),
-                           "Intensive vegetable production" = as.integer(50),
-                           "Pasture conversion" = as.integer(180)
-                           )
+      )
+    AMN.result <- as.integer(input$AMN1.1)
     ture_period <- crop_period()
-    if(input$AMN1.1!=0){
-      converisonF <- ifelse(crop_period() >= 100, 0.9,
-                            ifelse(crop_period() < 40, 0.3, 0.5))
-      DataSupplyRate = input$AMN1.1 * converisonF / crop_period()
+    converisonF <- ifelse(crop_period() >= 100, 0.9,
+                          ifelse(crop_period() < 40, 0.3, 0.5))
+
+    if(AMN.result > 0){
+      DataSupplyRate = AMN.result * converisonF / crop_period()
       AMN_remaining = round(crop_period() * DataSupplyRate - DAP_SD() * DataSupplyRate, digits = 0)
       return(AMN_remaining)
     } else {
-      converisonF <- ifelse(crop_period() >= 100, 0.9,
-                            ifelse(crop_period() < 40, 0.3, 0.5))
+      AMN_default <- switch(input$input_system,
+                            "Mixed cropping/arable" = as.integer(90),
+                            "Intensive vegetable production" = as.integer(50),
+                            "Pasture conversion" = as.integer(180)
+                            )
+
       DefaultSupplyRate = AMN_default * converisonF / crop_period()
       AMN_remaining = round(crop_period() * DefaultSupplyRate - DAP_SD() * DefaultSupplyRate, digits = 0)
       return(AMN_remaining)
     }
+
 
   })
   # debugging AMN supply -----
