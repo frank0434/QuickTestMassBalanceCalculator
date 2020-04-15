@@ -556,7 +556,7 @@ shinyServer(function(input, output,session) {
 
     # Add validation to make sure planting date is earlier than sampling dates
     validate(
-      need(plantingDate() < samplingDate(),
+      need(plantingDate() <= samplingDate(),
            "The sampling date needs to be greater than the planting date.
 Please check the dates in crop info tab.
 Please use the fallow option if you only want to know the nitrogen status in the soil.")
