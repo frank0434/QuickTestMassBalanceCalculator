@@ -58,15 +58,17 @@ layer.1 <- "0-30 cm"
 layer.1.1 <- "0-15 cm"
 
 ## Marketable yield
-marketable.yield.crops <- c("Potatoes",
+marketable.yield.crops <- c("Barley_Autumn",
+                            "Barley_Spring",
+
                             "Maize_Grain",
                             "Lettuce",
                             "Broccoli_Winter",
                             "Broccoli_Summer",
-                            "Onions",
+
                             "Cabbage_Summer",
                             "Cabbage_Winter",
-                            "Baby_Spinach",
+
                             "Sweetcorn")
 
 #message to show in the UI

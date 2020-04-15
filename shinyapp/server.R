@@ -29,9 +29,11 @@ shinyServer(function(input, output,session) {
     ### only need the vector value
       subset(crop.para, Crop_name_display == input$input_crop)$Crop
   })
-  output$cropname <- reactive({
-    input_crop()
-    })
+  # output$cropname <- reactive({
+  #   input_crop()
+  #   })
+
+  # Show the marketable yield
   output$vegeOrNot <- reactive({
     as.integer(input_crop() %in% marketable.yield.crops)})
   # Use output need to turn off the suspendWhenHidden
@@ -44,6 +46,8 @@ shinyServer(function(input, output,session) {
       filter(Crop == input_crop())
     df
   })
+
+  output$crop_filtered <- renderTable(crop_filtered())
 
   ## crop harvest componet unit and name filtered
   crop.para_filtered <- reactive({
@@ -350,7 +354,12 @@ shinyServer(function(input, output,session) {
     # Marketable Yield dropdown list - key component
     # updating by crop name
     updateSelectInput(session,
-                      "input_componentYield",
+                      "input_targetYield",
+                      label = crop.para_filtered()$Yield.parameter,
+                      choices = crop_filtered()$Yield.value)
+  })
+  observe({
+    updateSelectInput(session, "input_componentYield",
                       label = crop.para_filtered()$Harvested.parameter,
                       choices = crop_filtered()$Harvested.value)
   })

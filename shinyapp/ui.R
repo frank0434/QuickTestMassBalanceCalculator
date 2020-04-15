@@ -93,6 +93,7 @@ shinyUI(fluidPage(
                                # textOutput("vegeOrNot"),
                                conditionalPanel(
                                  condition = "output.vegeOrNot",
+                                 # tableOutput("crop_filtered"),
                                  # h4("vege")
                                  selectInput("input_componentYield", label = "Harvested component (t FW/ha)", choices =  c(""), width = width_box)
                                  )
