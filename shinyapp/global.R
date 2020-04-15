@@ -56,6 +56,19 @@ width_box <- 400
 ## Two top layer options
 layer.1 <- "0-30 cm"
 layer.1.1 <- "0-15 cm"
+
+## Marketable yield
+marketable.yield.crops <- c("Potatoes",
+                            "Maize_Grain",
+                            "Lettuce",
+                            "Broccoli_Winter",
+                            "Broccoli_Summer",
+                            "Onions",
+                            "Cabbage_Summer",
+                            "Cabbage_Winter",
+                            "Baby_Spinach",
+                            "Sweetcorn")
+
 #message to show in the UI
 warning_report.tab  <- as.character("Please fill the soil tab first.")
 warning_soil.tab <- as.character("Quick test result must be between 0 and 2147483647.")

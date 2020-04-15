@@ -87,8 +87,16 @@ shinyUI(fluidPage(
                         column(12,
                                dateInput(inputId = "input_nextsamplingDate", label = "Next Sampling Date/Side Dressing", width = width_box, format = "d MM yyyy")),
                         column(12,
-                               selectInput("input_componentYield", label = "Harvested component (t FW/ha)", choices =  c(""), width = width_box)
-                        ),
+                               selectInput("input_targetYield", label = "Target yield (t FW/ha)", choices =  c(""), width = width_box)),
+                        column(12,
+                               # textOutput("cropname"),
+                               # textOutput("vegeOrNot"),
+                               conditionalPanel(
+                                 condition = "output.vegeOrNot",
+                                 # h4("vege")
+                                 selectInput("input_componentYield", label = "Harvested component (t FW/ha)", choices =  c(""), width = width_box)
+                                 )
+                               ),
                         column(12,
                                textInput(inputId = "input_paddock.id", label = "Paddock Name/Number (Optional)", width = width_box)),
                         column(12,

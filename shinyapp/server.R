@@ -29,6 +29,13 @@ shinyServer(function(input, output,session) {
     ### only need the vector value
       subset(crop.para, Crop_name_display == input$input_crop)$Crop
   })
+  output$cropname <- reactive({
+    input_crop()
+    })
+  output$vegeOrNot <- reactive({
+    as.integer(input_crop() %in% marketable.yield.crops)})
+  # Use output need to turn off the suspendWhenHidden
+  outputOptions(output, "vegeOrNot", suspendWhenHidden = FALSE)
 
   ## crop selction and the yield options
   crop_filtered <- reactive({
