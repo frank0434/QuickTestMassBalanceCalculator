@@ -678,7 +678,11 @@ Please use the fallow option if you only want to know the nitrogen status in the
     validate(
       need(!is.null(top_layer()), warning_report.tab)
     )
-    tab <- DT::datatable(N_crop(),
+    tab <- N_crop()
+    tab[2,1] <- add.questionMark(tab[2,1], report.tab1.tooltips)
+
+    tab <- DT::datatable(tab,
+                         escape = FALSE,
                          rownames = FALSE,
                          options = list(dom = 't', #https://datatables.net/reference/option/dom
                                         columnDefs = list(list(className = 'dt-left', targets = '_all'))),
