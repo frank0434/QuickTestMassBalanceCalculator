@@ -375,7 +375,7 @@ shinyServer(function(input, output,session) {
   observe({
     updateSelectInput(session, "input_componentYield",
                       label = crop.para_filtered()$Harvested.parameter,
-                      choices = crop_filtered()$Harvested.value)
+                      choices = crop_filtered_1row()$Harvested.value)
   })
   observeEvent(input$samplingDepth1.2, {
     updateNumericInput(session, inputId = "samplingDepth2.1", value = input$samplingDepth1.2)
@@ -471,7 +471,7 @@ shinyServer(function(input, output,session) {
 
   # crop n requirement unitl next sampling date, a value -----
   crop.N.req.until.next.SD <- reactive({
-    if(samplingDate() >= nextSamplingDate()){
+    if(samplingDate() > nextSamplingDate()){
       val <- "NA. Sampling date must be smaller than the next sampling date."
     } else {
       na.omit(Crop_N_graphing()$N_nextSD) - na.omit(Crop_N_graphing()$N_SD)
@@ -492,7 +492,7 @@ shinyServer(function(input, output,session) {
   # Crop N requirement table ----
   N_crop <- reactive({
     validate(
-      need(nextSamplingDate() > samplingDate(),
+      need(nextSamplingDate() >= samplingDate(),
            "Sampling date must be smaller than the next sampling date."),
       need(!is.na(Seasonal.N.uptake()) &&!is.null(remaining.crop.N.requirement()),
            "Sampling date is out of range!")
@@ -511,7 +511,7 @@ shinyServer(function(input, output,session) {
     })
   report.tab_2 <- reactive({
     validate(
-      need(nextSamplingDate() > samplingDate(), ""),
+      need(nextSamplingDate() >= samplingDate(), ""),
       need(!is.null(remaining.crop.N.requirement), "Next sampling date is out of growing period.")
     )
 
@@ -550,7 +550,7 @@ shinyServer(function(input, output,session) {
                Predicted.N.Uptake = ifelse(Predicted.N.Uptake < 0, 0, Predicted.N.Uptake),
                Remaining.N.Requirement = crop_filtered_1row()$Seasonal.N.uptake - Predicted.N.Uptake) %>%
         # add the sampling dates
-        mutate(Remaining.N.Requirement = ifelse(Remaining.N.Requirement > 1 , Remaining.N.Requirement, 0),
+        mutate(Remaining.N.Requirement = ifelse(Remaining.N.Requirement > 0 , Remaining.N.Requirement, 0),
                N_SD = ifelse(DAP_annual == DAP_SD(), Predicted.N.Uptake, NA),
                N_nextSD = ifelse(DAP_annual == DAP_nextSD(), Predicted.N.Uptake, NA))
     }
@@ -592,7 +592,7 @@ Please use the fallow option if you only want to know the nitrogen status in the
            y  = "Whole crop N uptake (kg/ha)",
            caption = "More accurate results could be obtained from Lab tests or more sophisticated biophysical model (e.g.APSIM).")+
       scale_x_continuous(breaks = seq(0, max(df$DAP_annual), by = 20)) +
-      scale_y_continuous(expand = c(0,0.5), limits = c(0, ylim), breaks = seq(0, ylim, by = 20)) +
+      # scale_y_continuous(expand = c(0,0.5), limits = c(0, ylim), breaks = seq(0, ylim, by = 40)) +
       theme_qtmb() +
       geom_hline(yintercept = maxN, colour = "#000000",size = 1) +
       annotate("text",
@@ -600,7 +600,7 @@ Please use the fallow option if you only want to know the nitrogen status in the
                y = maxN,
                size = 5.5,
                label = paste("N required to reach target yield:", round(maxN, digits = 0)),
-               vjust = -1,
+               vjust = "inward",
                hjust = "inward") +
       annotate("text",
                x = median(df$DAP_annual),
@@ -619,7 +619,7 @@ Please use the fallow option if you only want to know the nitrogen status in the
       need(!is.null(top_layer()), warning_report.tab)
     )
     validate(
-      need(nextSamplingDate() > samplingDate() | input$input_nextsamplingDate_fallow > input$Sampling.Date_fallow,
+      need(nextSamplingDate() >= samplingDate() | input$input_nextsamplingDate_fallow >= input$Sampling.Date_fallow,
            "Sampling date must be smaller than the next sampling date.")
     )
     depths <- soil_filter() %>%
