@@ -5,9 +5,9 @@ account: agricultural-landscape
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 1209617
-bundleId: 2772793
+bundleId: 3025229
 url: https://agricultural-landscape.shinyapps.io/QTMB_dev/
-when: 1580772492.98848
+when: 1587093952.61922
 asMultiple: FALSE
 asStatic: FALSE
-ignoredFiles: tests/mytest.R|tests/mytest-expected/001.json|tests/mytest-expected/001.png
+ignoredFiles: tests/app.R|tests/mytest.R|tests/mytest-expected/001.json|tests/mytest-expected/001.png

@@ -566,7 +566,7 @@ shinyServer(function(input, output,session) {
     nrows.non0 <- nrow(filter(Crop_N_graphing(), Remaining.N.Requirement != 0))
     # slice 50 days more to see the palateu
     df <- Crop_N_graphing() %>%
-      slice(1:(nrows.non0 + 50))
+      slice(1:(nrows.non0 + 30))
 
     # Add validation to make sure planting date is earlier than sampling dates
     validate(
@@ -591,17 +591,9 @@ Please use the fallow option if you only want to know the nitrogen status in the
            x = "Days after planting",
            y  = "Whole crop N uptake (kg/ha)",
            caption = "More accurate results could be obtained from Lab tests or more sophisticated biophysical model (e.g.APSIM).")+
-      scale_x_continuous(breaks = seq(0, max(df$DAP_annual), by = 20)) +
+      scale_x_continuous(breaks = seq(0, max(df$DAP_annual), by = 30)) +
       # scale_y_continuous(expand = c(0,0.5), limits = c(0, ylim), breaks = seq(0, ylim, by = 40)) +
       theme_qtmb() +
-      geom_hline(yintercept = maxN, colour = "#000000",size = 1) +
-      annotate("text",
-               x = 0,
-               y = maxN,
-               size = 5.5,
-               label = paste("N required to reach target yield:", round(maxN, digits = 0)),
-               vjust = "inward",
-               hjust = "inward") +
       annotate("text",
                x = median(df$DAP_annual),
                y = max(df$Predicted.N.Uptake)/2 - 3,
@@ -609,7 +601,21 @@ Please use the fallow option if you only want to know the nitrogen status in the
                alpha = 0.5, size = 5.5,
                label = "bold(\"This graph is only an indicator of crop N uptake.\")",
                parse = TRUE)
-    P
+
+    noLinesCrop <- c("Kale", "Fodder_Beet")
+    if(!input_crop() %in% noLinesCrop){
+      P +
+        geom_hline(yintercept = maxN, colour = "#000000",size = 1) +
+        annotate("text",
+                 x = 0,
+                 y = maxN,
+                 size = 5.5,
+                 label = paste("N required to reach target yield:", round(maxN, digits = 0)),
+                 vjust = 1,
+                 hjust = "inward")
+      } else {
+        P
+        }
   })
   # 2nd graph, bar plot for different depths ----
   N_supply_depth <- reactive({
