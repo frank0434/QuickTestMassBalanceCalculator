@@ -183,6 +183,7 @@ shinyServer(function(input, output,session) {
 
   Qtest1 <- reactive({
     val_layer1 <- as.integer(input$Qtest1)
+    val_layer1 <- ifelse(is.na(val_layer1) | is.null(val_layer1), 0, val_layer1)
     validate(
       need(val_layer1 >= 0, warning_soil.tab)
     )
@@ -191,6 +192,7 @@ shinyServer(function(input, output,session) {
 
   Qtest2 <- reactive({
     val_layer2 <- as.integer(input$Qtest2)
+    val_layer2 <- ifelse(is.na(val_layer2) | is.null(val_layer2), 0, val_layer2)
     validate(
       need(val_layer2 >= 0, warning_soil.tab)
     )
@@ -199,6 +201,7 @@ shinyServer(function(input, output,session) {
 
   Qtest3 <- reactive({
     val_layer3 <- as.integer(input$Qtest3)
+    val_layer3 <- ifelse(is.na(val_layer3) | is.null(val_layer3), 0, val_layer3)
     validate(
       need(val_layer3 >= 0, warning_soil.tab)
     )
@@ -315,7 +318,9 @@ shinyServer(function(input, output,session) {
     validate(
       need(crop_period() > 0, "AMN release curve requirs that the next sampling date is greater than the sampling date.")
     )
+
     AMN.result <- as.integer(input$AMN1.1)
+    AMN.result <- ifelse(is.na(AMN.result) | is.null(AMN.result), 0, AMN.result)
     ture_period <- crop_period()
     converisonF <- ifelse(crop_period() >= 100, 0.9,
                           ifelse(crop_period() < 40, 0.3, 0.5))
