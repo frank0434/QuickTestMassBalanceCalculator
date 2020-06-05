@@ -108,7 +108,7 @@ evaluate_inputDepth <- function(inputDepth){
 
 add.questionMark <- function(name, title) {
   paste0(name,
-         "<a target='_blank' href='#' title='",
+         "<a title='",
          title = title,
          "'><img src='blue_question_mark.png' height='13px'/>
          </a>")
