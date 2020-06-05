@@ -316,7 +316,7 @@ shinyServer(function(input, output,session) {
     # the raw data is from the excel file. two small to keep in a tab in the sqlite file
     # crop system default AMN reserves
     validate(
-      need(crop_period() > 0, "AMN release curve requirs that the next sampling date is greater than the sampling date.")
+      need(crop_period() > 0, "AMN release curve requires that the next sampling date is greater than the sampling date.")
     )
 
     AMN.result <- as.integer(input$AMN1.1)
@@ -344,7 +344,7 @@ shinyServer(function(input, output,session) {
     # the raw data is from the excel file. two small to keep in a tab in the sqlite file
     # crop system default AMN reserves
     validate(
-      need(crop_period() > 0, "AMN release curve requirs that the next sampling date is greater than the sampling date.")
+      need(crop_period() > 0, "AMN release curve requires that the next sampling date is greater than the sampling date.")
       )
      AMN_remaining = round(crop_period() * AMN.supply.rate() - DAP_SD() * AMN.supply.rate() , digits = 0)
 
@@ -704,7 +704,7 @@ Please use the fallow option if you only want to know the nitrogen status in the
     for(i in seq_len(length(report.tab2.tooltips))){
 
       tab2[i, 1] <- paste0(tab2[i, 1],
-                           "<a target='_blank' href='#' title='",
+                           "<a title='",
                            report.tab2.tooltips[i],
                            "'><img src='blue_question_mark.png' height='13px'/>
                            </a>")
