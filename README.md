@@ -90,3 +90,13 @@ in between = AMN default * 0.5 / crop period
 
 
 
+<span style="font-size:smaller;">Disclaimer</span>  
+<span style="font-size:smaller;">
+The data and related report in the app is copyright to the Foundation for Arable Research (FAR) and may not be reproduced or copied
+in any form whatsoever without FAR’s written permission. The data and related report are intended to provide accurate and
+adequate information relating to the subject matters contained in it and is based on information current at the time of
+report. Information contained in the report is general in nature and not intended as a substitute for specific
+professional advice on any matter and should not be relied upon for that purpose. It has been prepared and made
+available to all persons and entities strictly on the basis that FAR, its researchers and authors are fully excluded from
+any liability for damages arising out of any reliance in part or in full upon any of the information for any purpose.
+</span>
