@@ -50,7 +50,7 @@ knitr::kable(params$tab_NCrop, caption = "Crop nitrogen requirements.")
 ```
 
 
-## Nitrogen requirement to next sampling date 
+## Nitrogen requirement for target yield and to next sampling date
 
 ```{r N application tab}
 

@@ -63,6 +63,10 @@ shinyServer(function(input, output,session) {
     df <- crop.yield %>%
       filter(Crop == input_crop(), Yield.value == input$input_targetYield)
     df
+    validate(
+      need(nrow(df) != 0 , "Please choose a target yield.\r\n")
+    )
+    df
   })
 
   ## paddock information for multi tests
@@ -73,9 +77,29 @@ shinyServer(function(input, output,session) {
     as.character(input$input_paddock.id)
   })
 
-  samplingDate <- reactive({input$Sampling.Date})
-  nextSamplingDate <- reactive({input$input_nextsamplingDate})
-  plantingDate <- reactive({input$input_PlantingDate})
+  samplingDate <- reactive({
+    samplingDate <- input$Sampling.Date
+    validate(
+      need(!is.na(samplingDate) | !is.na(samplingDate), "Sampling Date must not be empty.\r\n")
+    )
+    samplingDate
+    })
+
+  nextSamplingDate <- reactive({
+    samplingDate <- input$input_nextsamplingDate
+    validate(
+      need(!is.na(samplingDate) | !is.na(samplingDate), "Next sampling Date must not be empty.\r\n")
+    )
+    samplingDate
+  })
+
+  plantingDate <- reactive({
+    samplingDate <- input$input_PlantingDate
+    validate(
+      need(!is.na(samplingDate) | !is.na(samplingDate), "Planting Date must not be empty.\r\n")
+    )
+    samplingDate
+  })
 
   ## make a data frame to feed into the downloadable report
   crop_info_reactive <- reactive({
