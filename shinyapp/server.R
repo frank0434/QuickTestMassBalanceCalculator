@@ -625,7 +625,7 @@ Please use the fallow option if you only want to know the nitrogen status in the
       labs(title = "Estimated whole crop N uptake",
            x = "Days after planting",
            y  = "Whole crop N uptake (kg/ha)",
-           caption = "More accurate results could be obtained from Lab tests or more sophisticated biophysical model (e.g.APSIM).")+
+           caption = "More accurate results could be obtained from Lab tests or a more sophisticated biophysical model (e.g.APSIM).")+
       scale_x_continuous(breaks = seq(0, max(df$DAP_annual), by = 30)) +
       # scale_y_continuous(expand = c(0,0.5), limits = c(0, ylim), breaks = seq(0, ylim, by = 40)) +
       theme_qtmb() +
