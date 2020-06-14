@@ -5,6 +5,6 @@
 
 # unwanted files
 *.xlsx
-*.sqlite3
+
 *.pdf
 *.Rprofvis
