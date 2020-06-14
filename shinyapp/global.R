@@ -31,7 +31,7 @@ input_systems <- unique(systems$System)
 ## Crop
 #read parameter tab in and unique the crop names
 crop.para <- dbReadTable(conn, "tab_crop.para")
-crops <- unique(crop.para$Crop_name_display)
+crops <- sort(unique(crop.para$Crop_name_display))
 
 #read the yield tab in
 crop.yield <- dbReadTable(conn, "tab_crop")

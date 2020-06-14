@@ -374,14 +374,14 @@ shinyServer(function(input, output,session) {
 
   })
 
-  # debugging AMN supply -----
-  output$df_AMN <-  renderText({AMN_supply()})
-  output$df_days <-  renderText({DAP_SD()})
-  output$crop_period <- renderText({crop_period()})
-  output$AMN.supply.rate <- renderText({AMN.supply.rate()})
-  # debugging the issue 14----
-  output$df_graph <- DT::renderDataTable({Crop_N_graphing()})
-  output$df_graph2 <- DT::renderDataTable({crop_filtered_1row()})
+  # # debugging AMN supply -----
+  # output$df_AMN <-  renderText({AMN_supply()})
+  # output$df_days <-  renderText({DAP_SD()})
+  # output$crop_period <- renderText({crop_period()})
+  # output$AMN.supply.rate <- renderText({AMN.supply.rate()})
+  # # debugging the issue 14----
+  # output$df_graph <- DT::renderDataTable({Crop_N_graphing()})
+  # output$df_graph2 <- DT::renderDataTable({crop_filtered_1row()})
 
   # total N supply from soil - minN + AMN
   Soil_N_supply <- reactive({
