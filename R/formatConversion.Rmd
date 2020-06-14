@@ -4,21 +4,30 @@ author: "Jian"
 date: "5 September 2019"
 output: html_document
 ---
+# Adding new crops or updating existing ones 
 
+**The easist way is copy and paste the value in `N uptake curve data` to the mother workbook**
+1. Copy the `B`, `M` and `C` parameters into the sheet `Crop parameters` in the mother workbook.  
+   Only `estimate` values needed.   
+2. Copy the last row in the `N uptake (kg/ha)` excluding the highlighten values. 
+
+![](../Capture.png)
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(readxl)
-library(tidyverse)
+library(dplyr)
+library(tibble)
+library(tidyr)
 library(DBI)
 library(RSQLite)
 ```
 _Note_
 
 ```{r main excel}
-sheets <- excel_sheets("../QTMB Tool - V 2.1.xlsx")
+sheets <- excel_sheets("C:/Users/cflfcl/Dropbox/Data/QTMB Tool - V 2.1.xlsx")
 sh <- grep("parameters| graphing|AMN input", sheets, value = T,ignore.case = T)
 # l <- lapply(sh, function(x) read_excel("../QTMB Tool - V 2.1.xlsx", sheet = x))
-path <- "../QTMB Tool - V 2.1.xlsx"
+path <- "C:/Users/cflfcl/Dropbox/Data/QTMB Tool - V 2.1.xlsx"
 ```
 
 
@@ -45,7 +54,7 @@ cols_new <- gsub("\\s", ".", gsub("\\s$","",gsub("\\(.+\\)", "", cols)))
 names(cols_new) <- cols
 cols_new_df <- cols_new %>% 
   enframe(name = "origin", value = "new") %>% 
-  unnest()
+  unnest(cols = c(new))
 
 meta_soil <- tibble(origin = cols) %>% 
   left_join(cols_new_df) %>% 
@@ -86,15 +95,13 @@ units <-  regmatches(cols, gregexpr("\\(.+\\D", cols))
 
 names(units) <- cols
 units_df <- units %>% 
-  enframe(name = "origin", value = "unit") %>% 
-  unnest()
+  enframe(name = "origin", value = "unit")
 
 
 cols_new <- gsub("\\s", ".", gsub("\\s$","",gsub("\\(.+\\)", "", cols)))
 names(cols_new) <- cols
 cols_new_df <- cols_new %>% 
-  enframe(name = "origin", value = "new") %>% 
-  unnest()
+  enframe(name = "origin", value = "new") 
 
 meta_crop <- tibble(origin = cols) %>% 
   left_join(cols_new_df) %>% 
@@ -117,8 +124,7 @@ names(crop_para) <- cols
 cols_new <- gsub("\\s", ".", gsub("\\s$","",gsub("\\(.+\\)", "", cols)))
 names(cols_new) <- cols
 meta_crop_para <- cols_new %>% 
-  enframe(name = "origin", value = "new") %>% 
-  unnest()
+  enframe(name = "origin", value = "new") 
 names(crop_para) <- cols_new
 
 
@@ -203,14 +209,7 @@ dbDisconnect(con)
 ```
 
 
-# Adding new crops or updating existing ones 
 
-**The easist way is copy and paste the value in `N uptake curve data` to the mother workbook**
-1. Copy the `B`, `M` and `C` parameters into the sheet `Crop parameters` in the mother workbook.  
-   Only `estimate` values needed.   
-2. Copy the last row in the `N uptake (kg/ha)` excluding the highlighten values. 
-
-![](../Capture.png)
 
 
 
