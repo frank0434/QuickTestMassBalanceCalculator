@@ -375,13 +375,13 @@ shinyServer(function(input, output,session) {
   })
 
   # debugging AMN supply -----
-  # output$df_AMN <-  renderText({AMN_supply()})
-  # output$df_days <-  renderText({DAP_SD()})
-  # output$crop_period <- renderText({crop_period()})
-  # output$AMN.supply.rate <- renderText({AMN.supply.rate()})
+  output$df_AMN <-  renderText({AMN_supply()})
+  output$df_days <-  renderText({DAP_SD()})
+  output$crop_period <- renderText({crop_period()})
+  output$AMN.supply.rate <- renderText({AMN.supply.rate()})
   # debugging the issue 14----
-  # output$df_graph <- DT::renderDataTable({Crop_N_graphing()})
-  # output$df_graph2 <- DT::renderDataTable({crop_filtered_1row()})
+  output$df_graph <- DT::renderDataTable({Crop_N_graphing()})
+  output$df_graph2 <- DT::renderDataTable({crop_filtered_1row()})
 
   # total N supply from soil - minN + AMN
   Soil_N_supply <- reactive({
@@ -577,7 +577,9 @@ shinyServer(function(input, output,session) {
         # calculate the curve
         mutate(Predicted.N.Uptake = A+C/(1+exp(-B*(DAP_annual - M))),
                Predicted.N.Uptake = ifelse(Predicted.N.Uptake < 0, 0, Predicted.N.Uptake),
-               Remaining.N.Requirement = crop_filtered_1row()$Seasonal.N.uptake - Predicted.N.Uptake) %>%
+               Remaining.N.Requirement = crop_filtered_1row()$Seasonal.N.uptake - Predicted.N.Uptake,
+               Predicted.N.Uptake = round(Predicted.N.Uptake, digits = 0),
+               Remaining.N.Requirement = round(Remaining.N.Requirement, digits = 0)) %>%
         # add the sampling dates
         mutate(Remaining.N.Requirement = ifelse(Remaining.N.Requirement > 0 , Remaining.N.Requirement, 0),
                N_SD = ifelse(DAP_annual == DAP_SD(), Predicted.N.Uptake, NA),
@@ -592,8 +594,12 @@ shinyServer(function(input, output,session) {
     size = 5
 
     # filter the x axis to bring the resolution up
-    nrows.non0 <- nrow(filter(Crop_N_graphing(), Remaining.N.Requirement != 0))
-    # slice 50 days more to see the palateu
+    ## The
+    rle <- rle(Crop_N_graphing()$Remaining.N.Requirement)
+
+    nrows.non0 <- nrow(filter(Crop_N_graphing(), Remaining.N.Requirement != min(rle$values)))
+
+    # slice xx days more to see the palateu
     df <- Crop_N_graphing() %>%
       slice(1:(nrows.non0 + 30))
 
