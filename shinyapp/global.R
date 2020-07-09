@@ -61,7 +61,7 @@ layer.1.1 <- "0-15 cm"
 marketable.yield.crops <- c("Barley_Autumn",
                             "Barley_Spring",
 
-                            "Maize_Grain",
+                            "Maize",
                             "Lettuce",
                             "Broccoli_Winter",
                             "Broccoli_Summer",
