@@ -698,14 +698,16 @@ Please use the fallow option if you only want to know the nitrogen status in the
       need(!is.null(top_layer()), warning_report.tab)
     )
     tab <- table_soil_N()%>%
+      mutate(SubTotal = as.character(SubTotal)) %>%
       add_row(.,
               Texture = "",
               Moisture = "",
               Sampling.Depth = "",
-              QTest.Results = "",
-              MineralN = "",
-              AMN = "",
-              SubTotal = paste0("Total plant available N: ",sum(.$SubTotal), "kg/ha"))%>%
+              QTest.Results = as.integer(""),
+              MineralN = as.integer(""),
+              AMN = as.integer(""),
+              SubTotal = paste0("Total plant available N: ",
+                                sum(as.numeric(.$SubTotal)), "kg/ha"))%>%
       rename('Sampling.Depth (cm)' = Sampling.Depth,
              'QTest.Results (mg/L)' = QTest.Results,
              'Mineral N (kg/ha)' = MineralN,
