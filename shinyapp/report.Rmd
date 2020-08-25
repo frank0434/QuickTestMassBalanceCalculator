@@ -13,6 +13,7 @@ params:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
+options(knitr.kable.NA = '')
 ```
 
 ## Crop information
@@ -30,7 +31,8 @@ profile.depth <-  gsub("-.+-", "-", x = paste(df$Sampling.Depth, collapse = "-")
 
 
 # add a total amount
-df <- rbind(df, c("Total", "",profile.depth, "","","", sum(df$SubTotal)))
+df <- rbind(df, c("Total", "",profile.depth, "","","", sum(df$SubTotal, 
+                                                           na.rm = TRUE)))
 # add units into the table
 df <-df %>% 
   rename('Depth (cm)' = Sampling.Depth,

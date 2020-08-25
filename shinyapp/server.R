@@ -563,8 +563,10 @@ shinyServer(function(input, output,session) {
     times <- ifelse(no.ofRows < 0 ,0 , no.ofRows)
     table <- soil_filter() %>%
       select(Texture, Moisture, Sampling.Depth, QTest.Results = qtest_user.input, MineralN) %>%
-      mutate(AMN = c(AMN_supply(), rep(0, times)),
-             SubTotal = as.numeric(AMN) + MineralN)
+      mutate(AMN = as.integer(c(AMN_supply(), rep(0, times))),
+             SubTotal = AMN + MineralN,
+             AMN = ifelse(AMN == 0, NA, AMN)
+             )
     })
   # key intermediate data - crop growing period and N uptake to draw 1st plot ----
   Crop_N_graphing <- reactive({
@@ -707,7 +709,8 @@ Please use the fallow option if you only want to know the nitrogen status in the
               MineralN = as.integer(""),
               AMN = as.integer(""),
               SubTotal = paste0("Total plant available N: ",
-                                sum(as.numeric(.$SubTotal)), "kg/ha"))%>%
+                                sum(as.numeric(table_soil_N()$SubTotal),
+                                    na.rm = TRUE), "kg/ha"))%>%
       rename('Sampling.Depth (cm)' = Sampling.Depth,
              'QTest.Results (mg/L)' = QTest.Results,
              'Mineral N (kg/ha)' = MineralN,
