@@ -12,5 +12,13 @@ The process is as follows:
   •	Fit a logistic regression to this, either in GenStat or in R (Duncan can assist with this).
   •	Extract required parameters and update QTMB model.
   
-
+Used long cultivar in the MaizeData.xlsx steph put together.
+Manually input the potential yield
+The grain yield was calculated by a HI of 0.58674 and substrating 0.05 - assumed that this aligned with the AmaizeN tool
+The N uptake was estimated by a linear regression - same assumption as note 3
+Manually complete the sheet n UPTAKE CURVES
+Open Genstat
+Import data from excel - make sure all column are labelled
+Stats > Regression analysis > standard curves > logistic (s-shape) model
+Select the correct variables and run
 
