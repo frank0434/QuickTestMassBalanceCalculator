@@ -15,7 +15,8 @@ shinyUI(fluidPage(
   #use shinyjs package for refresh feature
   useShinyjs(),
   shinyjs::useShinyjs(),
-  shinyjs::extendShinyjs(text = "shinyjs.refresh = function() { location.reload(); }"),
+  shinyjs::extendShinyjs(text = "shinyjs.refresh = function() { location.reload(); }",
+                         functions = c("refresh")),
 
   #beginning of the page layout. column to control the width of the layout
 
