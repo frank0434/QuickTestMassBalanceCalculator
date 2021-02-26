@@ -157,6 +157,7 @@ crop_para <- crop_para %>%
                                   " - \\2 planting", Crop),
          Crop_name_display = recode(Crop_name_display, 
                                     "Baby_Spinach" = "Baby Spinach",
+                                    "Maize" = "Maize Grain",
                                     "Wheat - Autumn planting" = "Wheat - Autumn sown", 
                                     "Wheat - Spring planting" = "Wheat - Spring sown",
                                     "Barley - Autumn planting" = "Barley - Autumn sown",
