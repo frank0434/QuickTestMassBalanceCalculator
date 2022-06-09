@@ -1,7 +1,9 @@
 ---
 title: "Quick test mass calculator report"
 date: "`r format(Sys.time(), ' %a %X, %d %B %Y')`"
-output: pdf_document
+output:
+  html_document:
+    df_print: paged
 params:
   Soil_N_supply: NA
   p_N_supply: NA
